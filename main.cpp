@@ -4,13 +4,14 @@
 #include <unistd.h>     // fd gestion
 #include <cstring>
 
-#define PORT 11080
+#define PORT 15080
 #define MAX_CLIENTS 10
 
 /* First create and fd witch a socket
 Second initialize the struct sockaddr_in
 After we need to link the struct with the socket with bind()*/
 /* AF_INET for IPV4 adress familly */
+/* SOCK_STREAM works with TCP protocol */
 int main()
 {
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -37,13 +38,16 @@ int main()
     while (1)
     {
         int new_socket = accept(server_fd, NULL, NULL);
+        if(new_socket < 0)
+            continue;
         char buffer[512];
         memset(buffer, 0, sizeof(buffer));
-        if(read(new_socket, buffer, sizeof(buffer)) > 0)
+        int nread = read(new_socket, &buffer, sizeof(buffer));
+        if(nread > 0)
         {
-            std::cout << "buffer" << std::endl;
+            std::cout << buffer;
         }
-        send(new_socket, buffer, sizeof(buffer), 0); 
+        // parsing(buffer);
         close(new_socket);
     }
 
