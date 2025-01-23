@@ -82,7 +82,6 @@ int set_server()
     serverpfd.fd = server_fd;
     serverpfd.events = POLLIN;
     pfds.push_back(serverpfd);
-
     pollfd *pfds_ptr;
     while (1)
     {
@@ -99,6 +98,6 @@ int set_server()
                     handle_message(pfds, clients, i);
             }
         }
-        close(server_fd);
     }
+    close(server_fd);
 }
