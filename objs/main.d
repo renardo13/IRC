@@ -1,3 +1,8 @@
-objs/main.o: Srcs/main.cpp Srcs/../Includes/client.hpp
+objs/main.o: Srcs/main.cpp Includes/Client.hpp \
+  Includes/../Includes/Client.hpp Includes/Server.hpp
 
-Srcs/../Includes/client.hpp:
+Includes/Client.hpp:
+
+Includes/../Includes/Client.hpp:
+
+Includes/Server.hpp:

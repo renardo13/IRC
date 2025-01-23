@@ -4,12 +4,12 @@ SRCDIR = Srcs
 INCDIR = Includes
 OBJDIR = objs
 
-SRCS = main.cpp client.cpp server.cpp cpp client.hpp
+SRCS = main.cpp Client.cpp Server.cpp
 OBJS = $(addprefix $(OBJDIR)/, $(SRCS:.cpp=.o))
 DEPS = $(OBJS:.o=.d)
 
 CC = c++
-FLAGS = -Wall -Werror -Wextra -std=c++98 -I$(INCDIR) -MMD -MP
+FLAGS = -Wall -Werror -Wextra -std=c++98 -g3 -I$(INCDIR) -MMD -MP
 
 all: $(NAME)
 
