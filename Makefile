@@ -1,26 +1,19 @@
-NAME = ircserv
-
-SRCDIR = Srcs
-INCDIR = Includes
-OBJDIR = objs
-
-SRCS = main.cpp client.cpp server.cpp cpp client.hpp
-OBJS = $(addprefix $(OBJDIR)/, $(SRCS:.cpp=.o))
+NAME = server
+SRCS = ./Srcs/main.cpp
+OBJDIR = ./objs
+OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)
 DEPS = $(OBJS:.o=.d)
-
 CC = c++
-FLAGS = -Wall -Werror -Wextra -std=c++98 -I$(INCDIR) -MMD -MP
+FLAGS = -Wall -Werror -Wextra -std=c++98 -MMD -MP
 
 all: $(NAME)
 
 $(NAME): $(OBJS)
 	$(CC) $(FLAGS) $(OBJS) -o $(NAME)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
+$(OBJDIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
 	$(CC) $(FLAGS) -c $< -o $@
-
-$(OBJDIR):
-	mkdir -p $(OBJDIR)
 
 clean:
 	rm -rf $(OBJDIR)
