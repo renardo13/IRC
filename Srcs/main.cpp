@@ -3,6 +3,8 @@
 #include <netinet/in.h> // for sockaddr_in struct
 #include <unistd.h>     // fd gestion
 #include <cstring>
+#include <map>
+#include "Includes/client.hpp"
 
 #define PORT 15080
 #define MAX_CLIENTS 10
@@ -14,6 +16,8 @@ After we need to link the struct with the socket with bind()*/
 /* SOCK_STREAM works with TCP protocol */
 int main()
 {
+    // std::map<int, Client> clients;
+
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == -1)
     {
