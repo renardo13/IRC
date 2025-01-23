@@ -1,4 +1,4 @@
-#include "client.hpp"
+#include "../Includes/client.hpp"
 
 Client::Client()
 {
@@ -21,4 +21,5 @@ Client const& Client::operator=(Client const& obj)
     this->nickname = obj.nickname;
     this->fd = obj.fd;
     this->message_timer = obj.message_timer;
+    return(*this);
 }

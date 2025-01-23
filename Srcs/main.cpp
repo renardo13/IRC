@@ -4,10 +4,10 @@
 #include <unistd.h>     // fd gestion
 #include <cstring>
 #include <map>
-#include "Includes/client.hpp"
+#include "../Includes/client.hpp"
 
 #define PORT 15080
-#define MAX_CLIENTS 10
+#define MAX_CLIENTS 1024
 
 /* First create and fd witch a socket
 Second initialize the struct sockaddr_in
@@ -16,7 +16,7 @@ After we need to link the struct with the socket with bind()*/
 /* SOCK_STREAM works with TCP protocol */
 int main()
 {
-    // std::map<int, Client> clients;
+    std::map<int, Client> clients;
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == -1)
@@ -27,7 +27,7 @@ int main()
     memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
     address.sin_port = htons(PORT);
-    address.sin_addr.s_addr = INADDR_ANY; 
+    address.sin_addr.s_addr = INADDR_ANY;
 
     /* Casting in a generic struct sockaddr because struct sockaddr_in is for IPV4 address */
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
@@ -41,15 +41,21 @@ int main()
     }
     while (1)
     {
+        /* Accept is a blocking function */
         int new_socket = accept(server_fd, NULL, NULL);
-        if(new_socket < 0)
+        if (new_socket < 0)
             continue;
-        char buffer[512];
-        memset(buffer, 0, sizeof(buffer));
-        int nread = read(new_socket, &buffer, sizeof(buffer));
-        if(nread > 0)
+        Client new_client(new_socket);
+        clients.insert({new_socket, new_client});
+        while (nread > 0)
         {
-            std::cout << buffer;
+            char buffer[512];
+            memset(buffer, 0, sizeof(buffer));
+            int nread = read(new_socket, &buffer, sizeof(buffer));
+            if (nread > 0)
+            {
+                std::cout << buffer;
+            }
         }
         // parsing(buffer);
         close(new_socket);
@@ -57,5 +63,4 @@ int main()
 
     // close the server_fd
     close(server_fd);
-   
 }

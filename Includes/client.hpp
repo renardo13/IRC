@@ -14,5 +14,6 @@ class Client
         ~Client();
         Client(Client const& obj);
         Client const& operator=(Client const& obj);
+        Client(int socket) : fd(socket) {};
 
 };
