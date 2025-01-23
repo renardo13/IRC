@@ -47,11 +47,10 @@ int main()
             continue;
         Client new_client(new_socket);
         clients.insert({new_socket, new_client});
-        while (nread > 0)
+
+        for(std::map<int, Client>::iterator it = clients.begin(); it != clients.end(); it++)
         {
-            char buffer[512];
-            memset(buffer, 0, sizeof(buffer));
-            int nread = read(new_socket, &buffer, sizeof(buffer));
+            int nread = read(new_socket, it->second.message, sizeof(buffer));
             if (nread > 0)
             {
                 std::cout << buffer;

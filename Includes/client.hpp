@@ -6,6 +6,7 @@ class Client
 {
     private:
         int fd;
+        char message[512];
         std::string name;
         std::string nickname;
         double message_timer;
@@ -14,6 +15,9 @@ class Client
         ~Client();
         Client(Client const& obj);
         Client const& operator=(Client const& obj);
-        Client(int socket) : fd(socket) {};
+        Client(int socket);
+
+        void setMessage(char *message);
+        char* getMessage();
 
 };
