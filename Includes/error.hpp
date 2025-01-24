@@ -6,7 +6,6 @@
 #define ERR_UNKNOWN_ERROR "Error: An unknown error occurred"
 #define ERR_PERMISSION_DENIED "Error: Permission denied"
 
-
 // Network error
 
 #define ERR_SOCKET_CREATION "Error: Failed to create socket"

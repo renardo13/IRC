@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <vector>
 #include <sstream>
+#include "error.hpp"
 #include "../Includes/Client.hpp"
 
 #define MAX_CLIENTS 1024
