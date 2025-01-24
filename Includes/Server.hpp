@@ -2,4 +2,4 @@
 
 #include "Client.hpp"
 
-int set_server();
+int set_server(char *port, char *passwd);

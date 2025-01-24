@@ -63,7 +63,7 @@ After we need to link the struct with the socket with bind()*/
 /* AF_INET for IPV4 adress familly */
 /* SOCK_STREAM works with TCP protocol */
 
-int set_server()
+int set_server(char *port, char *passwd)
 {
     std::map<int, Client> clients;
     std::vector<struct pollfd> pfds;
