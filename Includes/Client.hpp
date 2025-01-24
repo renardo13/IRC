@@ -17,6 +17,8 @@
 #define MAX_CLIENTS 1024
 #define MAX_PORT 65535
 
+class Server;
+
 class Client
 {
     private:
@@ -55,8 +57,8 @@ int atoi(char *str);
 std::string toStdString(char *str);
 
 //commands
-void handle_commands(std::string buff);
-void join();
+void handle_commands(std::string buff, Server server);
+void join(Server server);
 
 std::string getWelcomeMessage(Client &client);
 int sendMessageToClient(Client &client, std::string msg);

@@ -5,18 +5,23 @@
 #include "Channel.hpp"
 
 class Client;
+class Channel;
 
 class Server
 {
     private:
         std::map<int, Client> clients;
         std::vector<Channel> channels;
+
     public:
         Server();
         ~Server();
         Server(std::map<int, Client> clients);
-        Server(Server const& obj);
-        Server const &operator=(Server const& obj);
+        Server(Server const &obj);
+        Server const &operator=(Server const &obj);
+
+        std::map<int, Client> getClients() const;
+        void setClients(std::map<int, Client> &clients);
 };
 
 int set_server(char *port, char *passwd);

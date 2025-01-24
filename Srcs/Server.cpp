@@ -25,3 +25,13 @@ Server const& Server::operator=(Server const& obj)
     this->clients = obj.clients;
     return(*this);
 }
+
+std::map<int, Client> Server::getClients() const
+{
+    return(clients);
+}
+
+void Server::setClients(std::map<int, Client> &clients)
+{
+    this->clients = clients;
+}

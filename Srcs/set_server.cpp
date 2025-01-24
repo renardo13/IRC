@@ -37,8 +37,9 @@ void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, std:
     }
 }
 
-void handle_message(std::vector<struct pollfd> &pfds, std::map<int, Client> &clients, int i)
+void handle_message(std::vector<struct pollfd> &pfds, Server server, int i)
 {
+    std::map<int, Client> clients = server.getClients();
     char buff[256];
     int nbytes = recv(pfds[i].fd, buff, 256, 0);
     if (nbytes <= 0)
@@ -58,7 +59,7 @@ void handle_message(std::vector<struct pollfd> &pfds, std::map<int, Client> &cli
         buff[nbytes] = '\0';
         clients[pfds[i].fd].setMessage(buff);
         std::cout << clients[pfds[i].fd].getMessage();
-        handle_commands(toStdString(buff));
+        handle_commands(toStdString(buff), server);
     }
 }
 
@@ -72,7 +73,7 @@ int set_server(char *port, char *passwd)
 {
     (void)passwd;
     std::map<int, Client> clients;
-    // Server server(clients);
+    Server server(clients);
     std::vector<struct pollfd> pfds;
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -105,7 +106,7 @@ int set_server(char *port, char *passwd)
                 }
                 else
                 {
-                    handle_message(pfds, clients, i);
+                    handle_message(pfds, server, i);
                 }
             }
         }
