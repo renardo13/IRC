@@ -58,6 +58,7 @@ void handle_message(std::vector<struct pollfd> &pfds, std::map<int, Client> &cli
         buff[nbytes] = '\0';
         clients[pfds[i].fd].setMessage(buff);
         std::cout << clients[pfds[i].fd].getMessage();
+        handle_commands(toStdString(buff));
     }
 }
 

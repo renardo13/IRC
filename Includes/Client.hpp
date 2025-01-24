@@ -26,7 +26,7 @@ class Client
         std::string nickname;
         std::string hostname;
         bool isRegistered;
-        bool admin;
+        // bool admin;
         double message_timer;
     public:
         Client();
@@ -50,7 +50,13 @@ class Client
 
 };
 
-
+//Utils
 int atoi(char *str);
+std::string toStdString(char *str);
+
+//commands
+void handle_commands(std::string buff);
+void join();
+
 std::string getWelcomeMessage(Client &client);
 int sendMessageToClient(Client &client, std::string msg);

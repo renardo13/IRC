@@ -2,6 +2,7 @@
 
 #include "Client.hpp"
 #include <map>
+#include "Channel.hpp"
 
 class Client;
 
@@ -9,7 +10,7 @@ class Server
 {
     private:
         std::map<int, Client> clients;
-        std::vector<std::string> 
+        std::vector<Channel> channels;
     public:
         Server();
         ~Server();

@@ -9,3 +9,12 @@ int atoi(char *str)
     iss >> result;
     return (result);
 }
+
+std::string toStdString(char *str)
+{
+    std::istringstream iss(str);
+    std::string result;
+    
+    iss >> result;
+    return (result);
+}
