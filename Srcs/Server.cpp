@@ -40,8 +40,6 @@ void handle_message(std::vector<struct pollfd> &pfds, std::map<int, Client> &cli
 {
     char buff[256];
     int nbytes = recv(pfds[i].fd, buff, 256, 0);
-    buff[nbytes] = '\0';
-    clients[i].setMessage(buff);
     if (nbytes <= 0)
     {
         if (nbytes == 0)
@@ -56,7 +54,9 @@ void handle_message(std::vector<struct pollfd> &pfds, std::map<int, Client> &cli
     }
     else
     {
-        std::cout << clients[i].getMessage();
+        buff[nbytes] = '\0';
+        clients[pfds[i].fd].setMessage(buff);
+        std::cout << clients[pfds[i].fd].getMessage();
     }
 }
 
@@ -97,9 +97,13 @@ int set_server(char *port, char *passwd)
             if (pfds[i].revents & (POLLIN | POLLHUP))
             {
                 if (pfds[i].fd == server_fd)
+                {
                     handle_new_connection(server_fd, pfds, clients);
+                }
                 else
+                {
                     handle_message(pfds, clients, i);
+                }
             }
         }
     }

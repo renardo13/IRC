@@ -21,8 +21,10 @@ class Client
     private:
         int pfd;
         std::string message;
-        std::string name;
+        std::string username;
         std::string nickname;
+        std::string hostname;
+        bool isRegistered;
         double message_timer;
     public:
         Client();
@@ -31,9 +33,18 @@ class Client
         Client const& operator=(Client const& obj);
         Client(int socket);
 
-        void setMessage(char *message);
-        std::string getMessage();
         int getPfd() const;
+        std::string getUsername() const;
+        std::string getNickname() const;
+        std::string getHostname() const;
+        std::string getMessage();
+        bool getIsRegistered() const;
+        
+        void setUsername(std::string username);
+        void setNickname(std::string username);
+        void setHostname(std::string username);
+        void setMessage(char *message);
+        void SetIsRegistered(bool status);
 
 };
 

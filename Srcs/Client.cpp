@@ -11,6 +11,7 @@ Client::~Client() {}
 Client::Client(int pfd) : pfd(pfd)
 {
     std::cout << "New connexion ! client pfd = " << pfd << std::endl;
+    this->isRegistered = false;
     memset(&message, 0, sizeof(message));
 };
 
@@ -24,7 +25,7 @@ Client::Client(Client const &obj)
 
 Client const &Client::operator=(Client const &obj)
 {
-    this->name = obj.name;
+    this->username = obj.username;
     this->nickname = obj.nickname;
     this->pfd = obj.pfd;
     this->message_timer = obj.message_timer;
@@ -45,3 +46,44 @@ int Client::getPfd() const
 {
     return (this->pfd);
 }
+
+bool Client::getIsRegistered() const
+{
+    return (this->isRegistered);
+}
+
+std::string Client::getUsername() const
+{
+    return(this->username);
+}
+
+std::string Client::getNickname() const
+{
+    return(this->nickname);
+}
+
+std::string Client::getHostname() const
+{
+    return(this->hostname);
+}
+
+void Client::setUsername(std::string username)
+{
+    this->username = username;
+}
+
+void Client::setNickname(std::string nickname)
+{
+    this->nickname = nickname;
+}
+
+void Client::setHostname(std::string hostname)
+{
+    this->hostname = hostname;
+}
+
+void Client::SetIsRegistered(bool status)
+{
+    this->isRegistered = status;
+}
+
