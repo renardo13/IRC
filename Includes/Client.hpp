@@ -20,7 +20,7 @@ class Client
 {
     private:
         int pfd;
-        char *message;
+        std::string message;
         std::string name;
         std::string nickname;
         double message_timer;

@@ -12,7 +12,6 @@ void bind_address(int port, int server_fd)
     memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
 
-    std::cout << port << std::endl;
     if (port < 0 || port > MAX_PORT)
         throw std::runtime_error("Port is not in a valid range");
     address.sin_port = htons(port);
