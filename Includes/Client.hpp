@@ -11,6 +11,7 @@
 #include <vector>
 #include <sstream>
 #include "error.hpp"
+#include "Server.hpp"
 #include "../Includes/Client.hpp"
 
 #define MAX_CLIENTS 1024
