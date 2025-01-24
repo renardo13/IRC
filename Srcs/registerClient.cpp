@@ -1,0 +1,4 @@
+int registerClient(int fd)
+{
+    
+}

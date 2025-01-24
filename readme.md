@@ -1,1 +1,6 @@
-We can add the link of the google doc
+order for registeration is :
+
+        PASS 
+        NICK
+        USER - USER myusername 0 * :Real Name
+
