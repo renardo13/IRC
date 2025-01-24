@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <vector>
 #include <sstream>
+#include "error.hpp"
 #include "../Includes/Client.hpp"
 
 #define MAX_CLIENTS 1024
@@ -19,7 +20,7 @@ class Client
 {
     private:
         int pfd;
-        char *message;
+        std::string message;
         std::string name;
         std::string nickname;
         double message_timer;
@@ -31,9 +32,12 @@ class Client
         Client(int socket);
 
         void setMessage(char *message);
-        char* getMessage();
+        std::string getMessage();
+        int getPfd() const;
 
 };
 
 
 int atoi(char *str);
+std::string getWelcomeMessage(Client &client);
+int sendMessageToClient(Client &client, std::string msg);

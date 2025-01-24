@@ -1,5 +1,4 @@
 #include "Client.hpp"
-
 void reuse_local_address(int server_fd)
 {
     int opt = 1;
@@ -12,12 +11,12 @@ void bind_address(int port, int server_fd)
     memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
 
-    if(port < 0 || port > MAX_PORT)
-        std::runtime_error("Port is not in a valid range");
+    if (port < 0 || port > MAX_PORT)
+        throw std::runtime_error("Port is not in a valid range");
     address.sin_port = htons(port);
     address.sin_addr.s_addr = INADDR_ANY;
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
-        std::runtime_error("Error while binding\n");
+        throw std::runtime_error("Error while binding\n");
 }
 
 void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients)
@@ -26,13 +25,14 @@ void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, std:
     if (new_socket > 0)
     {
         if (pfds.size() > MAX_CLIENTS)
-            std::cout << "Cannot add client to the server (server is full)\n";
+            throw std::runtime_error("Cannot add client to the server (server is full)");
         Client new_client(new_socket);
         clients.insert(std::pair<int, Client>(new_socket, new_client));
         struct pollfd new_pfd;
         new_pfd.fd = new_socket;
         new_pfd.events = POLLIN;
         pfds.push_back(new_pfd);
+        sendMessageToClient(new_client,getWelcomeMessage(new_client).c_str());
     }
 }
 
@@ -46,13 +46,13 @@ void handle_message(std::vector<struct pollfd> &pfds, std::map<int, Client> &cli
     {
         if (nbytes == 0)
         {
-            std::cout << "connection closed, client is removed" << std::endl;
+            throw std::runtime_error("connection closed, client is removed");
             close(pfds[i].fd);
             clients.erase(clients.find(pfds[i].fd));
             pfds.erase(pfds.begin() + i);
         }
         else
-            std::cerr << "Error receiving message" << std::endl;
+            throw std::runtime_error("Error receiving message");
     }
     else
     {
@@ -74,13 +74,13 @@ int set_server(char *port, char *passwd)
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == -1)
-        std::runtime_error("Error while creating socket");
+        throw std::runtime_error(ERR_SOCKET_CREATION);
     reuse_local_address(server_fd);
     bind_address(atoi(port), server_fd);
     if (listen(server_fd, MAX_CLIENTS) < 0)
     {
         close(server_fd);
-        std::runtime_error("Error while listening");
+        throw std::runtime_error(ERR_SOCKET_LISTENING);
     }
     struct pollfd serverpfd;
     serverpfd.fd = server_fd;
@@ -91,7 +91,7 @@ int set_server(char *port, char *passwd)
     {
         pfds_ptr = &pfds[0];
         if (poll(pfds_ptr, pfds.size(), -1) < 0)
-            std::runtime_error("poll error");
+            throw std::runtime_error("poll error");
         for (int i = 0; i < (int)pfds.size(); i++)
         {
             if (pfds[i].revents & (POLLIN | POLLHUP))

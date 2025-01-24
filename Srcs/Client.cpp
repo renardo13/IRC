@@ -36,7 +36,12 @@ void Client::setMessage(char *message)
     this->message = message;
 }
 
-char* Client::getMessage()
+std::string Client::getMessage()
 {
     return (this->message);
+}
+
+int Client::getPfd() const
+{
+    return (this->pfd);
 }
