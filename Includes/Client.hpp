@@ -57,8 +57,8 @@ int atoi(char *str);
 std::string toStdString(char *str);
 
 //commands
-void handle_commands(std::string buff, Server server);
-void join(Server server);
+void handle_commands(std::string buff, Server& server);
+void join(Server& server);
 
 std::string getWelcomeMessage(Client &client);
 int sendMessageToClient(Client &client, std::string msg);
