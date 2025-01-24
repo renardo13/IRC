@@ -12,8 +12,8 @@
 #include <sstream>
 #include "../Includes/Client.hpp"
 
-#define PORT 10450
 #define MAX_CLIENTS 1024
+#define MAX_PORT 65535
 
 class Client
 {
@@ -34,3 +34,6 @@ class Client
         char* getMessage();
 
 };
+
+
+int atoi(char *str);

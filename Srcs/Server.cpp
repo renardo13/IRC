@@ -6,12 +6,15 @@ void reuse_local_address(int server_fd)
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 }
 
-void bind_address(int server_fd)
+void bind_address(int port, int server_fd)
 {
     struct sockaddr_in address;
     memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
-    address.sin_port = htons(PORT);
+
+    if(port < 0 || port > MAX_PORT)
+        std::runtime_error("Port is not in a valid range");
+    address.sin_port = htons(port);
     address.sin_addr.s_addr = INADDR_ANY;
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
         std::runtime_error("Error while binding\n");
@@ -65,6 +68,7 @@ After we need to link the struct with the socket with bind()*/
 
 int set_server(char *port, char *passwd)
 {
+    (void)passwd;
     std::map<int, Client> clients;
     std::vector<struct pollfd> pfds;
 
@@ -72,7 +76,7 @@ int set_server(char *port, char *passwd)
     if (server_fd == -1)
         std::runtime_error("Error while creating socket");
     reuse_local_address(server_fd);
-    bind_address(server_fd);
+    bind_address(atoi(port), server_fd);
     if (listen(server_fd, MAX_CLIENTS) < 0)
     {
         close(server_fd);

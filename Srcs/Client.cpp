@@ -1,5 +1,5 @@
 #include "../Includes/Client.hpp"
-#include<cstring>
+#include <cstring>
 
 Client::Client()
 {
