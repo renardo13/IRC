@@ -26,12 +26,14 @@ void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, std:
     {
         if (pfds.size() > MAX_CLIENTS)
             throw std::runtime_error("Cannot add client to the server (server is full)");
+            
         Client new_client(new_socket);
         clients.insert(std::pair<int, Client>(new_socket, new_client));
         struct pollfd new_pfd;
         new_pfd.fd = new_socket;
         new_pfd.events = POLLIN;
         pfds.push_back(new_pfd);
+        
         sendMessageToClient(new_client,getWelcomeMessage(new_client).c_str());
     }
 }
