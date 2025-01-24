@@ -71,7 +71,7 @@ int set_server(char *port, char *passwd)
 {
     (void)passwd;
     std::map<int, Client> clients;
-    Server server(clients);
+    // Server server(clients);
     std::vector<struct pollfd> pfds;
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);

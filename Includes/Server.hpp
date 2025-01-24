@@ -3,10 +3,13 @@
 #include "Client.hpp"
 #include <map>
 
+class Client;
+
 class Server
 {
     private:
         std::map<int, Client> clients;
+        std::vector<std::string> 
     public:
         Server();
         ~Server();

@@ -26,6 +26,7 @@ class Client
         std::string nickname;
         std::string hostname;
         bool isRegistered;
+        bool admin;
         double message_timer;
     public:
         Client();
