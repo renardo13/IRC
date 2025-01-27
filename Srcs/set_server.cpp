@@ -13,11 +13,11 @@ void bind_address(int port, int server_fd)
     address.sin_family = AF_INET;
 
     if (port < 0 || port > MAX_PORT)
-        throw std::runtime_error("Port is not in a valid range");
+        throw std::runtime_error(ERR_PORT_NOT_VALID_RANGE);
     address.sin_port = htons(port);
     address.sin_addr.s_addr = INADDR_ANY;
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
-        throw std::runtime_error("Error while binding\n");
+        throw std::runtime_error(ERR_SOCKET_BINDING);
 }
 
 void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients)
@@ -26,7 +26,7 @@ void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, std:
     if (new_socket > 0)
     {
         if (pfds.size() > MAX_CLIENTS)
-            throw std::runtime_error("Cannot add client to the server (server is full)");
+            throw std::runtime_error(ERR_SERVER_FULL);
         Client new_client(new_socket);
         clients.insert(std::pair<int, Client>(new_socket, new_client));
         struct pollfd new_pfd;
@@ -37,9 +37,9 @@ void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, std:
     }
 }
 
-void handle_message(std::vector<struct pollfd> &pfds, Server server, int i)
+void handle_message(std::vector<struct pollfd> &pfds, Server& server, int i)
 {
-    std::map<int, Client> clients = server.getClients();
+    std::map<int, Client>& clients = server.getClients();
     char buff[256];
     int nbytes = recv(pfds[i].fd, buff, 256, 0);
     if (nbytes <= 0)
@@ -52,13 +52,13 @@ void handle_message(std::vector<struct pollfd> &pfds, Server server, int i)
             pfds.erase(pfds.begin() + i);
         }
         else
-            throw std::runtime_error("Error receiving message");
+            throw std::runtime_error(ERR_SOCKET_RECEIVE);
     }
     else
     {
         buff[nbytes] = '\0';
-        clients[pfds[i].fd].setMessage(buff);
-        std::cout << clients[pfds[i].fd].getMessage();
+        clients[i].setMessage(buff);
+        std::cout << clients[i].getMessage();
         handle_commands(toStdString(buff), server);
     }
 }
@@ -95,7 +95,7 @@ int set_server(char *port, char *passwd)
     {
         pfds_ptr = &pfds[0];
         if (poll(pfds_ptr, pfds.size(), -1) < 0)
-            throw std::runtime_error("poll error");
+            throw std::runtime_error(ERR_POLL_FAILURE);
         for (int i = 0; i < (int)pfds.size(); i++)
         {
             if (pfds[i].revents & (POLLIN | POLLHUP))

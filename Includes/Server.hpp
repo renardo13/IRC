@@ -16,12 +16,13 @@ class Server
     public:
         Server();
         ~Server();
-        Server(std::map<int, Client> clients);
+        Server(std::map<int, Client>& clients);
         Server(Server const &obj);
         Server const &operator=(Server const &obj);
 
-        std::map<int, Client> getClients() const;
+        std::map<int, Client>& getClients();
         void setClients(std::map<int, Client> &clients);
+        void print_clients(Server& server);
 };
 
 int set_server(char *port, char *passwd);

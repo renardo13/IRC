@@ -18,3 +18,4 @@ std::string toStdString(char *str)
     iss >> result;
     return (result);
 }
+
