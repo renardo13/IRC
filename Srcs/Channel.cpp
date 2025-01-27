@@ -4,12 +4,11 @@ Channel::Channel() {}
 
 Channel::~Channel()
 {
-
 }
 
-Channel::Channel(Channel const& obj)
+Channel::Channel(Channel const &obj)
 {
-    if(this != &obj)
+    if (this != &obj)
     {
         *this = obj;
     }
@@ -19,16 +18,16 @@ Channel::Channel(std::string name) : name(name)
 {
 }
 
-Channel const& Channel::operator=(Channel const& obj)
+Channel const &Channel::operator=(Channel const &obj)
 {
     this->name = obj.name;
     this->mode = obj.mode;
-    return(*this);
+    return (*this);
 }
 
 std::string Channel::getMode() const
 {
-    return(this->mode);
+    return (this->mode);
 }
 
 void Channel::setMode(std::string mode)
@@ -38,5 +37,10 @@ void Channel::setMode(std::string mode)
 
 std::string Channel::getName() const
 {
-    return(name);
+    return (name);
+}
+
+std::vector<Client> &Channel::getClients()
+{
+    return (this->clients);
 }

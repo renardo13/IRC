@@ -52,12 +52,13 @@ void Server::print_clients()
         i++;
         std::cout << "Pfd: " << it->first << ", Client message: " << it->second.getMessage() << std::endl;
         std::vector<Channel>::iterator chan_it = it->second.getChannel().begin();
-        for(; chan_it != it->second.getChannel().end(); chan_it++)
+        for(int i = 1; chan_it != it->second.getChannel().end(); chan_it++)
         {
-           std::cout << chan_it->getName();
+           std::cout << "Channel " << i << ": " + chan_it->getName();
            std::cout << std::endl;
         }
     }
+    std::cout << std::string(40, '*');
 }
 
 void Server::addNewClient(Client &client, int fd)
