@@ -32,7 +32,10 @@ void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, Serv
         struct pollfd new_pfd;
         new_pfd.fd = new_socket;
         new_pfd.events = POLLIN;
+        std::cout << pfds.size() << std::endl;
         pfds.push_back(new_pfd);
+        std::cout << pfds.size() << std::endl;
+
         sendMessageToClient(new_client,getWelcomeMessage(new_client).c_str());
     }
 }
@@ -83,14 +86,14 @@ void handle_message(std::vector<struct pollfd> &pfds, Server& server, int i)
         if (limiter == -1)
         {
             clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str);
-            std::cout << "CRLF not found buffer set to: " << clients[pfds[i].fd].getMessage()  << std::endl;
+            //std::cout << "CRLF not found buffer set to: " << clients[pfds[i].fd].getMessage()  << std::endl;
         }
         else
         {
             clients[pfds[i].fd].setResMessage(buff_str.substr(limiter + 1));
             clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str.substr(0, limiter));
-            std::cout << "CRLF found full message is: " << clients[pfds[i].fd].getMessage() << std::endl;
-            std::cout << "Rest of the message is: " << clients[pfds[i].fd].getResMessage() << std::endl;
+            //std::cout << "CRLF found full message is: " << clients[pfds[i].fd].getMessage() << std::endl;
+            //std::cout << "Rest of the message is: " << clients[pfds[i].fd].getResMessage() << std::endl;
             handle_commands(server, pfds[i].fd);
         }
     }
@@ -127,10 +130,17 @@ int set_server(char *port, char *passwd)
     while (1)
     {
         pfds_ptr = &pfds[0];
-        if (poll(pfds_ptr, pfds.size(), -1) < 0)
-            throw std::runtime_error(ERR_POLL_FAILURE);
-        for (int i = 0; i < (int)pfds.size(); i++)
+        if ((poll(pfds_ptr, pfds.size(), -1)) < 0)
+            throw std::runtime_error(ERR_POLL_FAILURE);        
+        for (size_t i = 0; i < pfds.size(); i++)
         {
+            int flags = fcntl(pfds[i].fd, F_GETFL, 0);
+            if (flags == -1) {
+                throw std::runtime_error("fcntl F_GETFL failed");
+            }
+            if (fcntl(pfds[i].fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+                throw std::runtime_error("fcntl F_SETFL failed");
+            }
             if (pfds[i].revents & (POLLIN | POLLHUP))
             {
                 if (pfds[i].fd == server_fd)
@@ -140,6 +150,7 @@ int set_server(char *port, char *passwd)
                 else
                 {
                     handle_message(pfds, server, i);
+                    std::cout << "msg" << std::endl;
                 }
             }
         }
