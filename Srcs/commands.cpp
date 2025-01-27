@@ -1,8 +1,9 @@
 #include "../Includes/Client.hpp"
 int sendMessageToClient(Client &client, std::string msg);
 
-void handle_commands(std::string buff, Server& server, Client &client);
+void handle_commands(std::string buff, Server& server, Client &client)
 {
+    (void)server;
     client.setMessage("");
     client.setNBytes(0);
     std::cout << buff << std::endl;

@@ -4,6 +4,8 @@
 #include <cstring>
 #include "Client.hpp"
 
+class Client;
+
 std::string getMessageIsLongMessage(Client &client);
 std::string getWelcomeMessage(Client &client);
 #endif

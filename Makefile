@@ -4,13 +4,8 @@ SRCDIR = Srcs
 INCDIR = Includes
 OBJDIR = objs
 
-<<<<<<< HEAD
 SRCS = main.cpp Client.cpp set_server.cpp utils.cpp msgUtils.cpp msgGenerator.cpp \
-commands.cpp
-=======
-SRCS = main.cpp Client.cpp set_server.cpp utils.cpp msgUtils.cpp serverMessageGenerator.cpp \
 commands.cpp Server.cpp Channel.cpp
->>>>>>> origin/melbranch
 OBJS = $(addprefix $(OBJDIR)/, $(SRCS:.cpp=.o))
 DEPS = $(OBJS:.o=.d)
 
