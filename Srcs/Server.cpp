@@ -31,17 +31,25 @@ std::map<int, Client>& Server::getClients()
     return(clients);
 }
 
+std::vector<Channel>& Server::getChannels()
+{
+    return(this->channels);
+}
+
 void Server::setClients(std::map<int, Client> &clients)
 {
     this->clients = clients;
 }
 
-void Server::print_clients(Server& server)
+void Server::print_clients()
 {
-    std::map<int, Client>::iterator it = server.getClients().begin();
+    std::map<int, Client>::iterator it = getClients().begin();
 
-    for (; it != server.getClients().end(); it++)
+    for (int i = 1; it != getClients().end(); it++)
     {
+        std::cout << std::string(40, '_');
+        std::cout << "\nClient number " << i << std::endl;
+        i++;
         std::cout << "Pfd: " << it->first << ", Client: " << it->second.getMessage() << std::endl;
     }
 }

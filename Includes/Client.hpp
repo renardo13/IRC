@@ -12,13 +12,16 @@
 #include <sstream>
 #include "error.hpp"
 #include "Server.hpp"
+#include <algorithm>
 #include "../Includes/Client.hpp"
+#include "../Includes/Channel.hpp"
 #include "msgGenerator.hpp"
 
 #define MAX_CLIENTS 1024
 #define MAX_PORT 65535
 
 class Server;
+class Channel;
 
 class Client
 {
@@ -30,8 +33,9 @@ class Client
         std::string username;
         std::string nickname;
         std::string hostname;
+        std::vector<Channel> channels;
         bool isRegistered;
-        // bool admin;
+        bool admin;
         double message_timer;
     public:
         Client();
@@ -46,6 +50,8 @@ class Client
         std::string getHostname() const;
         std::string getMessage();
         std::string getResMessage() const;
+        std::vector<Channel>& getChannel();
+        bool getAdmin() const;
         int getNBytes() const;
         bool getIsRegistered() const;
         
@@ -53,8 +59,10 @@ class Client
         void setNickname(std::string username);
         void setHostname(std::string username);
         void setMessage(std::string message);
+        void setChannel(std::vector<Channel> channels);
         void SetIsRegistered(bool status);
         void setNBytes(int);
+        void setAdmin(bool flag);
         void setResMessage(std::string resMessage);
 
 };
@@ -65,6 +73,6 @@ std::string toStdString(char *str);
 
 //commands
 void handle_commands(std::string buff, Server& server, Client &client);
-void join(Server& server);
+void join(Server& server, Client& client);
 
 int sendMessageToClient(Client &client, std::string msg);

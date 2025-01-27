@@ -59,7 +59,7 @@ void handle_message(std::vector<struct pollfd> &pfds, Server& server, int i)
     {
         if (nbytes == 0)
         {
-            std::cout << "connection closed, client is removed";
+            std::cout << "connection closed, client is removed\n";
             close(pfds[i].fd);
             clients.erase(clients.find(pfds[i].fd));
             pfds.erase(pfds.begin() + i);
@@ -83,14 +83,14 @@ void handle_message(std::vector<struct pollfd> &pfds, Server& server, int i)
         if (limiter == -1)
         {
             clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str);
-            std::cout << "buffer set to: " << clients[pfds[i].fd].getMessage() << "**" << std::endl;
+            // std::cout << "buffer set to: " << clients[pfds[i].fd].getMessage() << "**" << std::endl;
         }
         else
         {
             clients[pfds[i].fd].setResMessage(buff_str.substr(limiter + 1));
-            std::cout << "resbuffer set to: " << clients[pfds[i].fd].getResMessage() << "**" << std::endl;
+            // std::cout << "resbuffer set to: " << clients[pfds[i].fd].getResMessage() << "**" << std::endl;
             clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str.substr(0, limiter));
-            handle_commands(clients[pfds[i].fd].getMessage(),server, clients[pfds[i].fd]);
+            handle_commands(clients[pfds[i].fd].getMessage(), server, clients[pfds[i].fd]);
         }
     }
 }

@@ -12,6 +12,8 @@ class Channel
         ~Channel();
         Channel(Channel const& obj);
         Channel const& operator=(Channel const& obj);
+        Channel(std::string name);
         std::string getMode() const;
+        std::string getName() const;
         void setMode(std::string mode);
 };

@@ -15,6 +15,10 @@ Channel::Channel(Channel const& obj)
     }
 }
 
+Channel::Channel(std::string name) : name(name)
+{
+}
+
 Channel const& Channel::operator=(Channel const& obj)
 {
     this->name = obj.name;
@@ -30,4 +34,9 @@ std::string Channel::getMode() const
 void Channel::setMode(std::string mode)
 {
     this->mode = mode;
+}
+
+std::string Channel::getName() const
+{
+    return(name);
 }

@@ -3,14 +3,14 @@
 
 Client::Client()
 {
-    std::cout << "A new client has been register" << std::endl;
+    // std::cout << "A new client has been register" << std::endl;
 }
 
 Client::~Client() {}
 
 Client::Client(int pfd) : pfd(pfd)
 {
-    std::cout << "New connexion ! client pfd = " << pfd << std::endl;
+    // std::cout << "New connexion ! client pfd = " << pfd << std::endl;
     this->nbytes = 0;
     this->message = "";
     this->resMessage = "";
@@ -110,3 +110,22 @@ void Client::setResMessage(std::string resMessage)
     this->resMessage = resMessage;
 }
 
+bool Client::getAdmin() const
+{
+    return(admin);
+}
+
+void Client::setAdmin(bool flag)
+{
+    admin = flag;
+}
+
+std::vector<Channel>& Client::getChannel()
+{
+    return(channels);
+}
+
+void Client::setChannel(std::vector<Channel> channels)
+{
+    this->channels = channels;
+}
