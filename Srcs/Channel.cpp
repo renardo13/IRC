@@ -1,8 +1,11 @@
 #include "../Includes/Channel.hpp"
 
-Channel::Channel() {};
+Channel::Channel() {}
 
-Channel::~Channel() {};
+Channel::~Channel()
+{
+
+}
 
 Channel::Channel(Channel const& obj)
 {
@@ -15,6 +18,7 @@ Channel::Channel(Channel const& obj)
 Channel const& Channel::operator=(Channel const& obj)
 {
     this->name = obj.name;
+    this->mode = obj.mode;
     return(*this);
 }
 

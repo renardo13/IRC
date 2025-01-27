@@ -44,6 +44,8 @@
 #define ERR_NOT_AN_OPERATOR "Error: You must be an operator to perform this action"
 #define ERR_INVALID_PASSWORD "Error: Invalid password"
 #define ERR_COMMAND_NOT_ALLOWED "Error: You are not allowed to execute this command"
+#define ERR_SERVER_FULL "Cannot add client to the server (server is full)"
+#define ERR_PORT_NOT_VALID_RANGE "Port is not in a valid range"
 
 
 

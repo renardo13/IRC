@@ -1,7 +1,7 @@
 #include "../Includes/Client.hpp"
 int sendMessageToClient(Client &client, std::string msg);
 
-void handle_commands(Client &client, std::string buff)
+void handle_commands(std::string buff, Server& server, Client &client);
 {
     client.setMessage("");
     client.setNBytes(0);
@@ -13,10 +13,10 @@ void handle_commands(Client &client, std::string buff)
     // if(cmd == "NICK")
     //     nick();
     // ...
-    
 }
 
-void join()
+void join(Server &server)
 {
 
+   (void)server;
 }

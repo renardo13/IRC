@@ -13,11 +13,11 @@ void bind_address(int port, int server_fd)
     address.sin_family = AF_INET;
 
     if (port < 0 || port > MAX_PORT)
-        throw std::runtime_error("Port is not in a valid range");
+        throw std::runtime_error(ERR_PORT_NOT_VALID_RANGE);
     address.sin_port = htons(port);
     address.sin_addr.s_addr = INADDR_ANY;
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
-        throw std::runtime_error("Error while binding\n");
+        throw std::runtime_error(ERR_SOCKET_BINDING);
 }
 
 void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients)
@@ -26,7 +26,7 @@ void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, std:
     if (new_socket > 0)
     {
         if (pfds.size() > MAX_CLIENTS)
-            throw std::runtime_error("Cannot add client to the server (server is full)");
+            throw std::runtime_error(ERR_SERVER_FULL);
         Client new_client(new_socket);
         clients.insert(std::pair<int, Client>(new_socket, new_client));
         struct pollfd new_pfd;
@@ -49,9 +49,10 @@ int crlfCheck(char buff[512])
     return -1;
 }
 
-void handle_message(std::vector<struct pollfd> &pfds, std::map<int, Client> &clients, int i)
+void handle_message(std::vector<struct pollfd> &pfds, Server& server, int i)
 {
     char buff[512];
+    std::map<int, Client>& clients = server.getClients();
     int nbytes = recv(pfds[i].fd, buff, 512, 0);
     clients[pfds[i].fd].setNBytes(clients[pfds[i].fd].getNBytes() + nbytes);
     if (nbytes <= 0)
@@ -64,7 +65,7 @@ void handle_message(std::vector<struct pollfd> &pfds, std::map<int, Client> &cli
             pfds.erase(pfds.begin() + i);
         }
         else
-            throw std::runtime_error("Error receiving message");
+            throw std::runtime_error(ERR_SOCKET_RECEIVE);
     }
     else
     {
@@ -89,8 +90,7 @@ void handle_message(std::vector<struct pollfd> &pfds, std::map<int, Client> &cli
             clients[pfds[i].fd].setResMessage(buff_str.substr(limiter + 1));
             std::cout << "resbuffer set to: " << clients[pfds[i].fd].getResMessage() << "**" << std::endl;
             clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str.substr(0, limiter));
-            handle_commands(clients[pfds[i].fd], clients[pfds[i].fd].getMessage());
-
+            handle_commands(clients[pfds[i].fd].getMessage(),server, clients[pfds[i].fd]);
         }
     }
 }
@@ -105,7 +105,7 @@ int set_server(char *port, char *passwd)
 {
     (void)passwd;
     std::map<int, Client> clients;
-    // Server server(clients);
+    Server server(clients);
     std::vector<struct pollfd> pfds;
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -127,7 +127,7 @@ int set_server(char *port, char *passwd)
     {
         pfds_ptr = &pfds[0];
         if (poll(pfds_ptr, pfds.size(), -1) < 0)
-            throw std::runtime_error("poll error");
+            throw std::runtime_error(ERR_POLL_FAILURE);
         for (int i = 0; i < (int)pfds.size(); i++)
         {
             if (pfds[i].revents & (POLLIN | POLLHUP))
@@ -138,7 +138,7 @@ int set_server(char *port, char *passwd)
                 }
                 else
                 {
-                    handle_message(pfds, clients, i);
+                    handle_message(pfds, server, i);
                 }
             }
         }
