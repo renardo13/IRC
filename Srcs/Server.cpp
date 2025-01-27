@@ -45,3 +45,8 @@ void Server::print_clients(Server& server)
         std::cout << "Pfd: " << it->first << ", Client: " << it->second.getMessage() << std::endl;
     }
 }
+
+void Server::addNewClient(Client &client, int fd)
+{
+    this->clients.insert(std::pair<int, Client>(fd, client));
+}
