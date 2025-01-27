@@ -19,11 +19,13 @@ class Server
         Server(std::map<int, Client>& clients);
         Server(Server const &obj);
         Server const &operator=(Server const &obj);
-
         std::map<int, Client>& getClients();
         std::vector<Channel>& getChannels();
         void setClients(std::map<int, Client> &clients);
         void print_clients();
+        void addNewClient(Client &client, int fd);
+
 };
 
 int set_server(char *port, char *passwd);
+void handle_commands(Server& server, Client &client);

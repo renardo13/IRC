@@ -1,5 +1,5 @@
 #include "Client.hpp"
-
+#include "Server.hpp"
 void reuse_local_address(int server_fd)
 {
     int opt = 1;
@@ -20,7 +20,7 @@ void bind_address(int port, int server_fd)
         throw std::runtime_error(ERR_SOCKET_BINDING);
 }
 
-void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, std::map<int, Client> &clients)
+void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, Server &server)
 {
     int new_socket = accept(server_fd, NULL, NULL);
     if (new_socket > 0)
@@ -28,7 +28,7 @@ void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, std:
         if (pfds.size() > MAX_CLIENTS)
             throw std::runtime_error(ERR_SERVER_FULL);
         Client new_client(new_socket);
-        clients.insert(std::pair<int, Client>(new_socket, new_client));
+        server.addNewClient(new_client,new_socket);
         struct pollfd new_pfd;
         new_pfd.fd = new_socket;
         new_pfd.events = POLLIN;
@@ -90,7 +90,7 @@ void handle_message(std::vector<struct pollfd> &pfds, Server& server, int i)
             clients[pfds[i].fd].setResMessage(buff_str.substr(limiter + 1));
             // std::cout << "resbuffer set to: " << clients[pfds[i].fd].getResMessage() << "**" << std::endl;
             clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str.substr(0, limiter));
-            handle_commands(clients[pfds[i].fd].getMessage(), server, clients[pfds[i].fd]);
+            handle_commands(server, pfds[i].fd);
         }
     }
 }
@@ -134,7 +134,7 @@ int set_server(char *port, char *passwd)
             {
                 if (pfds[i].fd == server_fd)
                 {
-                    handle_new_connection(server_fd, pfds, clients);
+                    handle_new_connection(server_fd, pfds, server);
                 }
                 else
                 {

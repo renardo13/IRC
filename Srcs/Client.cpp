@@ -15,6 +15,9 @@ Client::Client(int pfd) : pfd(pfd)
     this->message = "";
     this->resMessage = "";
     this->isRegistered = false;
+    this->username = "";
+    this->hostname = "";
+    this->nickname = "";
     memset(&message, 0, sizeof(message));
 };
 
