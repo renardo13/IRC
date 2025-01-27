@@ -37,10 +37,23 @@ void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, std:
     }
 }
 
+int crlfCheck(char buff[512])
+{
+    int i = 0;
+    while (buff[i])
+    {
+        if (buff[i] == '\r' && buff[i + 1] == '\n')
+            return i;
+        i++;
+    }
+    return -1;
+}
+
 void handle_message(std::vector<struct pollfd> &pfds, std::map<int, Client> &clients, int i)
 {
-    char buff[256];
-    int nbytes = recv(pfds[i].fd, buff, 256, 0);
+    char buff[512];
+    int nbytes = recv(pfds[i].fd, buff, 512, 0);
+    clients[pfds[i].fd].setNBytes(clients[pfds[i].fd].getNBytes() + nbytes);
     if (nbytes <= 0)
     {
         if (nbytes == 0)
@@ -55,10 +68,30 @@ void handle_message(std::vector<struct pollfd> &pfds, std::map<int, Client> &cli
     }
     else
     {
+        if (clients[pfds[i].fd].getNBytes() > 512)
+        {
+            clients[pfds[i].fd].setMessage("");
+            clients[pfds[i].fd].setResMessage("");
+            clients[pfds[i].fd].setNBytes(0);
+            sendMessageToClient(clients[pfds[i].fd],getMessageIsLongMessage(clients[pfds[i].fd]).c_str());
+            return ;
+        }
         buff[nbytes] = '\0';
-        clients[pfds[i].fd].setMessage(buff);
-        std::cout << clients[pfds[i].fd].getMessage();
-        handle_commands(toStdString(buff));
+        std::string buff_str = std::string(buff);
+        int limiter = crlfCheck(buff);
+        if (limiter == -1)
+        {
+            clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str);
+            std::cout << "buffer set to: " << clients[pfds[i].fd].getMessage() << "**" << std::endl;
+        }
+        else
+        {
+            clients[pfds[i].fd].setResMessage(buff_str.substr(limiter + 1));
+            std::cout << "resbuffer set to: " << clients[pfds[i].fd].getResMessage() << "**" << std::endl;
+            clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str.substr(0, limiter));
+            handle_commands(clients[pfds[i].fd], clients[pfds[i].fd].getMessage());
+
+        }
     }
 }
 

@@ -11,6 +11,9 @@ Client::~Client() {}
 Client::Client(int pfd) : pfd(pfd)
 {
     std::cout << "New connexion ! client pfd = " << pfd << std::endl;
+    this->nbytes = 0;
+    this->message = "";
+    this->resMessage = "";
     this->isRegistered = false;
     memset(&message, 0, sizeof(message));
 };
@@ -32,7 +35,7 @@ Client const &Client::operator=(Client const &obj)
     return (*this);
 }
 
-void Client::setMessage(char *message)
+void Client::setMessage(std::string message)
 {
     this->message = message;
 }
@@ -40,6 +43,11 @@ void Client::setMessage(char *message)
 std::string Client::getMessage()
 {
     return (this->message);
+}
+
+std::string Client::getResMessage() const
+{
+    return (this->resMessage);
 }
 
 int Client::getPfd() const
@@ -67,6 +75,11 @@ std::string Client::getHostname() const
     return(this->hostname);
 }
 
+int Client::getNBytes() const
+{
+    return nbytes;
+}
+
 void Client::setUsername(std::string username)
 {
     this->username = username;
@@ -85,5 +98,15 @@ void Client::setHostname(std::string hostname)
 void Client::SetIsRegistered(bool status)
 {
     this->isRegistered = status;
+}
+
+void Client::setNBytes(int nbytes)
+{
+    this->nbytes = nbytes;
+}
+
+void Client::setResMessage(std::string resMessage)
+{
+    this->resMessage = resMessage;
 }
 

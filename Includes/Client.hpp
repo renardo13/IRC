@@ -13,6 +13,7 @@
 #include "error.hpp"
 #include "Server.hpp"
 #include "../Includes/Client.hpp"
+#include "msgGenerator.hpp"
 
 #define MAX_CLIENTS 1024
 #define MAX_PORT 65535
@@ -21,7 +22,9 @@ class Client
 {
     private:
         int pfd;
+        int nbytes;
         std::string message;
+        std::string resMessage;
         std::string username;
         std::string nickname;
         std::string hostname;
@@ -40,13 +43,17 @@ class Client
         std::string getNickname() const;
         std::string getHostname() const;
         std::string getMessage();
+        std::string getResMessage() const;
+        int getNBytes() const;
         bool getIsRegistered() const;
         
         void setUsername(std::string username);
         void setNickname(std::string username);
         void setHostname(std::string username);
-        void setMessage(char *message);
+        void setMessage(std::string message);
         void SetIsRegistered(bool status);
+        void setNBytes(int);
+        void setResMessage(std::string resMessage);
 
 };
 
@@ -55,8 +62,7 @@ int atoi(char *str);
 std::string toStdString(char *str);
 
 //commands
-void handle_commands(std::string buff);
+void handle_commands(Client &client, std::string buff);
 void join();
 
-std::string getWelcomeMessage(Client &client);
 int sendMessageToClient(Client &client, std::string msg);
