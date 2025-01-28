@@ -31,6 +31,7 @@ class Client
         std::string nickname;
         std::string hostname;
         bool isRegistered;
+        int register_process;
         // bool admin;
         double message_timer;
     public:
@@ -48,7 +49,7 @@ class Client
         std::string getResMessage() const;
         int getNBytes() const;
         bool getIsRegistered() const;
-        
+        int getRegisterProcess() const;
         void setUsername(std::string username);
         void setNickname(std::string username);
         void setHostname(std::string username);
@@ -56,6 +57,7 @@ class Client
         void SetIsRegistered(bool status);
         void setNBytes(int);
         void setResMessage(std::string resMessage);
+        void setRegisterProcess(int rp);
 
 };
 

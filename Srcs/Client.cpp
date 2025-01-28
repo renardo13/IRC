@@ -18,7 +18,7 @@ Client::Client(int pfd) : pfd(pfd)
     this->username = "";
     this->hostname = "";
     this->nickname = "";
-    memset(&message, 0, sizeof(message));
+    this->register_process = 0;
 };
 
 Client::Client(Client const &obj)
@@ -83,6 +83,11 @@ int Client::getNBytes() const
     return nbytes;
 }
 
+int Client::getRegisterProcess() const
+{
+    return (this->register_process);
+}
+
 void Client::setUsername(std::string username)
 {
     this->username = username;
@@ -111,5 +116,10 @@ void Client::setNBytes(int nbytes)
 void Client::setResMessage(std::string resMessage)
 {
     this->resMessage = resMessage;
+}
+
+void Client::setRegisterProcess(int rp)
+{
+    this->register_process = rp;
 }
 

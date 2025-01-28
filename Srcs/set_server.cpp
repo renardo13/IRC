@@ -1,5 +1,6 @@
 #include "Client.hpp"
 #include "Server.hpp"
+
 void reuse_local_address(int server_fd)
 {
     int opt = 1;
@@ -20,27 +21,48 @@ void bind_address(int port, int server_fd)
         throw std::runtime_error(ERR_SOCKET_BINDING);
 }
 
-void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, Server &server)
+void deleteClientPfd(struct pollfd pfds[MAX_FDS], int i)
+{
+    while (i < MAX_FDS - 1)
+    {
+        pfds[i] = pfds[i + 1];
+        i++;
+    }
+}
+
+void handle_new_connection(int server_fd, struct pollfd pfds[], int *pfd_count, Server &server)
 {
     int new_socket = accept(server_fd, NULL, NULL);
     if (new_socket > 0)
     {
-        if (pfds.size() > MAX_CLIENTS)
+        if (*pfd_count > MAX_CLIENTS + 1)
             throw std::runtime_error(ERR_SERVER_FULL);
         Client new_client(new_socket);
         server.addNewClient(new_client,new_socket);
         struct pollfd new_pfd;
         new_pfd.fd = new_socket;
         new_pfd.events = POLLIN;
-        std::cout << pfds.size() << std::endl;
-        pfds.push_back(new_pfd);
-        std::cout << pfds.size() << std::endl;
-
-        sendMessageToClient(new_client,getWelcomeMessage(new_client).c_str());
+        new_pfd.revents = 0;
+        pfds[*pfd_count] = new_pfd;
+        *pfd_count += 1;
+        //sendMessageToClient(new_client,getWelcomeMessage(new_client).c_str());
     }
 }
 
-int crlfCheck(char buff[512])
+int getCrlfAmount(const char* buff)
+{
+    int i = 0;
+    int n = 0;
+    while (buff[i])
+    {
+        if (buff[i] == '\r' && buff[i + 1] == '\n')
+            n++;
+        i++;
+    }
+    return n;
+}
+
+int crlfCheck(const char* buff)
 {
     int i = 0;
     while (buff[i])
@@ -52,7 +74,7 @@ int crlfCheck(char buff[512])
     return -1;
 }
 
-void handle_message(std::vector<struct pollfd> &pfds, Server& server, int i)
+void handle_message(struct pollfd pfds[], int *pfd_count ,Server& server, int i)
 {
     char buff[512];
     std::map<int, Client>& clients = server.getClients();
@@ -63,39 +85,36 @@ void handle_message(std::vector<struct pollfd> &pfds, Server& server, int i)
         if (nbytes == 0)
         {
             std::cout << "connection closed, client is removed";
+            throw std::runtime_error("try");
             close(pfds[i].fd);
             clients.erase(clients.find(pfds[i].fd));
-            pfds.erase(pfds.begin() + i);
+            deleteClientPfd(pfds,i);
+            *pfd_count-=1;
         }
         else
             throw std::runtime_error(ERR_SOCKET_RECEIVE);
     }
     else
     {
-        if (clients[pfds[i].fd].getNBytes() > 512)
-        {
-            clients[pfds[i].fd].setMessage("");
-            clients[pfds[i].fd].setResMessage("");
-            clients[pfds[i].fd].setNBytes(0);
-            sendMessageToClient(clients[pfds[i].fd],getMessageIsLongMessage(clients[pfds[i].fd]).c_str());
-            return ;
-        }
+        // ADD LONG COMMAND CHECK!
         buff[nbytes] = '\0';
         std::string buff_str = std::string(buff);
-        int limiter = crlfCheck(buff);
-        if (limiter == -1)
+        int nCrlf = getCrlfAmount(buff_str.c_str());
+        if (nCrlf != 0)
         {
-            clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str);
-            //std::cout << "CRLF not found buffer set to: " << clients[pfds[i].fd].getMessage()  << std::endl;
+            while (nCrlf != 0)
+            {
+                int limiter = crlfCheck(buff_str.c_str());
+                clients[pfds[i].fd].setResMessage(buff_str.substr(limiter + 1));
+                std::cout << "Res : " <<clients[pfds[i].fd].getResMessage() << std::endl;
+                clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str.substr(0, limiter));
+                handle_commands(server, pfds[i].fd);
+                buff_str = buff_str.substr(limiter + 2);
+                nCrlf = getCrlfAmount(buff_str.c_str());
+            }
         }
         else
-        {
-            clients[pfds[i].fd].setResMessage(buff_str.substr(limiter + 1));
-            clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str.substr(0, limiter));
-            //std::cout << "CRLF found full message is: " << clients[pfds[i].fd].getMessage() << std::endl;
-            //std::cout << "Rest of the message is: " << clients[pfds[i].fd].getResMessage() << std::endl;
-            handle_commands(server, pfds[i].fd);
-        }
+            clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str);
     }
 }
 
@@ -110,8 +129,8 @@ int set_server(char *port, char *passwd)
     (void)passwd;
     std::map<int, Client> clients;
     Server server(clients);
-    std::vector<struct pollfd> pfds;
-
+    struct pollfd pfds[10];
+    int pfd_count = 0;
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == -1)
         throw std::runtime_error(ERR_SOCKET_CREATION);
@@ -125,14 +144,13 @@ int set_server(char *port, char *passwd)
     struct pollfd serverpfd;
     serverpfd.fd = server_fd;
     serverpfd.events = POLLIN;
-    pfds.push_back(serverpfd);
-    pollfd *pfds_ptr;
+    pfds[0] = serverpfd;
+    pfd_count = 1;
     while (1)
     {
-        pfds_ptr = &pfds[0];
-        if ((poll(pfds_ptr, pfds.size(), -1)) < 0)
+        if ((poll(pfds, pfd_count, -1)) < 0)
             throw std::runtime_error(ERR_POLL_FAILURE);        
-        for (size_t i = 0; i < pfds.size(); i++)
+        for (int i = 0; i < pfd_count; i++)
         {
             int flags = fcntl(pfds[i].fd, F_GETFL, 0);
             if (flags == -1) {
@@ -145,12 +163,11 @@ int set_server(char *port, char *passwd)
             {
                 if (pfds[i].fd == server_fd)
                 {
-                    handle_new_connection(server_fd, pfds, server);
+                    handle_new_connection(server_fd, pfds, &pfd_count ,server);
                 }
                 else
                 {
-                    handle_message(pfds, server, i);
-                    std::cout << "msg" << std::endl;
+                    handle_message(pfds, &pfd_count ,server, i);
                 }
             }
         }

@@ -4,5 +4,6 @@ order for registeration is :
         NICK
         USER - USER myusername 0 * :Real Name
 
+/quit = QUIT
 
 
