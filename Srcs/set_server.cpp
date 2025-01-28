@@ -28,7 +28,7 @@ void handle_new_connection(int server_fd, std::vector<struct pollfd> &pfds, Serv
         if (pfds.size() > MAX_CLIENTS)
             throw std::runtime_error(ERR_SERVER_FULL);
         Client new_client(new_socket);
-        server.addNewClient(new_client,new_socket);
+        server.addNewClient(new_client, new_socket);
         struct pollfd new_pfd;
         new_pfd.fd = new_socket;
         new_pfd.events = POLLIN;
@@ -105,7 +105,8 @@ int set_server(char *port, char *passwd)
 {
     (void)passwd;
     std::map<int, Client> clients;
-    Server server(clients);
+    std::vector<Channel> channels;
+    Server server(clients, channels);
     std::vector<struct pollfd> pfds;
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);

@@ -32,40 +32,17 @@ void handle_commands(Server &server, int fd)
     }
 }
 
-// // generic template function to find a specific attribute in a class
-// template <typename Container, typename Value, typename AttributeType>
-// typename Container::iterator findByAttribute(Container &container, Value value, AttributeType Container::value_type::*attribute)
-// {
-//     typename Container::iterator it = container.begin();
-//     for (; it != container.end(); ++it)
-//     {
-//         if (it->*attribute == value)
-//         {
-//             return it;
-//         }
-//     }
-//     return container.end();
-// }
-
-template <typename Container, typename Value>
-typename Container::iterator findByAttribute(Container &container, bool (*comparator)(const typename Container::value_type&))
+// Generic function to find a value of a certain type in a certain container type. ("::Value_type" is the type of elements that the container store)
+template <typename Container, typename AttributeType, typename Value>
+typename Container::iterator findValue(Container &container, AttributeType (Container::value_type::*getter)() const, const Value value)
 {
     typename Container::iterator it = container.begin();
+
     for (; it != container.end(); ++it)
-    {
-        if (comparator(*it))  // Utilisation du pointeur de fonction pour comparer
-        {
+        if (((*it).*getter)() == value)
             return it;
-        }
-    }
     return container.end();
 }
-
-std::string compareChannelName(const Channel &chan)
-{
-    return chan.getName();
-}
-
 
 void join(Server &server, Client &client)
 {
@@ -78,7 +55,7 @@ void join(Server &server, Client &client)
     {
         Channel chan(name);
         chan.getClients().push_back(client);
-        if (findByAttribute(server.getChannels(), compareChannelName) != server.getChannels().end())
+        if (server.getChannels().size() == 0 || findValue(server.getChannels(), &Channel::getName, name) == server.getChannels().end())
         {
             server.getChannels().push_back(chan);
             client.getChannel().push_back(chan);
@@ -90,11 +67,11 @@ void join(Server &server, Client &client)
             client.getChannel().clear();
             std::cout << "Erase of the channels-s client\n";
         }
-        else
+        else if (findValue(client.getChannel(), &Channel::getName, name) == client.getChannel().end())
         {
             client.getChannel().push_back(chan);
             std::cout << "Client reached successfully an existing channel\n";
         }
     }
-    // server.print_clients();
+    server.print_clients();
 }

@@ -16,7 +16,7 @@ class Server
     public:
         Server();
         ~Server();
-        Server(std::map<int, Client>& clients);
+        Server(std::map<int, Client>& clients, std::vector<Channel>& channels);
         Server(Server const &obj);
         Server const &operator=(Server const &obj);
         std::map<int, Client>& getClients();
