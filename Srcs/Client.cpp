@@ -8,7 +8,7 @@ Client::Client()
 
 Client::~Client() {}
 
-Client::Client(int pfd) : pfd(pfd)
+Client::Client(int pfd) : pfd(pfd), isRegistered(false)
 {
     std::cout << "New connexion ! client pfd = " << pfd << std::endl;
     this->nbytes = 0;
@@ -35,6 +35,14 @@ Client const &Client::operator=(Client const &obj)
     this->nickname = obj.nickname;
     this->pfd = obj.pfd;
     this->message_timer = obj.message_timer;
+    this->nbytes = obj.nbytes;
+    this->message = obj.message;
+    this->resMessage = obj.resMessage;
+    this->isRegistered = obj.isRegistered;
+    this->username = obj.username;
+    this->hostname = obj.hostname;
+    this->nickname = obj.nickname;
+    this->register_process = obj.register_process;
     return (*this);
 }
 
@@ -83,7 +91,7 @@ int Client::getNBytes() const
     return nbytes;
 }
 
-int Client::getRegisterProcess() const
+int Client:: getRegisterProcess() const
 {
     return (this->register_process);
 }

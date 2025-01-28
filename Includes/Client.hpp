@@ -47,9 +47,9 @@ class Client
         std::string getHostname() const;
         std::string getMessage();
         std::string getResMessage() const;
+        int getRegisterProcess() const;
         int getNBytes() const;
         bool getIsRegistered() const;
-        int getRegisterProcess() const;
         void setUsername(std::string username);
         void setNickname(std::string username);
         void setHostname(std::string username);
@@ -58,7 +58,6 @@ class Client
         void setNBytes(int);
         void setResMessage(std::string resMessage);
         void setRegisterProcess(int rp);
-
 };
 
 //Utils
