@@ -23,4 +23,5 @@ class Channel
         std::vector<Client>& getClients();
 
         void setMode(std::string mode);
+        void setClients(Client& client);
 };

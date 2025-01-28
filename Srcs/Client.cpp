@@ -136,17 +136,17 @@ void Client::setAdmin(bool flag)
     admin = flag;
 }
 
-std::vector<Channel>& Client::getChannel()
-{
-    return(channels);
-}
+// std::vector<Channel>& Client::getChannel()
+// {
+//     return(channels);
+// }
 
-void Client::setChannel(std::vector<Channel> channels)
-{
-    this->channels = channels;
-}
+// void Client::setChannel(std::vector<Channel> channels)
+// {
+//     this->channels = channels;
+// }
 
-void Client::setRegisterProcess(int rp)
-{
-    this->register_process = rp;
-}
+// void Client::setRegisterProcess(int rp)
+// {
+//     this->register_process = rp;
+// }

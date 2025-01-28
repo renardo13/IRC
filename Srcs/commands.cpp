@@ -1,18 +1,19 @@
 #include "../Includes/Client.hpp"
+#include "../Includes/Server.hpp"
 #include <string>
 #include <vector>
 
 // Generic function to find a value of a certain type in a certain container type. ("::Value_type" is the type of elements that the container store)
 template <typename Container, typename AttributeType, typename Value>
-typename Container::iterator findValue(Container &container, AttributeType (Container::value_type::*getter)() const, const Value value)
+typename Container findValue(Container &container, AttributeType (Container::value_type::*getter)() const, const Value value)
 {
     typename Container::iterator it = container.begin();
 
     for (; it != container.end(); it++)
     {
-        // std::cout << "it : " << ((*it).*getter)() << " | value : " << value << std::endl;
+        std::cout << "it : " << ((*it).*getter)() << " | value : " << value << std::endl;
         if (((*it).*getter)() == value)
-            return it;
+            return *it;
     }
 
     return container.end();
@@ -20,7 +21,7 @@ typename Container::iterator findValue(Container &container, AttributeType (Cont
 
 int sendMessageToClient(Client &client, std::string msg);
 
-void handle_commands(Server &server, int fd)
+void Server::handle_commands(Server &server, int fd)
 {
     Client &client = server.getClients()[fd];
     std::string msg = client.getMessage();
@@ -39,9 +40,9 @@ void handle_commands(Server &server, int fd)
     {
         join(server, server.getClients()[fd]);
     }
-    else if (cmd == "LEAVE")
+    else if (cmd == "PART")
     {
-        leave(server, server.getClients()[fd]);
+        part(server, server.getClients()[fd]);
     }
     else if (cmd == "NICK")
     {
@@ -85,6 +86,7 @@ void join(Server &server, Client &client)
         std::cout << "Channel name is invalid\n";
         return;
     }
+   
     name = name.substr(1);
     Channel chan(name);
     if (name == "0")
@@ -92,13 +94,13 @@ void join(Server &server, Client &client)
         client.getChannel().clear();
         std::cout << "Erase all the channels's client\n";
     }
+    
     else if (server.getChannels().size() == 0 || findValue(server.getChannels(), &Channel::getName, name) == server.getChannels().end())
     {
         chan.getClients().push_back(client);
-        // std::cout << "Client nickname : " << chan.getClients().begin()
+        std::cout << "Client nickname : " << chan.getClients().begin()->getNickname() << std::endl;
         server.getChannels().push_back(chan);
         client.getChannel().push_back(chan);
-        client.setAdmin(1);
         std::cout << "Channel was successfully created\n";
     }
     else if (findValue(client.getChannel(), &Channel::getName, name) == client.getChannel().end())
@@ -107,32 +109,35 @@ void join(Server &server, Client &client)
         client.getChannel().push_back(chan);
         std::cout << "Client reached successfully an existing channel\n";
     }
-    // server.print_clients();
+    server.print();
+
 }
 
-void leave(Server &server, Client &client)
+void Server::part(Client &client)
 {
     std::string mess = client.getMessage().substr(client.getMessage().find(' '));
     std::string chan_name = mess.substr(mess.find_first_not_of(' '));
 
     // std::cout << "Channel name = " << chan_name << std::endl;
 
-    std::vector<Channel>::iterator it = findValue(client.getChannel(), &Channel::getName, chan_name);
+    if (findValue(client.getChannel(), &Channel::getName, chan_name) == client.getChannel().end())
+        return;
+    Channel chan = *findValue(client.getChannel(), &Channel::getName, chan_name);
 
-    std::vector<Client>::iterator client_it = it->getClients().begin();
-    std::cout << "List of client inside this specific channel :\n";
-    for(; client_it != it->getClients().end(); client_it++)
+    std::vector<Client>::iterator client_it = chan.getClients().begin();
+    std::cout << "List of client inside this specific channel : " << client_it->getNickname() << std::endl << std::endl;
+    for(; client_it != chan.getClients().end(); client_it++)
     {
         std::cout << "Client_name = " << client_it->getNickname() << std::endl;
     }
 
-    if (it == client.getChannel().end())
-    {
-        std::cout << "Client is not in this channel\n";
-    } 
+    // if (chan == client.getChannel().end())
+    // {
+    //     std::cout << "Client is not in this channel\n";
+    // }
     else
     {
-        // it->getClients().erase(findValue(it->getClients(), &Client::getNickname, client.getNickname()));
+        it->getClients().erase(findValue(it->getClients(), &Client::getNickname, client.getNickname()));
         std::cout << "Client leave the channel\n";
         if (it->getClients().size() == 0)
         {
@@ -141,5 +146,5 @@ void leave(Server &server, Client &client)
         }
         client.getChannel().erase(it);
     }
-    server.print();
+
 }

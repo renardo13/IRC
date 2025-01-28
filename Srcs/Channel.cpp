@@ -44,3 +44,8 @@ std::vector<Client> &Channel::getClients()
 {
     return (this->clients);
 }
+
+void Channel::setClients(Client& client)
+{
+    this->clients.push_back(client);
+}
