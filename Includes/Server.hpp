@@ -22,7 +22,7 @@ class Server
         std::map<int, Client>& getClients();
         std::vector<Channel>& getChannels();
         void setClients(std::map<int, Client> &clients);
-        void print_clients();
+        void print();
         void addNewClient(Client &client, int fd);
 
 };

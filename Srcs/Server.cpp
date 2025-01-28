@@ -41,7 +41,7 @@ void Server::setClients(std::map<int, Client> &clients)
     this->clients = clients;
 }
 
-void Server::print_clients()
+void Server::print()
 {
     std::map<int, Client>::iterator it = getClients().begin();
 
@@ -58,7 +58,19 @@ void Server::print_clients()
            std::cout << std::endl;
         }
     }
+
+   
+
+    std::vector<Channel>::iterator ite = getChannels().begin();
+
+    for(int i = 1; ite != getChannels().end(); ite++, i++)
+    { 
+        if(i == 1)
+            std::cout << "\nList of existing channels : \n";
+        std::cout << "Channel number : " << i << ' ' << ite->getName() << std::endl;
+    }
     std::cout << std::string(40, '*');
+    std::cout << std::endl;
 }
 
 void Server::addNewClient(Client &client, int fd)
