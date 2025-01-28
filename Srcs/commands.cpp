@@ -3,9 +3,11 @@
 #include <string>
 #include <vector>
 
+int sendMessageToClient(Client &client, std::string msg);
+
 // Generic function to find a value of a certain type in a certain container type. ("::Value_type" is the type of elements that the container store)
 template <typename Container, typename AttributeType, typename Value>
-typename Container findValue(Container &container, AttributeType (Container::value_type::*getter)() const, const Value value)
+typename Container& findValue(Container &container, AttributeType (Container::value_type::*getter)() const, const Value value)
 {
     typename Container::iterator it = container.begin();
 
@@ -19,11 +21,9 @@ typename Container findValue(Container &container, AttributeType (Container::val
     return container.end();
 }
 
-int sendMessageToClient(Client &client, std::string msg);
-
-void Server::handle_commands(Server &server, int fd)
+void Server::handle_commands(int fd)
 {
-    Client &client = server.getClients()[fd];
+    Client &client = getClients()[fd];
     std::string msg = client.getMessage();
     std::string cmd = msg.substr(0, msg.find(' '));
     std::cout << cmd << std::endl;
@@ -38,11 +38,11 @@ void Server::handle_commands(Server &server, int fd)
     }
     else if (cmd == "JOIN")
     {
-        join(server, server.getClients()[fd]);
+        join(getClients()[fd]);
     }
     else if (cmd == "PART")
     {
-        part(server, server.getClients()[fd]);
+        part(getClients()[fd]);
     }
     else if (cmd == "NICK")
     {
@@ -71,12 +71,12 @@ void Server::handle_commands(Server &server, int fd)
            client.setRegisterProcess(0); 
     }
     else
-        sendMessageToClient(server.getClients()[fd], "Unknown command");
+        sendMessageToClient(getClients()[fd], "Unknown command");
     client.setMessage("");
     client.setNBytes(0);
 }
 
-void join(Server &server, Client &client)
+void Server::join(Client &client)
 {
 
     std::string mess = client.getMessage().substr(client.getMessage().find(' '));
@@ -95,7 +95,7 @@ void join(Server &server, Client &client)
         std::cout << "Erase all the channels's client\n";
     }
     
-    else if (server.getChannels().size() == 0 || findValue(server.getChannels(), &Channel::getName, name) == server.getChannels().end())
+    else if (getChannels().size() == 0 || findValue(server.getChannels(), &Channel::getName, name) == server.getChannels().end())
     {
         chan.getClients().push_back(client);
         std::cout << "Client nickname : " << chan.getClients().begin()->getNickname() << std::endl;
@@ -109,7 +109,7 @@ void join(Server &server, Client &client)
         client.getChannel().push_back(chan);
         std::cout << "Client reached successfully an existing channel\n";
     }
-    server.print();
+    print();
 
 }
 

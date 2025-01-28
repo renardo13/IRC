@@ -70,9 +70,6 @@ public:
     void setResMessage(std::string resMessage);
     void setRegisterProcess(int rp);
 
-    void handle_commands(Server &server, int fd);
-    void join(Client &client);
-    void part(Client &client);
 };
 
 // Utils

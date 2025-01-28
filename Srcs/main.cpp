@@ -7,7 +7,8 @@ int main(int ac, char **av)
         std::cout << "Invalid arguments, please enter a port and a password ./ircserv <port> <passeword>\n";
     try
     {
-        set_server(av[1], av[2]);
+        Server server;
+        server.set_server(av[1], av[2]);
     }
     catch(const std::exception& e)
     {

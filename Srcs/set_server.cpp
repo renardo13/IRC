@@ -74,7 +74,7 @@ int crlfCheck(const char* buff)
     return -1;
 }
 
-void handle_message(struct pollfd pfds[], int *pfd_count ,Server& server, int i)
+void handle_message(struct pollfd pfds[], int *pfd_count, Server& server, int i)
 {
     char buff[512];
     std::map<int, Client>& clients = server.getClients();
@@ -122,7 +122,7 @@ After we need to link the struct with the socket with bind()*/
 /* AF_INET for IPV4 adress familly */
 /* SOCK_STREAM works with TCP protocol */
 
-int set_server(char *port, char *passwd)
+int Server::set_server(char *port, char *passwd)
 {
     (void)passwd;
     std::map<int, Client> clients;
