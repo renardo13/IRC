@@ -22,34 +22,57 @@ int sendMessageToClient(Client &client, std::string msg);
 
 void handle_commands(Server &server, int fd)
 {
-    std::string msg = server.getClients()[fd].getMessage();
+    Client &client = server.getClients()[fd];
+    std::string msg = client.getMessage();
     std::string cmd = msg.substr(0, msg.find(' '));
-    if (cmd == "JOIN")
+    std::cout << cmd << std::endl;
+    if (cmd == "PASS")
+    {
+        if (client.getRegisterProcess() == 0)
+        {
+            std::string pass = msg.substr(msg.find(' ') + 1);
+            client.setRegisterProcess(1);
+            //pass auth
+        }
+    }
+    else if (cmd == "JOIN")
     {
         join(server, server.getClients()[fd]);
     }
-    if (cmd == "LEAVE")
+    else if (cmd == "LEAVE")
     {
         leave(server, server.getClients()[fd]);
     }
-    else if (cmd == "KICK")
+    else if (cmd == "NICK")
     {
-        join(server, server.getClients()[fd]);
+        if (client.getRegisterProcess() == 1)
+        {
+            std::string nick = msg.substr(msg.find(' ') + 1);
+            client.setNickname(nick);
+            client.setRegisterProcess(2);
+        }
+        else
+        {
+            client.setRegisterProcess(0);
+        }  
     }
-    else if (cmd == "MODE")
+    else if (cmd == "USER")
     {
-        join(server, server.getClients()[fd]);
-    }
-    else if (cmd == "INVITE")
-    {
-        join(server, server.getClients()[fd]);
+        if (client.getRegisterProcess() == 2)
+        {
+            std::string user = msg.substr(msg.find(' ') + 1);
+            client.setUsername(user); 
+            client.SetIsRegistered(true);
+            client.setRegisterProcess(3);
+            sendMessageToClient(client,getWelcomeMessage(client).c_str());
+        }
+        else
+           client.setRegisterProcess(0); 
     }
     else
-    {
         sendMessageToClient(server.getClients()[fd], "Unknown command");
-    }
-    server.getClients()[fd].setMessage("");
-    server.getClients()[fd].setNBytes(0);
+    client.setMessage("");
+    client.setNBytes(0);
 }
 
 void join(Server &server, Client &client)

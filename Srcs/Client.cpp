@@ -8,7 +8,7 @@ Client::Client()
 
 Client::~Client() {}
 
-Client::Client(int pfd) : pfd(pfd)
+Client::Client(int pfd) : pfd(pfd), isRegistered(false)
 {
     // std::cout << "New connexion ! client pfd = " << pfd << std::endl;
     this->nbytes = 0;
@@ -18,7 +18,7 @@ Client::Client(int pfd) : pfd(pfd)
     this->username = "";
     this->hostname = "";
     this->nickname = "";
-    memset(&message, 0, sizeof(message));
+    this->register_process = 0;
 };
 
 Client::Client(Client const &obj)
@@ -35,6 +35,14 @@ Client const &Client::operator=(Client const &obj)
     this->nickname = obj.nickname;
     this->pfd = obj.pfd;
     this->message_timer = obj.message_timer;
+    this->nbytes = obj.nbytes;
+    this->message = obj.message;
+    this->resMessage = obj.resMessage;
+    this->isRegistered = obj.isRegistered;
+    this->username = obj.username;
+    this->hostname = obj.hostname;
+    this->nickname = obj.nickname;
+    this->register_process = obj.register_process;
     return (*this);
 }
 
@@ -81,6 +89,11 @@ std::string Client::getHostname() const
 int Client::getNBytes() const
 {
     return nbytes;
+}
+
+int Client:: getRegisterProcess() const
+{
+    return (this->register_process);
 }
 
 void Client::setUsername(std::string username)
@@ -131,4 +144,9 @@ std::vector<Channel>& Client::getChannel()
 void Client::setChannel(std::vector<Channel> channels)
 {
     this->channels = channels;
+}
+
+void Client::setRegisterProcess(int rp)
+{
+    this->register_process = rp;
 }

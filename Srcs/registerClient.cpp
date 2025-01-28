@@ -1,4 +1,0 @@
-int registerClient(int fd)
-{
-    
-}

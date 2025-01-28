@@ -25,46 +25,50 @@ class Channel;
 
 class Client
 {
-private:
-    int pfd;
-    int nbytes;
-    std::string message;
-    std::string resMessage;
-    std::string username;
-    std::string nickname;
-    std::string hostname;
-    std::vector<Channel> channels;
-    bool isRegistered;
-    bool admin;
-    double message_timer;
 
-public:
-    Client();
-    ~Client();
-    Client(Client const &obj);
-    Client const &operator=(Client const &obj);
-    Client(int socket);
+    private:
+        int pfd;
+        int nbytes;
+        std::string message;
+        std::string resMessage;
+        std::string username;
+        std::string nickname;
+        std::string hostname;
+        std::vector<Channel> channels;
+        bool isRegistered;
+        int register_process;
+        bool admin;
+        double message_timer;
+    public:
+        Client();
+        ~Client();
+        Client(Client const& obj);
+        Client const& operator=(Client const& obj);
+        Client(int socket);
 
-    int getPfd() const;
-    std::string getUsername() const;
-    std::string getNickname() const;
-    std::string getHostname() const;
-    std::string getMessage();
-    std::string getResMessage() const;
+        int getPfd() const;
     std::vector<Channel> &getChannel();
-    bool getAdmin() const;
-    int getNBytes() const;
-    bool getIsRegistered() const;
+        std::string getUsername() const;
+        std::string getNickname() const;
+        std::string getHostname() const;
+        std::string getMessage();
+        std::string getResMessage() const;
+        bool getAdmin() const;
+        int getRegisterProcess() const;
+        int getNBytes() const;
+        bool getIsRegistered() const;
 
-    void setUsername(std::string username);
-    void setNickname(std::string username);
-    void setHostname(std::string username);
-    void setMessage(std::string message);
-    void setChannel(std::vector<Channel> channels);
-    void SetIsRegistered(bool status);
-    void setNBytes(int);
+        void setUsername(std::string username);
+        void setNickname(std::string username);
+        void setHostname(std::string username);
+        void setMessage(std::string message);
     void setAdmin(bool flag);
-    void setResMessage(std::string resMessage);
+
+    void setChannel(std::vector<Channel> channels);
+        void SetIsRegistered(bool status);
+        void setNBytes(int);
+        void setResMessage(std::string resMessage);
+        void setRegisterProcess(int rp);
 };
 
 // Utils
