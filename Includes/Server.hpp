@@ -19,8 +19,11 @@ public:
     Server(std::map<int, Client> &clients, std::vector<Channel> &channels);
     Server(Server const &obj);
     Server const &operator=(Server const &obj);
+
     std::map<int, Client> &getClients();
     std::vector<Channel> &getChannels();
+
+    void setChannel(Channel& chan);
     void setClients(std::map<int, Client> &clients);
 
     int set_server(char *port, char *passwd);

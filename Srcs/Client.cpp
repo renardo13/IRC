@@ -3,7 +3,7 @@
 
 Client::Client()
 {
-    // std::cout << "A new client has been register" << std::endl;
+    std::cout << "A new client has been register" << std::endl;
 }
 
 Client::~Client() {}
@@ -146,7 +146,7 @@ void Client::setAdmin(bool flag)
 //     this->channels = channels;
 // }
 
-// void Client::setRegisterProcess(int rp)
-// {
-//     this->register_process = rp;
-// }
+void Client::setRegisterProcess(int rp)
+{
+    this->register_process = rp;
+}

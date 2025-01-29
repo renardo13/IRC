@@ -45,7 +45,7 @@ void handle_new_connection(int server_fd, struct pollfd pfds[], int *pfd_count, 
         new_pfd.revents = 0;
         pfds[*pfd_count] = new_pfd;
         *pfd_count += 1;
-        //sendMessageToClient(new_client,getWelcomeMessage(new_client).c_str());
+        sendMessageToClient(new_client,getWelcomeMessage(new_client).c_str());
     }
 }
 
@@ -80,6 +80,10 @@ void handle_message(struct pollfd pfds[], int *pfd_count, Server& server, int i)
     std::map<int, Client>& clients = server.getClients();
     int nbytes = recv(pfds[i].fd, buff, 512, 0);
     clients[pfds[i].fd].setNBytes(clients[pfds[i].fd].getNBytes() + nbytes);
+
+    clients[pfds[i].fd].setNickname("John");
+
+
     if (nbytes <= 0)
     {
         if (nbytes == 0)
@@ -106,7 +110,7 @@ void handle_message(struct pollfd pfds[], int *pfd_count, Server& server, int i)
                 int limiter = crlfCheck(buff_str.c_str());
                 clients[pfds[i].fd].setResMessage(buff_str.substr(limiter + 1));
                 clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str.substr(0, limiter));
-                handle_commands(server, pfds[i].fd);
+                server.handle_commands(pfds[i].fd);
                 buff_str = buff_str.substr(limiter + 2);
                 nCrlf = getCrlfAmount(buff_str.c_str());
             }

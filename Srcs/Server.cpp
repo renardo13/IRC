@@ -50,13 +50,7 @@ void Server::print()
         std::cout << std::string(40, '_');
         std::cout << "\nClient number " << i << std::endl;
         i++;
-        std::cout << "Pfd: " << it->first << ", Client message: " << it->second.getMessage() << std::endl;
-        std::vector<Channel>::iterator chan_it = it->second.getChannel().begin();
-        for(int i = 1; chan_it != it->second.getChannel().end(); chan_it++)
-        {
-           std::cout << "Channel " << i << ": " + chan_it->getName();
-           std::cout << std::endl;
-        }
+        std::cout << "Nick name: " << it->second.getNickname() << ", Client message: " << it->second.getMessage() << std::endl;
     }
 
    
@@ -67,7 +61,12 @@ void Server::print()
     { 
         if(i == 1)
             std::cout << "\nList of existing channels : \n";
-        std::cout << "Channel number : " << i << ' ' << ite->getName() << std::endl;
+        std::cout << "Channel number " << i << " : " << ite->getName() << std::endl;
+        std::vector<Client>::iterator client_it = ite->getClients().begin();
+        for(; client_it != ite->getClients().end(); client_it++)
+        {
+            std::cout << "    - " << client_it->getNickname() << std::endl;
+        }
     }
     std::cout << std::string(40, '*');
     std::cout << std::endl;
@@ -76,4 +75,9 @@ void Server::print()
 void Server::addNewClient(Client &client, int fd)
 {
     this->clients.insert(std::pair<int, Client>(fd, client));
+}
+
+void Server::setChannel(Channel& chan)
+{
+    this->channels.push_back(chan);
 }
