@@ -15,6 +15,7 @@
 #include <algorithm>
 #include "../Includes/Client.hpp"
 #include "../Includes/Channel.hpp"
+#include "../Includes/Command.hpp"
 #include "msgGenerator.hpp"
 
 #define MAX_CLIENTS 1024

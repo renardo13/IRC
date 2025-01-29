@@ -12,11 +12,8 @@ template <typename Container, typename AttributeType,
 {
 	typename Container::iterator it = container.begin();
 	for (; it != container.end(); it++)
-	{
-		std::cout << "it : " << ((*it).*getter)() << " | value : " << value << std::endl;
 		if (((*it).*getter)() == value)
 			return (it);
-	}
 	return (container.end());
 }
 
@@ -42,6 +39,10 @@ void Server::handle_commands(int fd)
 	else if (cmd == "PART")
 	{
 		part(getClients()[fd]);
+	}
+    else if (cmd == "KICK")
+	{
+		kick(getClients()[fd]);
 	}
 	else if (cmd == "NICK")
 	{
@@ -75,6 +76,21 @@ void Server::handle_commands(int fd)
 	client.setNBytes(0);
 }
 
+void Server::kick(Client &client)
+{
+    Command cmd;
+	cmd.parseCmd(client.getMessage());
+
+    
+
+    // if(client.getNickname()[0] != '@')
+    // {
+    //     std::cout << "Client is not operator and cannot kick " << " from " << chan << std::endl;
+    // }
+
+
+}
+
 void Server::join(Client &client)
 {
 	std::string mess = client.getMessage().substr(client.getMessage().find(' '));
@@ -96,6 +112,7 @@ void Server::join(Client &client)
 	{
 		Channel channel(name);
 		this->setChannel(channel);
+        client.setNickname('@' + client.getNickname());
 		getChannels().back().getClients().push_back(client);
 		std::cout << "Channel was successfully created\n";
 	}
@@ -130,3 +147,5 @@ void Server::part(Client &client)
 	}
 	print();
 }
+
+

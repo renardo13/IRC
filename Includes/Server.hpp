@@ -34,4 +34,5 @@ public:
     void handle_commands(int fd);
     void join(Client &client);
     void part(Client &client);
+    void kick(Client &client);
 };
