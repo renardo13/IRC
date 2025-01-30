@@ -40,5 +40,5 @@ public:
     void join(Client &client);
     void part(Client &client);
     void kick(Client &client);
-    void quit(Client &client);
+    //void quit(Client &client);
 };

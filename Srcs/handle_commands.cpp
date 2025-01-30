@@ -157,9 +157,9 @@ void Server::part(Client &client)
 	print();
 }
 
-void Server::quit(Client &client)
-{
-	
-}
+// void Server::quit(Client &client)
+// {
+
+// }
 
 
