@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 
-int	sendMessageToClient(Client &client, std::string msg);
 
 // Generic function to find a value of a certain type in a certain container type. ("::Value_type" is the type of elements that the container store)
 template <typename Container, typename AttributeType,
@@ -22,15 +21,22 @@ void Server::handle_commands(int fd)
 	Client &client = getClients()[fd];
 	std::string msg = client.getMessage();
 	std::string cmd = msg.substr(0, msg.find(' '));
-	std::cout << cmd << std::endl;
+	std::cout << "MSG: " << msg << std::endl;
+	// TO-DO: without registeration no message should be handled.
 	if (cmd == "PASS")
 	{
 		if (client.getRegisterProcess() == 0)
 		{
-			std::string pass = msg.substr(msg.find(' ') + 1);
-			client.setRegisterProcess(1);
-			// pass auth
+			std::string passwd = msg.substr(msg.find(' ') + 1, msg.size() - 2);
+			std::cout << "pass is: " << this->pass << std::endl;
+			if (passwd == this->pass)
+			{
+				client.setRegisterProcess(1);
+				std::cout << "PASS IS CORRECT" << std::endl;
+			}
 		}
+		else
+			sendMessageToClient(client, ERR_ALREADYREGISTRED);
 	}
 	else if (cmd == "JOIN")
 	{
@@ -54,7 +60,9 @@ void Server::handle_commands(int fd)
 		}
 		else
 		{
-			client.setRegisterProcess(0);
+			std::string nick = msg.substr(msg.find(' ') + 1);
+			sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
+			client.setNickname(nick);
 		}
 	}
 	else if (cmd == "USER")
@@ -65,7 +73,8 @@ void Server::handle_commands(int fd)
 			client.setUsername(user);
 			client.SetIsRegistered(true);
 			client.setRegisterProcess(3);
-			sendMessageToClient(client, getWelcomeMessage(client).c_str());
+			sendMessageToClient(client, RPL_WELCOME(client).c_str());
+			std::cout << "Welcome message shouldve been sent" << std::endl;
 		}
 		else
 			client.setRegisterProcess(0);
@@ -146,6 +155,11 @@ void Server::part(Client &client)
 		}
 	}
 	print();
+}
+
+void Server::quit(Client &client)
+{
+	
 }
 
 
