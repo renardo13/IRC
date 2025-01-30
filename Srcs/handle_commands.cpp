@@ -3,12 +3,13 @@
 #include <string>
 #include <vector>
 
-int	sendMessageToClient(Client &client, std::string msg);
+int sendMessageToClient(Client &client, std::string msg);
 
 // Generic function to find a value of a certain type in a certain container type. ("::Value_type" is the type of elements that the container store)
 template <typename Container, typename AttributeType,
-	typename Value> typename Container::iterator findValue(Container &container,
-	AttributeType (Container::value_type::*getter)() const, const Value value)
+		  typename Value>
+typename Container::iterator findValue(Container &container,
+									   AttributeType (Container::value_type::*getter)() const, const Value value)
 {
 	typename Container::iterator it = container.begin();
 	for (; it != container.end(); it++)
@@ -20,35 +21,35 @@ template <typename Container, typename AttributeType,
 void Server::handle_commands(int fd)
 {
 	Client &client = getClients()[fd];
-	std::string msg = client.getMessage();
-	std::string cmd = msg.substr(0, msg.find(' '));
-	std::cout << cmd << std::endl;
-	if (cmd == "PASS")
+	Command cmd;
+	cmd.parseCmd(client.getMessage());
+
+	if (cmd.getCmd() == "PASS")
 	{
 		if (client.getRegisterProcess() == 0)
 		{
-			std::string pass = msg.substr(msg.find(' ') + 1);
+			std::string pass = client.getMessage().substr(client.getMessage().find(' ') + 1);
 			client.setRegisterProcess(1);
 			// pass auth
 		}
 	}
-	else if (cmd == "JOIN")
+	else if (cmd.getCmd() == "JOIN")
 	{
-		join(getClients()[fd]);
+		join(getClients()[fd], cmd);
 	}
-	else if (cmd == "PART")
+	else if (cmd.getCmd() == "PART")
 	{
-		part(getClients()[fd]);
+		part(getClients()[fd], cmd);
 	}
-    else if (cmd == "KICK")
+	else if (cmd.getCmd() == "KICK")
 	{
-		kick(getClients()[fd]);
+		kick(getClients()[fd], cmd);
 	}
-	else if (cmd == "NICK")
+	else if (cmd.getCmd() == "NICK")
 	{
 		if (client.getRegisterProcess() == 1)
 		{
-			std::string nick = msg.substr(msg.find(' ') + 1);
+			std::string nick = cmd.getMsg().substr(cmd.getMsg().find(' ') + 1);
 			client.setNickname(nick);
 			client.setRegisterProcess(2);
 		}
@@ -57,11 +58,11 @@ void Server::handle_commands(int fd)
 			client.setRegisterProcess(0);
 		}
 	}
-	else if (cmd == "USER")
+	else if (cmd.getMsg() == "USER")
 	{
 		if (client.getRegisterProcess() == 2)
 		{
-			std::string user = msg.substr(msg.find(' ') + 1);
+			std::string user = cmd.getMsg().substr(cmd.getMsg().find(' ') + 1);
 			client.setUsername(user);
 			client.SetIsRegistered(true);
 			client.setRegisterProcess(3);
@@ -76,61 +77,59 @@ void Server::handle_commands(int fd)
 	client.setNBytes(0);
 }
 
-void Server::kick(Client &client)
+void Server::kick(Client &client, Command cmd)
 {
-    Command cmd;
-	cmd.parseCmd(client.getMessage());
-
-    
-
-    // if(client.getNickname()[0] != '@')
-    // {
-    //     std::cout << "Client is not operator and cannot kick " << " from " << chan << std::endl;
-    // }
-
-
+	(void)client;
+	(void)cmd;
+	// if(client.getNickname()[0] != '@')
+	// {
+	//     std::cout << "Client is not operator and cannot kick " << " from " << chan << std::endl;
+	// }
 }
 
-void Server::join(Client &client)
+void Server::join(Client &client, Command& cmd)
 {
-	std::string mess = client.getMessage().substr(client.getMessage().find(' '));
-	std::string name = mess.substr(mess.find_first_not_of(' '));
-	if (name.empty() || name[0] != '#')
+	if (cmd.getChannel().empty())
 	{
-		std::cout << "Channel name is invalid\n";
-		return ;
+		std::cout << "Missing channel\n";
+		return;
 	}
-	name = name.substr(1);
-	std::vector<Channel>::iterator chan = findValue(getChannels(),
-			&Channel::getName, name);
-	if (chan != getChannels().end())
+	for (std::vector<std::string>::iterator chan_name = cmd.getChannel().begin(); chan_name != cmd.getChannel().end(); chan_name++)
 	{
-		chan->getClients().push_back(client);
-		std::cout << "Client reached successfully an existing channel\n";
+		std::vector<Channel>::iterator chan_find = findValue(getChannels(), &Channel::getName, *chan_name);
+
+		if (chan_find != getChannels().end())
+		{
+			chan_find->getClients().push_back(client);
+			std::cout << "Client reached successfully an existing channel\n";
+		}
+		else
+		{
+			Channel channel(*chan_name);
+			this->setChannel(channel);
+			getChannels().back().getClients().push_back(client);
+			getChannels().back().getClients().back().setNickname('@' + client.getNickname());
+			std::cout << "Channel was successfully created\n";
+		}
 	}
-	else
-	{
-		Channel channel(name);
-		this->setChannel(channel);
-        client.setNickname('@' + client.getNickname());
-		getChannels().back().getClients().push_back(client);
-		std::cout << "Channel was successfully created\n";
-	}
+	print();
 }
-void Server::part(Client &client)
+
+void Server::part(Client &client, Command cmd)
 {
+	(void)cmd;
 	std::string mess = client.getMessage().substr(client.getMessage().find(' '));
 	std::string chan_name = mess.substr(mess.find_first_not_of(' '));
 
 	std::vector<Channel>::iterator chan = findValue(getChannels(),
-			&Channel::getName, chan_name);
+													&Channel::getName, chan_name);
 	if (chan == getChannels().end())
 	{
 		std::cout << "Channel does not exist in the server\n";
-		return ;
+		return;
 	}
 	std::vector<Client>::iterator client_it = findValue(chan->getClients(),
-			&Client::getNickname, client.getNickname());
+														&Client::getNickname, client.getNickname());
 	if (client_it == chan->getClients().end())
 	{
 		std::cout << "Client is not in this channel\n";
@@ -147,5 +146,3 @@ void Server::part(Client &client)
 	}
 	print();
 }
-
-

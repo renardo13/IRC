@@ -80,10 +80,6 @@ void handle_message(struct pollfd pfds[], int *pfd_count, Server& server, int i)
     std::map<int, Client>& clients = server.getClients();
     int nbytes = recv(pfds[i].fd, buff, 512, 0);
     clients[pfds[i].fd].setNBytes(clients[pfds[i].fd].getNBytes() + nbytes);
-
-    clients[pfds[i].fd].setNickname("John");
-
-
     if (nbytes <= 0)
     {
         if (nbytes == 0)
