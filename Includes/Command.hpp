@@ -17,5 +17,11 @@ class Command
         Command(Command const &obj); 
         Command const &operator=(Command const &obj);
 
-        Command parseCmd(std::string message);
+        void parseCmd(std::string message);
+
+        std::string getCmd() {return cmd;};
+        std::vector<std::string>& getChannel() {return channel;};
+        std::vector<std::string>& getUser() {return user;};
+        std::string getMsg() {return msg;};
+        std::vector<std::string>& getMode() {return mode;};
 };

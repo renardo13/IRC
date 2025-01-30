@@ -2,64 +2,94 @@
 
 Command::Command(Command const &obj)
 {
-	if (this != &obj)
-		*this = obj;
+    if (this != &obj)
+        *this = obj;
 }
 
 Command const &Command::operator=(Command const &obj)
 {
-	this->cmd = obj.cmd;
-	this->channel = obj.channel;
-	this->user = obj.user;
-	this->msg = obj.msg;
-	this->mode = obj.mode;
-	return (*this);
+    this->cmd = obj.cmd;
+    this->channel = obj.channel;
+    this->user = obj.user;
+    this->msg = obj.msg;
+    this->mode = obj.mode;
+    return (*this);
 }
 
-Command Command::parseCmd(std::string msg)
+size_t find_end(const std::string& msg, size_t start)
 {
-    Command cmd;
+    size_t end1 = msg.find(' ', start);
+    size_t end2 = msg.find(',', start);
 
-    cmd.cmd = msg.substr(msg.find(' '));
-    cmd.cmd = cmd.cmd.substr(cmd.cmd.find_first_not_of(' '));
-    std::cout <<  "cmd.cmd " << cmd.cmd << std::endl;
+    if (end1 == std::string::npos)
+        end1 = msg.size();
+    if (end2 == std::string::npos)
+        end2 = msg.size();
 
-    for(int i = 0; i < (int)msg.size(); i++)
+    return std::min(end1, end2);
+}
+
+void Command::parseCmd(std::string msg)
+{
+    size_t end;
+
+    end = msg.find_first_not_of(' ');
+    size_t next_space = msg.find(' ', end);
+
+    if (next_space == std::string::npos)
+        cmd = msg.substr(end);
+    else
+        cmd = msg.substr(end, next_space - end);
+
+    // std::cout << "MESSAGE = " << msg << std::endl;
+
+    for (int i = cmd.size(); i < (int)msg.size(); i++)
     {
-        if(msg[i] == '#')
+        if (msg[i] == '#')
         {
-            size_t channel_end = msg.find(' ');
-            std::string channel_name = msg.substr(i + 1, channel_end - 1);
-            cmd.channel.push_back(channel_name);
+            end = find_end(msg, i);
+            channel.push_back(msg.substr(i + 1, end - i - 1));
+            i = end;
+        }
+        else if (msg[i] == '+')
+        {
+            end = find_end(msg, i);
+            mode.push_back(msg.substr(i, end - i));
+            i = end - 1;
+        }
+        else if (msg[i] != ' ' && msg[i] != ':')
+        {
+            end = msg.find(' ', i);
+            if (end == std::string::npos)
+                end = msg.size();
 
+            user.push_back(msg.substr(i, end - i));
+            i = end - 1;
+        }
+        else if (msg[i] == ':')
+        {
+            msg = msg.substr(i + 1);
+            break;
         }
     }
-
-	// std::string chan = mess.substr(mess.find_first_not_of(' '));
-
-    std::vector<std::string>::iterator mode = cmd.mode.begin();
-    std::cout << "Mode :" << std::endl;
-    for(; mode != cmd.mode.end(); mode++ )
-    {   
-        std::cout << *mode << std::endl;
-    }
-
-    std::cout << "Channel :" << std::endl;
-    std::vector<std::string>::iterator channel = cmd.channel.begin();
-    for(; channel != cmd.channel.end(); channel++ )
-    {   
-        std::cout << *channel << std::endl;
-    }
-
-    std::cout << "User :" << std::endl;
-    std::vector<std::string>::iterator user = cmd.user.begin();
-    for(; user != cmd.user.end(); user++ )
-    {   
-        std::cout << *user << std::endl;
-    }
-
-    std::cout << "Message = " << cmd.msg;
-
-
-    return(cmd);
+    // std::cout << std::endl << "Mode : ";
+    // for (std::vector<std::string>::iterator mode = cmd.mode.begin(); mode != cmd.mode.end(); mode++)
+    // {
+    //     std::cout << *mode << ", ";
+    // }
+    // std::cout << std::endl;
+    // std::cout << "Channel : ";
+    // for (std::vector<std::string>::iterator channel = this->channel.begin(); channel != this->channel.end(); channel++)
+    // {
+    //     std::cout << *channel << ", ";
+    // }
+    // std::cout << std::endl;
+    // std::cout << "User : ";
+    // for (std::vector<std::string>::iterator user = cmd.user.begin(); user != cmd.user.end(); user++)
+    // {
+    //     std::cout << *user  << ", ";
+    // }
+    // std::cout << std::endl;
+    // std::cout << "Message : " << cmd.msg << std::endl;
 }
+

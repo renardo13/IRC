@@ -8,6 +8,7 @@
 #define MAX_FDS 10
 class Client;
 class Channel;
+class Command;
 
 class Server
 {
@@ -37,8 +38,7 @@ public:
     void setPassword(std::string password);
     //commands member function
     void handle_commands(int fd);
-    void join(Client &client);
-    void part(Client &client);
-    void kick(Client &client);
-    //void quit(Client &client);
+    void join(Client &client, Command &cmd);
+    void part(Client &client, Command cmd);
+    void kick(Client &client, Command cmd);
 };
