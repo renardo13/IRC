@@ -34,6 +34,6 @@ public:
     //commands member function
     void handle_commands(int fd);
     void join(Client &client, Command &cmd);
-    void part(Client &client, Command cmd);
-    void kick(Client &client, Command cmd);
+    void part(Client &client, Command &cmd);
+    void kick(Client &client, Command &cmd);
 };

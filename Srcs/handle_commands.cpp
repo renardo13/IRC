@@ -1,5 +1,6 @@
 #include "../Includes/Client.hpp"
 #include "../Includes/Server.hpp"
+#include "../Includes/replies.hpp"
 #include <string>
 #include <vector>
 
@@ -30,7 +31,6 @@ void Server::handle_commands(int fd)
 		{
 			std::string pass = client.getMessage().substr(client.getMessage().find(' ') + 1);
 			client.setRegisterProcess(1);
-			// pass auth
 		}
 	}
 	else if (cmd.getCmd() == "JOIN")
@@ -49,7 +49,7 @@ void Server::handle_commands(int fd)
 	{
 		if (client.getRegisterProcess() == 1)
 		{
-			std::string nick = cmd.getMsg().substr(cmd.getMsg().find(' ') + 1);
+			std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
 			client.setNickname(nick);
 			client.setRegisterProcess(2);
 		}
@@ -77,7 +77,7 @@ void Server::handle_commands(int fd)
 	client.setNBytes(0);
 }
 
-void Server::kick(Client &client, Command cmd)
+void Server::kick(Client &client, Command& cmd)
 {
 	(void)client;
 	(void)cmd;
@@ -91,7 +91,7 @@ void Server::join(Client &client, Command& cmd)
 {
 	if (cmd.getChannel().empty())
 	{
-		std::cout << "Missing channel\n";
+		// sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), cmd.getCmd()));
 		return;
 	}
 	for (std::vector<std::string>::iterator chan_name = cmd.getChannel().begin(); chan_name != cmd.getChannel().end(); chan_name++)
@@ -101,7 +101,7 @@ void Server::join(Client &client, Command& cmd)
 		if (chan_find != getChannels().end())
 		{
 			chan_find->getClients().push_back(client);
-			std::cout << "Client reached successfully an existing channel\n";
+			sendMessageToClient(client, RPL_JOIN(client.getHostname(), *chan_name));
 		}
 		else
 		{
@@ -109,31 +109,22 @@ void Server::join(Client &client, Command& cmd)
 			this->setChannel(channel);
 			getChannels().back().getClients().push_back(client);
 			getChannels().back().getClients().back().setNickname('@' + client.getNickname());
-			std::cout << "Channel was successfully created\n";
+			sendMessageToClient(client, RPL_JOIN(client.getHostname(), *chan_name));
 		}
 	}
-	print();
+	// print();
 }
 
-void Server::part(Client &client, Command cmd)
+void Server::part(Client &client, Command& cmd)
 {
-	(void)cmd;
-	std::string mess = client.getMessage().substr(client.getMessage().find(' '));
-	std::string chan_name = mess.substr(mess.find_first_not_of(' '));
-
 	std::vector<Channel>::iterator chan = findValue(getChannels(),
-													&Channel::getName, chan_name);
+													&Channel::getName, *cmd.getChannel().begin());
 	if (chan == getChannels().end())
-	{
-		std::cout << "Channel does not exist in the server\n";
 		return;
-	}
 	std::vector<Client>::iterator client_it = findValue(chan->getClients(),
 														&Client::getNickname, client.getNickname());
 	if (client_it == chan->getClients().end())
-	{
-		std::cout << "Client is not in this channel\n";
-	}
+		sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *cmd.getChannel().begin()));
 	else
 	{
 		std::cout << "Client left the channel\n";
