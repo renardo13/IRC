@@ -77,7 +77,23 @@ void Server::addNewClient(Client &client, int fd)
     this->clients.insert(std::pair<int, Client>(fd, client));
 }
 
+int Server::sendMessageToClient(Client &client, std::string msg)
+{
+    std::string irc_msg = msg + "\r\n";
+    return (send(client.getPfd(), irc_msg.c_str(),irc_msg.size(),0));
+}
+
 void Server::setChannel(Channel& chan)
 {
     this->channels.push_back(chan);
+}
+
+std::string Server::getPassword() const
+{
+    return (this->pass);
+}
+
+void Server::setPassword(std::string password)
+{
+    this->pass = password;
 }

@@ -45,7 +45,6 @@ void handle_new_connection(int server_fd, struct pollfd pfds[], int *pfd_count, 
         new_pfd.revents = 0;
         pfds[*pfd_count] = new_pfd;
         *pfd_count += 1;
-        sendMessageToClient(new_client,getWelcomeMessage(new_client).c_str());
     }
 }
 
@@ -95,7 +94,7 @@ void handle_message(struct pollfd pfds[], int *pfd_count, Server& server, int i)
     }
     else
     {
-        // ADD LONG COMMAND CHECK!
+        //TO-DO: Add long command check (>512)
         buff[nbytes] = '\0';
         std::string buff_str = std::string(buff);
         int nCrlf = getCrlfAmount(buff_str.c_str());
@@ -124,11 +123,10 @@ After we need to link the struct with the socket with bind()*/
 
 int Server::set_server(char *port, char *passwd)
 {
-    (void)passwd;
     std::map<int, Client> clients;
     std::vector<Channel> channels;
     Server server(clients, channels);
-
+    server.setPassword(passwd);
     struct pollfd pfds[10];
     int pfd_count = 0;
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);

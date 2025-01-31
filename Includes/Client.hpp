@@ -16,7 +16,6 @@
 #include "../Includes/Client.hpp"
 #include "../Includes/Channel.hpp"
 #include "../Includes/Command.hpp"
-#include "msgGenerator.hpp"
 
 #define MAX_CLIENTS 1024
 #define MAX_PORT 65535
@@ -76,5 +75,3 @@ public:
 // Utils
 int atoi(char *str);
 std::string toStdString(char *str);
-
-int sendMessageToClient(Client &client, std::string msg);

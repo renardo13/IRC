@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-int sendMessageToClient(Client &client, std::string msg);
 
 // Generic function to find a value of a certain type in a certain container type. ("::Value_type" is the type of elements that the container store)
 template <typename Container, typename AttributeType,
@@ -31,7 +30,14 @@ void Server::handle_commands(int fd)
 		{
 			std::string pass = client.getMessage().substr(client.getMessage().find(' ') + 1);
 			client.setRegisterProcess(1);
+			if (pass == this->pass)
+			{
+				client.setRegisterProcess(1);
+				std::cout << "PASS IS CORRECT" << std::endl;
+			}
 		}
+		else
+			sendMessageToClient(client, ERR_ALREADYREGISTRED);
 	}
 	else if (cmd.getCmd() == "JOIN")
 	{
@@ -55,10 +61,12 @@ void Server::handle_commands(int fd)
 		}
 		else
 		{
-			client.setRegisterProcess(0);
+			std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
+			sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
+			client.setNickname(nick);
 		}
 	}
-	else if (cmd.getMsg() == "USER")
+	else if (cmd.getCmd() == "USER")
 	{
 		if (client.getRegisterProcess() == 2)
 		{
@@ -66,7 +74,8 @@ void Server::handle_commands(int fd)
 			client.setUsername(user);
 			client.SetIsRegistered(true);
 			client.setRegisterProcess(3);
-			sendMessageToClient(client, getWelcomeMessage(client).c_str());
+			sendMessageToClient(client, RPL_WELCOME(client).c_str());
+			std::cout << "Welcome message shouldve been sent" << std::endl;
 		}
 		else
 			client.setRegisterProcess(0);
