@@ -6,4 +6,4 @@ order for registeration is :
 
 /quit = QUIT
 
-
+USER <username> <hostname> <servername> :<realname>

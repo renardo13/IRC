@@ -89,6 +89,6 @@ void Command::parseCmd(std::string msg)
     //     std::cout << *user  << ", ";
     // }
     // std::cout << std::endl;
-    // std::cout << "Message : " << cmd.msg << std::endl;
+     std::cout << "Message : " << msg << std::endl;
 }
 

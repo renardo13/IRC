@@ -20,3 +20,7 @@
 /* --------------------------- Custom reply -------------------------------------- */
 
 #define CRPL_NICKCHANGE(oldnick,newnick) (":" + oldnick + " NICK " + newnick)
+
+#define CMSG_PRIVMSG_CH(client, chname, msg) (":" + client.getNickname() + "!" + client.getHostname() + "@" + client.getHostname() + " PRIVMSG #" + chname + " :" + msg)
+#define CMSG_PRIVMSG_CL(client, client_target, msg) (":" + client.getNickname() + "!" + client.getHostname() + "@" + client.getHostname() + " PRIVMSG " + client_target.getNickname() + " :" + msg)
+#define ERR_ALREADYREGISTRED (":localhost 462 :You may not reregister")
