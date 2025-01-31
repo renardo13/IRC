@@ -11,6 +11,7 @@ class Channel
         std::string name;
         std::string mode;
         std::vector<Client> clients;
+        std::vector<std::string> operators;
     public:
         Channel();
         ~Channel();
@@ -21,6 +22,7 @@ class Channel
         std::string getMode() const;
         std::string getName() const;
         std::vector<Client>& getClients();
+        std::vector<std::string> getOperators();
 
         void setMode(std::string mode);
         void setClients(Client& client);

@@ -52,11 +52,8 @@ void Server::print()
         i++;
         std::cout << "Nick name: " << it->second.getNickname() << ", Client message: " << it->second.getMessage() << std::endl;
     }
-
-   
-
+    
     std::vector<Channel>::iterator ite = getChannels().begin();
-
     for(int i = 1; ite != getChannels().end(); ite++, i++)
     { 
         if(i == 1)

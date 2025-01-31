@@ -19,6 +19,7 @@
 
 #define MAX_CLIENTS 1024
 #define MAX_PORT 65535
+#define MAX_CHANNEL_FOR_CLIENT 10
 
 class Server;
 class Channel;
@@ -37,6 +38,7 @@ private:
     bool isRegistered;
     int register_process;
     bool admin;
+    int nb_channels;
     double message_timer;
 
 public:
@@ -57,18 +59,21 @@ public:
     int getRegisterProcess() const;
     int getNBytes() const;
     bool getIsRegistered() const;
+    int is_operator(std::vector<std::string> channels);
 
     void setUsername(std::string username);
     void setNickname(std::string username);
     void setHostname(std::string username);
     void setMessage(std::string message);
     void setAdmin(bool flag);
+    void setNbChannels(int increment);
 
     // void setChannel(std::vector<Channel> channels);
     void SetIsRegistered(bool status);
     void setNBytes(int);
     void setResMessage(std::string resMessage);
     void setRegisterProcess(int rp);
+    int getNbChannels() const;
 
 };
 

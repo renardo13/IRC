@@ -40,9 +40,14 @@ std::string Channel::getName() const
     return (name);
 }
 
-std::vector<Client> &Channel::getClients()
+std::vector<Client> &Channel::getClients() 
 {
     return (this->clients);
+}
+
+std::vector<std::string> Channel::getOperators()
+{
+    return(this->operators);
 }
 
 void Channel::setClients(Client& client)

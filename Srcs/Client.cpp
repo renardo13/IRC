@@ -1,6 +1,7 @@
 #include "../Includes/Client.hpp"
 #include <cstring>
 
+
 Client::Client()
 {
     std::cout << "A new client has been register" << std::endl;
@@ -96,6 +97,11 @@ int Client:: getRegisterProcess() const
     return (this->register_process);
 }
 
+int Client::getNbChannels() const
+{
+    return(nb_channels);
+}
+
 void Client::setUsername(std::string username)
 {
     this->username = username;
@@ -134,6 +140,24 @@ bool Client::getAdmin() const
 void Client::setAdmin(bool flag)
 {
     admin = flag;
+}
+
+void Client::setNbChannels(int increment)
+{
+    this->nb_channels += increment;
+}
+
+
+int Client::is_operator(std::vector<std::string> channel)
+{
+	std::vector<std::string>::iterator it = channel.begin();
+	for (; it != channel.end(); it++)
+	{
+    std::cout << "cucou\n";
+		if (this->getNickname() == *it)
+			return (1);
+	}
+	return (0);
 }
 
 // std::vector<Channel>& Client::getChannel()
