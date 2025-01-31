@@ -45,7 +45,7 @@ std::vector<Client> &Channel::getClients()
     return (this->clients);
 }
 
-std::vector<std::string> Channel::getOperators()
+std::vector<std::string>& Channel::getOperators()
 {
     return(this->operators);
 }

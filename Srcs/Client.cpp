@@ -153,7 +153,6 @@ int Client::is_operator(std::vector<std::string> channel)
 	std::vector<std::string>::iterator it = channel.begin();
 	for (; it != channel.end(); it++)
 	{
-    std::cout << "cucou\n";
 		if (this->getNickname() == *it)
 			return (1);
 	}

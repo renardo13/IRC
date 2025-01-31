@@ -22,7 +22,7 @@ class Channel
         std::string getMode() const;
         std::string getName() const;
         std::vector<Client>& getClients();
-        std::vector<std::string> getOperators();
+        std::vector<std::string>& getOperators();
 
         void setMode(std::string mode);
         void setClients(Client& client);

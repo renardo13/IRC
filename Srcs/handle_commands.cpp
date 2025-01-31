@@ -117,7 +117,6 @@ void Server::join(Client &client, Command &cmd)
 			else
 			{
 				Channel channel(*chan_name);
-				channel.getOperators().push_back(client.getNickname());
 				this->setChannel(channel);
 				client.setHostname("MyhostName");
 				getChannels().back().getClients().push_back(client);
@@ -141,12 +140,7 @@ void Server::part(Client &client, Command &cmd)
 		return;
 	}
 	std::vector<Client>::iterator client_it;
-	if (client.is_operator(chan->getOperators()))
-	{
-		std::cout << "Client is operator !\n";
-	}
-	else
-		client_it = findValue(chan->getClients(),
+	client_it = findValue(chan->getClients(),
 							  &Client::getNickname, client.getNickname());
 	if (client_it != chan->getClients().end())
 	{
@@ -155,7 +149,6 @@ void Server::part(Client &client, Command &cmd)
 		sendMessageToEveryone(RPL_PART(client, chan->getName()), chan->getName());
 		if (chan->getClients().size() == 0)
 			getChannels().erase(chan);
-		std::cout << "Remove client from channel\n";
 	}
 	else
 		sendMessageToClient(client, ERR_NOTONCHANNEL(client, chan->getName()));
