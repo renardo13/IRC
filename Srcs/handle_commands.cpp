@@ -22,21 +22,10 @@ void Server::handle_commands(int fd)
 	Client &client = getClients()[fd];
 	Command cmd;
 	cmd.parseCmd(client.getMessage());
-
+	std::cout << "MSG: " << client.getMessage() << std::endl;
 	if (cmd.getCmd() == "PASS")
 	{
-		if (client.getRegisterProcess() == 0)
-		{
-			std::string pass = client.getMessage().substr(client.getMessage().find(' ') + 1);
-			client.setRegisterProcess(1);
-			if (pass == this->pass)
-			{
-				client.setRegisterProcess(1);
-				std::cout << "PASS IS CORRECT" << std::endl;
-			}
-		}
-		else
-			sendMessageToClient(client, ERR_ALREADYREGISTRED);
+		password(client, cmd, this->getPassword());
 	}
 	else if (cmd.getCmd() == "JOIN")
 	{
@@ -52,32 +41,15 @@ void Server::handle_commands(int fd)
 	}
 	else if (cmd.getCmd() == "NICK")
 	{
-		if (client.getRegisterProcess() == 1)
-		{
-			std::string nick = cmd.getMsg().substr(cmd.getMsg().find(' ') + 1);
-			client.setNickname(nick);
-			client.setRegisterProcess(2);
-		}
-		else
-		{
-			std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
-			sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
-			client.setNickname(nick);
-		}
+		nick(client, cmd);
 	}
 	else if (cmd.getCmd() == "USER")
 	{
-		if (client.getRegisterProcess() == 2)
-		{
-			std::string user = cmd.getMsg().substr(cmd.getMsg().find(' ') + 1);
-			client.setUsername(user);
-			client.SetIsRegistered(true);
-			client.setRegisterProcess(3);
-			sendMessageToClient(client, RPL_WELCOME(client).c_str());
-			std::cout << "Welcome message shouldve been sent" << std::endl;
-		}
-		else
-			client.setRegisterProcess(0);
+		user(client, cmd);
+	}
+	else if (cmd.getCmd() == "PRIVMSG")
+	{
+		privmsg(client, cmd);
 	}
 	else
 		sendMessageToClient(getClients()[fd], "Unknown command");
@@ -153,4 +125,92 @@ void Server::part(Client &client, Command cmd)
 		}
 	}
 	print();
+}
+
+void Server::password(Client &client, Command cmd, std::string server_pass)
+{
+	(void)cmd;
+	if (client.getRegisterProcess() == 0)
+		{
+			std::string pass = client.getMessage().substr(client.getMessage().find(' ') + 1);
+			client.setRegisterProcess(1);
+			if (pass == server_pass)
+			{
+				client.setRegisterProcess(1);
+				std::cout << "PASS IS CORRECT" << std::endl;
+			}
+		}
+		else
+			sendMessageToClient(client, ERR_ALREADYREGISTRED);
+}
+
+void Server::nick(Client &client, Command cmd)
+{
+	(void)cmd;
+	if (client.getRegisterProcess() == 1)
+	{
+		std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
+		client.setNickname(nick);
+		client.setRegisterProcess(2);
+	}
+	else
+	{
+		std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
+		sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
+		client.setNickname(nick);
+	}
+}
+
+void Server::user(Client &client, Command cmd)
+{
+	(void)cmd;
+	if (client.getRegisterProcess() == 2)
+	{
+		std::string user = client.getMessage().substr(client.getMessage().find(' ') + 1);
+		size_t first_space = user.find(' ');
+		std::string hostname = user.substr(first_space + 1,user.find(' ',first_space));
+		client.setHostname(hostname);
+		client.setUsername(user);
+		client.SetIsRegistered(true);
+		client.setRegisterProcess(3);
+		sendMessageToClient(client, RPL_WELCOME(client).c_str());
+	}
+	else
+		client.setRegisterProcess(0);
+}
+
+void Server::privmsg(Client &client, Command cmd)
+{
+	
+	std::vector<std::string> chan_names = cmd.getChannel();
+	std::vector <std::string>::iterator it_chname = chan_names.begin();
+	std::string msgval = client.getMessage().substr(client.getMessage().find(':') + 1);
+	if (it_chname == chan_names.end())
+	{
+		int first_space = client.getMessage().find(' ');
+		int second_space = client.getMessage().find(' ', first_space + 1);
+		std::string target_client_nickname = client.getMessage().substr(first_space + 1, second_space - first_space - 1);
+		Client& target_client = getOneClientByNickname(target_client_nickname);
+		std::cout << "TARGET: " << target_client.getPfd() << std::endl;
+		if (sendMessageToClient(target_client, CMSG_PRIVMSG_CL(client, target_client, msgval)) == -1)
+			std::cout << "Message is not sent" <<std::endl;
+		else
+			std::cout << "Message is sent succesfully" << std::endl;
+	}
+	else
+	{
+		while (it_chname != chan_names.end())
+		{
+			std::vector<Channel>::iterator it_ch = findValue(getChannels(),
+													&Channel::getName, *it_chname);
+
+			std::vector<Client>::iterator it_cli = it_ch->getClients().begin();
+			for (; it_cli != it_ch->getClients().end(); it_cli++)
+			{
+				if (getRealNickname(it_cli->getNickname()) != client.getNickname())
+					sendMessageToClient(*it_cli, CMSG_PRIVMSG_CH(client,*it_chname,msgval));
+			}
+			it_chname++;
+		}
+	}
 }

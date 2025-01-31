@@ -34,11 +34,16 @@ public:
     void addNewClient(Client &client, int fd);
     int sendMessageToClient(Client &client, std::string msg);
     std::string getPassword() const;
-
+    Client &getOneClientByNickname(std::string nick);
     void setPassword(std::string password);
     //commands member function
     void handle_commands(int fd);
     void join(Client &client, Command &cmd);
     void part(Client &client, Command cmd);
     void kick(Client &client, Command cmd);
+    void password(Client &client, Command cmd, std::string server_pass);
+    void nick(Client &client, Command cmd);
+    void user(Client &client, Command cmd);
+    void privmsg(Client &client, Command cmd);
+
 };

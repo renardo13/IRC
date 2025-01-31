@@ -19,3 +19,13 @@ std::string toStdString(char *str)
     return (result);
 }
 
+std::string getRealNickname(std::string nick)
+{
+    if (nick[0] == '@')
+    {
+        return (nick.substr(1));
+    }
+    else
+        return nick;
+}
+

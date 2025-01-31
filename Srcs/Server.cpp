@@ -97,3 +97,16 @@ void Server::setPassword(std::string password)
 {
     this->pass = password;
 }
+
+Client &Server::getOneClientByNickname(std::string nickname)
+{
+    std::map<int,Client>::iterator it = getClients().begin();
+    for(; it != getClients().end(); it++)
+    {
+        if (it->second.getNickname() == nickname)
+        {
+            return (it->second);
+        }
+    }
+    return it->second;
+}

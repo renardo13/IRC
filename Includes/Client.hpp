@@ -69,9 +69,9 @@ public:
     void setNBytes(int);
     void setResMessage(std::string resMessage);
     void setRegisterProcess(int rp);
-
 };
 
 // Utils
 int atoi(char *str);
 std::string toStdString(char *str);
+std::string getRealNickname(std::string nick);
