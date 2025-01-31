@@ -3,7 +3,6 @@
 #include "Client.hpp"
 #include <map>
 #include "Channel.hpp"
-#include "rplMacros.hpp"
 
 #define MAX_FDS 10
 class Client;
@@ -33,6 +32,7 @@ public:
     void print();
     void addNewClient(Client &client, int fd);
     int sendMessageToClient(Client &client, std::string msg);
+    int sendMessageToEveryone(std::string msg, std::string chan);
     std::string getPassword() const;
 
     void setPassword(std::string password);

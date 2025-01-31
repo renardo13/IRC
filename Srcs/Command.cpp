@@ -42,7 +42,6 @@ void Command::parseCmd(std::string msg)
         cmd = msg.substr(end, next_space - end);
 
     std::cout << "MESSAGE = " << msg << std::endl;
-
     for (int i = cmd.size(); i < (int)msg.size(); i++)
     {
         if (msg[i] == '#')

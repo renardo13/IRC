@@ -96,32 +96,47 @@ void Server::kick(Client &client, Command& cmd)
 	// }
 }
 
+int Server::sendMessageToEveryone(std::string msg, std::string chan_name)
+{
+	std::vector<Channel>::iterator chan = findValue(getChannels(), &Channel::getName, chan_name);
+
+	if(chan == getChannels().end())
+		return(-1);
+	for(std::vector<Client>::iterator clients = chan->getClients().begin(); clients != chan->getClients().end(); clients++)
+		sendMessageToClient(*clients, msg);
+	return(0);
+}
+
 void Server::join(Client &client, Command& cmd)
 {
 	if (cmd.getChannel().empty())
 	{
-		// sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), cmd.getCmd()));
+		sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), cmd.getCmd()));
 		return;
 	}
-	for (std::vector<std::string>::iterator chan_name = cmd.getChannel().begin(); chan_name != cmd.getChannel().end(); chan_name++)
+	std::vector<std::string>::iterator chan_name = cmd.getChannel().begin();
+	for (; chan_name != cmd.getChannel().end(); chan_name++)
 	{
 		std::vector<Channel>::iterator chan_find = findValue(getChannels(), &Channel::getName, *chan_name);
 
 		if (chan_find != getChannels().end())
 		{
 			chan_find->getClients().push_back(client);
-			sendMessageToClient(client, RPL_JOIN(client.getHostname(), *chan_name));
+			client.setHostname("MyhostName");
+			break;
 		}
 		else
 		{
 			Channel channel(*chan_name);
 			this->setChannel(channel);
+			client.setHostname("MyhostName");
 			getChannels().back().getClients().push_back(client);
 			getChannels().back().getClients().back().setNickname('@' + client.getNickname());
-			sendMessageToClient(client, RPL_JOIN(client.getHostname(), *chan_name));
+			break;
 		}
 	}
-	// print();
+	sendMessageToEveryone(RPL_JOIN(client, *chan_name), *chan_name);
+	print();
 }
 
 void Server::part(Client &client, Command& cmd)
@@ -129,20 +144,14 @@ void Server::part(Client &client, Command& cmd)
 	std::vector<Channel>::iterator chan = findValue(getChannels(),
 													&Channel::getName, *cmd.getChannel().begin());
 	if (chan == getChannels().end())
-		return;
-	std::vector<Client>::iterator client_it = findValue(chan->getClients(),
-														&Client::getNickname, client.getNickname());
-	if (client_it == chan->getClients().end())
-		sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *cmd.getChannel().begin()));
-	else
 	{
-		std::cout << "Client left the channel\n";
-		chan->getClients().erase(client_it);
-		if (chan->getClients().size() == 0)
-		{
-			getChannels().erase(chan);
-			std::cout << "Channel was suppressed\n";
-		}
+		sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *cmd.getChannel().begin()));
+		return;
 	}
+	chan->getClients().erase(findValue(chan->getClients(),
+													&Client::getNickname, client.getNickname()));
+	sendMessageToClient(client, RPL_PART(client, *cmd.getChannel().begin()));
+	if (chan->getClients().size() == 0)
+		getChannels().erase(chan);
 	print();
 }
