@@ -8,7 +8,9 @@
 #define RPL_JOIN(client, channel_name) ":" + client.getNickname() + "@127.0.0.1 JOIN #" + channel_name + "\r\n"
 #define CHAN_WELC(nickname, channel) nickname + " has joined #"  + channel
 #define RPL_WELCOME(client) (":" + std::string("localhost") + " 001 " + (client).getNickname() + " :Welcome to the Internet Relay Network " + (client).getUsername())
-#define RPL_PART(nickname, username, channel) (":" + nickname + "!~" + username + "@127.0.0.1 PART #" + channel)
+#define RPL_PART(nickname, username, channel, part_msg) (":" + nickname + "!~" + username + "@127.0.0.1 PART #" + channel + " " + part_msg)
+# define RPL_NAMES(nickname, channel, clientslist) (": 353 " + nickname + " @ #" + channel + " :" + clientslist + "\r\n")
+# define RPL_ENDOFNAMES(nickname, channel) (": 366 " + nickname + " #" + channel + " :END of /NAMES list")
 
 /* --------------------------- Error reply command -------------------------------------- */
 
@@ -20,6 +22,7 @@
 #define ERR_NOTONCHANNEL(client, channel) (":irc_server 442 " + client.getNickname() + " " + channel + " :You're not on that channel")
 #define INVITE_ONLY(nickname, channel) (":localhost 473 " + nickname + " #" + channel + " :Cannot join channel (+i)")
 #define ERR_NOTOPERATOR(nickname, channel) (":localhost 482 " + nickname + " #" + channel + " :You're not channel operator")
+#define ERR_PSSWD(nickname, channel) (":localhost 475 " + nickname + " #" + channel + " :Cannot join channel (+k) - bad key")
 
 /* --------------------------- Custom reply -------------------------------------- */
 

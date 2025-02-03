@@ -11,7 +11,7 @@ class Channel
         std::string name;
         std::string psswd;
         bool invite_only;
-        bool client_limit;
+        int client_limit;
         std::vector<Client> clients;
         std::vector<std::string> operators;
         

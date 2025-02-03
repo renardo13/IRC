@@ -30,7 +30,7 @@ void Server::handle_commands(int fd)
 	{
 		password(client, cmd, this->getPassword());
 	}
-	if (cmd.getCmd() == "PING")
+	else if (cmd.getCmd() == "PING")
 	{
 		pong(getClients()[fd], cmd);
 	}
@@ -62,7 +62,7 @@ void Server::handle_commands(int fd)
 	{
 		mode(client, cmd);
 	}
-	else
+	else if (cmd.getCmd() != "CAP" || cmd.getCmd() != "WHOIS")
 		sendMessageToClient(getClients()[fd], "Unknown command");
 	client.setMessage("");
 	client.setNBytes(0);
@@ -96,7 +96,7 @@ int Server::sendMessageToEveryone(std::string msg, std::string chan_name)
 
 void Server::mode(Client &client, Command &cmd)
 {
-	if (getChannels().empty() || cmd.getChannel().empty())
+	if (cmd.getChannel().empty() || cmd.getMode().empty())
 		return;
 	std::vector<Channel>::iterator chan = findValue(getChannels(), &Channel::getName, cmd.getChannel()[0]);
 	if (chan != getChannels().end())
@@ -110,32 +110,30 @@ void Server::mode(Client &client, Command &cmd)
 					chan->setInviteOnly(1);
 				else if (cmd.getMode()[0] == "-i" && chan->getInviteOnly())
 					chan->setInviteOnly(0);
-				else if(cmd.getMode()[0] == "+o")
+				else if (cmd.getMode()[0] == "+o")
 				{
 					std::vector<std::string>::iterator user = cmd.getUser().begin();
-					for(; user != cmd.getUser().end(); user++)
+					for (; user != cmd.getUser().end(); user++)
 						chan->getOperators().push_back(*user);
 				}
-				else if(cmd.getMode()[0] == "-o")
+				else if (cmd.getMode()[0] == "-o")
 				{
 					std::vector<std::string>::iterator user = cmd.getUser().begin();
-					for(; user != cmd.getUser().end(); user++)
+					for (; user != cmd.getUser().end(); user++)
 						chan->getOperators().erase(user);
 				}
-				else if(cmd.getMode()[0] == "+t")
+				else if (cmd.getMode()[0] == "+t")
 					chan->setClientLimit(1);
-				else if(cmd.getMode()[0] == "+t")
+				else if (cmd.getMode()[0] == "+t")
 					chan->setClientLimit(0);
-				else if(cmd.getMode()[0] == "+k")
+				else if (cmd.getMode()[0] == "+k")
 				{
 					chan->setPsswd(cmd.getUser()[0]);
-
 				}
 				else if (cmd.getMode()[0] == "-k")
 				{
 					chan->setPsswd(NULL);
 				}
-				
 				break;
 			}
 		}
@@ -144,6 +142,45 @@ void Server::mode(Client &client, Command &cmd)
 	}
 	print();
 	// std::vector<std::string> client_op = findValue(getClients(), &Client::getNickname, client.getNickname());
+}
+
+int Server::reach_channel(Client &client, Command &cmd, Channel &chan, std::string chan_name)
+{
+	if (chan.getClients().size() > MAX_CLIENTS || (chan.getClientLimit() && chan.getClients().size() > chan.getClientLimit()))
+		return (sendMessageToClient(client, ERR_TOOMANYCLIENTS(client.getNickname(), chan.getName())));
+	else if (client.getNbChannels() > 10)
+		return (sendMessageToClient(client, ERR_TOOMANYCHANNELS(client.getNickname(), chan.getName())));
+	else if (chan.getInviteOnly())
+		return (sendMessageToClient(client, INVITE_ONLY(client.getNickname(), chan.getName())));
+	else if (!chan.getPsswd().empty())
+	{
+		if (!cmd.getUser().empty() && cmd.getUser()[0] != chan.getPsswd())
+			return (sendMessageToClient(client, ERR_PSSWD(client.getNickname(), chan.getName())));
+	}
+	client.setNbChannels(1);
+	chan.getClients().push_back(client);
+	sendMessageToEveryone(RPL_JOIN(client, chan_name), chan_name);
+	sendMessageToClient(client, RPL_ENDOFNAMES(client.getNickname(), chan_name));
+	sendMessageToClient(client, RPL_NAMES(client.getNickname(), chan_name, getClientsList(chan)));
+	return (0);
+}
+
+void Server::create_channel(Client &client, Channel &chan, std::string chan_name)
+{
+	if (client.getNbChannels() > 10)
+		sendMessageToClient(client, ERR_TOOMANYCHANNELS(client.getNickname(), chan.getName()));
+	else
+	{
+		Channel channel(chan_name);
+		setChannel(channel);
+		getChannels().back().getClients().push_back(client);
+		getChannels().back().getOperators().push_back(client.getNickname());
+		getChannels().back().setClientLimit(MAX_CLIENTS);
+		getChannels().back().setInviteOnly(0);
+		sendMessageToEveryone(RPL_JOIN(client, chan_name), chan_name);
+		sendMessageToClient(client, RPL_ENDOFNAMES(client.getNickname(), chan_name));
+		client.setNbChannels(1);
+	}
 }
 
 void Server::join(Client &client, Command &cmd)
@@ -157,41 +194,11 @@ void Server::join(Client &client, Command &cmd)
 	for (; chan_name != cmd.getChannel().end(); chan_name++)
 	{
 		std::vector<Channel>::iterator chan_find = findValue(getChannels(), &Channel::getName, *chan_name);
-
 		if (chan_find != getChannels().end())
-		{
-			if(chan_find->getClientLimit() && chan_find->getClients().size() > MAX_CLIENTS)
-				sendMessageToClient(client, ERR_TOOMANYCLIENTS(client.getNickname(), chan_find->getName()));
-			else if (client.getNbChannels() > 10)
-				sendMessageToClient(client, ERR_TOOMANYCHANNELS(client.getNickname(), chan_find->getName()));
-			else if(!chan_find->getInviteOnly())
-			{
-				chan_find->getClients().push_back(client);
-				sendMessageToEveryone(RPL_JOIN(client, *chan_name), *chan_name);
-				client.setNbChannels(1);
-			}
-			else
-				sendMessageToClient(client, INVITE_ONLY(client.getNickname(), chan_find->getName()));
-		}
+			reach_channel(client, cmd, *chan_find, *chan_name);
 		else
-		{
-			if (client.getNbChannels() > 10)
-				sendMessageToClient(client, ERR_TOOMANYCHANNELS(client.getNickname(), chan_find->getName()));
-			else
-			{
-				Channel channel(*chan_name);
-				setChannel(channel);
-				getChannels().back().getClients().push_back(client);
-				getChannels().back().getOperators().push_back(client.getNickname());
-				getChannels().back().setClientLimit(MAX_CLIENTS);
-				getChannels().back().setInviteOnly(0);
-				sendMessageToEveryone(RPL_JOIN(client, *chan_name), *chan_name);
-				client.setNbChannels(1);
-
-			}
-		}
+			create_channel(client, *chan_find, *chan_name);
 	}
-	print();
 }
 
 void Server::part(Client &client, Command &cmd)
@@ -208,7 +215,8 @@ void Server::part(Client &client, Command &cmd)
 						  &Client::getNickname, client.getNickname());
 	if (client_it != chan->getClients().end())
 	{
-		sendMessageToEveryone(RPL_PART(client.getNickname(), client.getUsername(), chan->getName()), chan->getName());
+		sendMessageToEveryone(RPL_PART(client.getNickname(), client.getUsername(), chan->getName(), cmd.getMsg()), chan->getName());
+		sendMessageToClient(client, RPL_PART(client.getNickname(), client.getUsername(), chan->getName(), cmd.getMsg()));
 		chan->getClients().erase(client_it);
 		client.setNbChannels(-1);
 		if (chan->getClients().size() == 0)

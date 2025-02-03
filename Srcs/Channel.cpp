@@ -14,8 +14,10 @@ Channel::Channel(Channel const &obj)
     }
 }
 
-Channel::Channel(std::string name) : name(name)
+Channel::Channel(std::string chan_name)
 {
+    memset(this, 0, sizeof(*this));
+    name = chan_name;
 }
 
 Channel const &Channel::operator=(Channel const &obj)

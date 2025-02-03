@@ -33,14 +33,19 @@ public:
     void addNewClient(Client &client, int fd);
     int sendMessageToClient(Client &client, std::string msg);
     int sendMessageToEveryone(std::string msg, std::string chan);
+    std::string getClientsList(Channel& chan);
     std::string getPassword() const;
     Client &getOneClientByNickname(std::string nick);
     void setPassword(std::string password);
     void handle_new_connection(int server_fd, struct pollfd pfds[], int *pfd_count);
     void handle_message(struct pollfd pfds[], int *pfd_count, int i);
+
+
     //commands member function
     void handle_commands(int fd);
     void join(Client &client, Command &cmd);
+    int reach_channel(Client &client, Command &cmd, Channel& chan, std::string chan_name);
+    void create_channel(Client &client, Channel& chan, std::string chan_name);
     void pong(Client &client, Command &cmd);
     void mode(Client &client, Command &cmd);
     void part(Client &client, Command &cmd);

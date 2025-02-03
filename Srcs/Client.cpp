@@ -9,17 +9,10 @@ Client::Client()
 
 Client::~Client() {}
 
-Client::Client(int pfd) : pfd(pfd), isRegistered(false)
+Client::Client(int pfd) : pfd(pfd)
 {
-    // std::cout << "New connexion ! client pfd = " << pfd << std::endl;
-    this->nbytes = 0;
-    this->message = "";
-    this->resMessage = "";
-    this->isRegistered = false;
-    this->username = "";
-    this->hostname = "";
-    this->nickname = "";
-    this->register_process = 0;
+    memset(this, 0, sizeof(*this));
+    this->pfd = pfd;
 };
 
 Client::Client(Client const &obj)
@@ -44,6 +37,8 @@ Client const &Client::operator=(Client const &obj)
     this->hostname = obj.hostname;
     this->nickname = obj.nickname;
     this->register_process = obj.register_process;
+    this->admin = obj.admin;
+    this->nb_channels = obj.nb_channels;
     return (*this);
 }
 
