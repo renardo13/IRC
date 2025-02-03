@@ -21,18 +21,17 @@ Channel::Channel(std::string name) : name(name)
 Channel const &Channel::operator=(Channel const &obj)
 {
     this->name = obj.name;
-    this->mode = obj.mode;
     return (*this);
 }
 
-std::string Channel::getMode() const
+std::string Channel::getPsswd() const
 {
-    return (this->mode);
+    return(psswd);
 }
 
-void Channel::setMode(std::string mode)
+void Channel::setPsswd(std::string key)
 {
-    this->mode = mode;
+    psswd = key;
 }
 
 std::string Channel::getName() const
@@ -50,7 +49,26 @@ std::vector<std::string>& Channel::getOperators()
     return(this->operators);
 }
 
+void Channel::setInviteOnly(bool flag)
+{
+    this->invite_only = flag;
+}
+
+void Channel::setClientLimit(bool flag)
+{
+    this->client_limit = flag;
+}
+
 void Channel::setClients(Client& client)
 {
     this->clients.push_back(client);
+}
+
+bool Channel::getInviteOnly() const
+{
+    return(this->invite_only);
+}
+bool Channel::getClientLimit() const
+{
+    return(this->client_limit);
 }

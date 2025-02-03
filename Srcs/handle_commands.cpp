@@ -25,10 +25,14 @@ void Server::handle_commands(int fd)
 	Client &client = getClients()[fd];
 	Command cmd;
 	cmd.parseCmd(client.getMessage());
-	std::cout << "MSG: " << client.getMessage() << std::endl;
+	// std::cout << "MSG: " << client.getMessage() << std::endl;
 	if (cmd.getCmd() == "PASS")
 	{
 		password(client, cmd, this->getPassword());
+	}
+	if (cmd.getCmd() == "PING")
+	{
+		pong(getClients()[fd], cmd);
 	}
 	else if (cmd.getCmd() == "JOIN")
 	{
@@ -54,10 +58,19 @@ void Server::handle_commands(int fd)
 	{
 		privmsg(client, cmd);
 	}
+	else if (cmd.getCmd() == "MODE")
+	{
+		mode(client, cmd);
+	}
 	else
 		sendMessageToClient(getClients()[fd], "Unknown command");
 	client.setMessage("");
 	client.setNBytes(0);
+}
+
+void Server::pong(Client &client, Command &cmd)
+{
+	sendMessageToClient(client, "PONG " + cmd.getCmd());
 }
 
 void Server::kick(Client &client, Command &cmd)
@@ -81,10 +94,57 @@ int Server::sendMessageToEveryone(std::string msg, std::string chan_name)
 	return (0);
 }
 
-// void Server::mode(Client &client, Command &cmd)
-// {
-// 	if(client.get)
-// }
+void Server::mode(Client &client, Command &cmd)
+{
+	if (getChannels().empty() || cmd.getChannel().empty())
+		return;
+	std::vector<Channel>::iterator chan = findValue(getChannels(), &Channel::getName, cmd.getChannel()[0]);
+	if (chan != getChannels().end())
+	{
+		std::vector<std::string>::iterator find_op = chan->getOperators().begin();
+		for (; find_op != chan->getOperators().end(); find_op++)
+		{
+			if (*find_op == client.getNickname())
+			{
+				if (cmd.getMode()[0] == "+i" && !chan->getInviteOnly())
+					chan->setInviteOnly(1);
+				else if (cmd.getMode()[0] == "-i" && chan->getInviteOnly())
+					chan->setInviteOnly(0);
+				else if(cmd.getMode()[0] == "+o")
+				{
+					std::vector<std::string>::iterator user = cmd.getUser().begin();
+					for(; user != cmd.getUser().end(); user++)
+						chan->getOperators().push_back(*user);
+				}
+				else if(cmd.getMode()[0] == "-o")
+				{
+					std::vector<std::string>::iterator user = cmd.getUser().begin();
+					for(; user != cmd.getUser().end(); user++)
+						chan->getOperators().erase(user);
+				}
+				else if(cmd.getMode()[0] == "+t")
+					chan->setClientLimit(1);
+				else if(cmd.getMode()[0] == "+t")
+					chan->setClientLimit(0);
+				else if(cmd.getMode()[0] == "+k")
+				{
+					chan->setPsswd(cmd.getUser()[0]);
+
+				}
+				else if (cmd.getMode()[0] == "-k")
+				{
+					chan->setPsswd(NULL);
+				}
+				
+				break;
+			}
+		}
+		if (find_op == chan->getOperators().end())
+			sendMessageToClient(client, ERR_NOTOPERATOR(client.getNickname(), chan->getName()));
+	}
+	print();
+	// std::vector<std::string> client_op = findValue(getClients(), &Client::getNickname, client.getNickname());
+}
 
 void Server::join(Client &client, Command &cmd)
 {
@@ -100,15 +160,18 @@ void Server::join(Client &client, Command &cmd)
 
 		if (chan_find != getChannels().end())
 		{
-			if (client.getNbChannels() > 10)
+			if(chan_find->getClientLimit() && chan_find->getClients().size() > MAX_CLIENTS)
+				sendMessageToClient(client, ERR_TOOMANYCLIENTS(client.getNickname(), chan_find->getName()));
+			else if (client.getNbChannels() > 10)
 				sendMessageToClient(client, ERR_TOOMANYCHANNELS(client.getNickname(), chan_find->getName()));
-			else
+			else if(!chan_find->getInviteOnly())
 			{
 				chan_find->getClients().push_back(client);
-				client.setHostname("MyhostName");
 				sendMessageToEveryone(RPL_JOIN(client, *chan_name), *chan_name);
 				client.setNbChannels(1);
 			}
+			else
+				sendMessageToClient(client, INVITE_ONLY(client.getNickname(), chan_find->getName()));
 		}
 		else
 		{
@@ -117,18 +180,19 @@ void Server::join(Client &client, Command &cmd)
 			else
 			{
 				Channel channel(*chan_name);
-				this->setChannel(channel);
-				client.setHostname("MyhostName");
+				setChannel(channel);
 				getChannels().back().getClients().push_back(client);
 				getChannels().back().getOperators().push_back(client.getNickname());
+				getChannels().back().setClientLimit(MAX_CLIENTS);
+				getChannels().back().setInviteOnly(0);
 				sendMessageToEveryone(RPL_JOIN(client, *chan_name), *chan_name);
 				client.setNbChannels(1);
+
 			}
 		}
 	}
 	print();
 }
-
 
 void Server::part(Client &client, Command &cmd)
 {
@@ -141,14 +205,17 @@ void Server::part(Client &client, Command &cmd)
 	}
 	std::vector<Client>::iterator client_it;
 	client_it = findValue(chan->getClients(),
-							  &Client::getNickname, client.getNickname());
+						  &Client::getNickname, client.getNickname());
 	if (client_it != chan->getClients().end())
 	{
+		sendMessageToEveryone(RPL_PART(client.getNickname(), client.getUsername(), chan->getName()), chan->getName());
 		chan->getClients().erase(client_it);
 		client.setNbChannels(-1);
-		sendMessageToEveryone(RPL_PART(client, chan->getName()), chan->getName());
 		if (chan->getClients().size() == 0)
+		{
+			// std::cout << "Je delete le channel\n";
 			getChannels().erase(chan);
+		}
 	}
 	else
 		sendMessageToClient(client, ERR_NOTONCHANNEL(client, chan->getName()));
@@ -159,17 +226,17 @@ void Server::password(Client &client, Command cmd, std::string server_pass)
 {
 	(void)cmd;
 	if (client.getRegisterProcess() == 0)
+	{
+		std::string pass = client.getMessage().substr(client.getMessage().find(' ') + 1);
+		client.setRegisterProcess(1);
+		if (pass == server_pass)
 		{
-			std::string pass = client.getMessage().substr(client.getMessage().find(' ') + 1);
 			client.setRegisterProcess(1);
-			if (pass == server_pass)
-			{
-				client.setRegisterProcess(1);
-				std::cout << "PASS IS CORRECT" << std::endl;
-			}
+			// std::cout << "PASS IS CORRECT" << std::endl;
 		}
-		else
-			sendMessageToClient(client, ERR_ALREADYREGISTRED);
+	}
+	else
+		sendMessageToClient(client, ERR_ALREADYREGISTRED);
 }
 
 void Server::nick(Client &client, Command cmd)
@@ -196,7 +263,7 @@ void Server::user(Client &client, Command cmd)
 	{
 		std::string user = client.getMessage().substr(client.getMessage().find(' ') + 1);
 		size_t first_space = user.find(' ');
-		std::string hostname = user.substr(first_space + 1,user.find(' ',first_space));
+		std::string hostname = user.substr(first_space + 1, user.find(' ', first_space));
 		client.setHostname(hostname);
 		client.setUsername(user);
 		client.SetIsRegistered(true);
@@ -209,19 +276,19 @@ void Server::user(Client &client, Command cmd)
 
 void Server::privmsg(Client &client, Command cmd)
 {
-	
+
 	std::vector<std::string> chan_names = cmd.getChannel();
-	std::vector <std::string>::iterator it_chname = chan_names.begin();
+	std::vector<std::string>::iterator it_chname = chan_names.begin();
 	std::string msgval = client.getMessage().substr(client.getMessage().find(':') + 1);
 	if (it_chname == chan_names.end())
 	{
 		int first_space = client.getMessage().find(' ');
 		int second_space = client.getMessage().find(' ', first_space + 1);
 		std::string target_client_nickname = client.getMessage().substr(first_space + 1, second_space - first_space - 1);
-		Client& target_client = getOneClientByNickname(target_client_nickname);
+		Client &target_client = getOneClientByNickname(target_client_nickname);
 		std::cout << "TARGET: " << target_client.getPfd() << std::endl;
 		if (sendMessageToClient(target_client, CMSG_PRIVMSG_CL(client, target_client, msgval)) == -1)
-			std::cout << "Message is not sent" <<std::endl;
+			std::cout << "Message is not sent" << std::endl;
 		else
 			std::cout << "Message is sent succesfully" << std::endl;
 	}
@@ -230,13 +297,13 @@ void Server::privmsg(Client &client, Command cmd)
 		while (it_chname != chan_names.end())
 		{
 			std::vector<Channel>::iterator it_ch = findValue(getChannels(),
-													&Channel::getName, *it_chname);
+															 &Channel::getName, *it_chname);
 
 			std::vector<Client>::iterator it_cli = it_ch->getClients().begin();
 			for (; it_cli != it_ch->getClients().end(); it_cli++)
 			{
 				if (getRealNickname(it_cli->getNickname()) != client.getNickname())
-					sendMessageToClient(*it_cli, CMSG_PRIVMSG_CH(client,*it_chname,msgval));
+					sendMessageToClient(*it_cli, CMSG_PRIVMSG_CH(client, *it_chname, msgval));
 			}
 			it_chname++;
 		}

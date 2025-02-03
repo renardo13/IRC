@@ -17,7 +17,7 @@
 #include "../Includes/Channel.hpp"
 #include "../Includes/Command.hpp"
 
-#define MAX_CLIENTS 1024
+#define MAX_CLIENTS 60
 #define MAX_PORT 65535
 #define MAX_CHANNEL_FOR_CLIENT 10
 

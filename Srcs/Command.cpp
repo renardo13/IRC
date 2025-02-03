@@ -50,7 +50,7 @@ void Command::parseCmd(std::string msg)
             channel.push_back(msg.substr(i + 1, end - i - 1));
             i = end;
         }
-        else if (msg[i] == '+')
+        else if (msg[i] == '+' || msg[i] == '-')
         {
             end = find_end(msg, i);
             mode.push_back(msg.substr(i, end - i));
@@ -89,6 +89,6 @@ void Command::parseCmd(std::string msg)
     //     std::cout << *user  << ", ";
     // }
     // std::cout << std::endl;
-     std::cout << "Message : " << msg << std::endl;
+    // std::cout << "Message : " << msg << std::endl;
 }
 
