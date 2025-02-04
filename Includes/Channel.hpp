@@ -10,6 +10,7 @@ class Channel
     private:
         std::string name;
         std::string psswd;
+        std::string topic;
         bool invite_only;
         int client_limit;
         std::vector<Client> clients;
@@ -26,6 +27,7 @@ class Channel
         std::string getName() const;
         std::vector<Client>& getClients();
         std::vector<std::string>& getOperators();
+        std::string getTopic() const;
         bool getInviteOnly() const;
         int getClientLimit() const;
 
@@ -33,5 +35,6 @@ class Channel
         void setClients(Client& client);
         void setClientLimit(int limit);
         void setInviteOnly(bool flag);
+        void setTopic(std::string str);
 
 };

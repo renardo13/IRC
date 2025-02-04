@@ -62,10 +62,11 @@ void Server::handle_commands(int fd)
 	{
 		mode(client, cmd);
 	}
-	// else if (cmd.getCmd() == "QUIT")
-	// {
-	// 	quit(client);
-	// }
+	else if (cmd.getCmd() == "QUIT")
+	{
+		quit(client);
+		return ;
+	}
 	else if (cmd.getCmd() != "CAP LS" || cmd.getCmd() != "WHOIS" || cmd.getCmd() != "WHO")
 		sendMessageToClient(getClients()[fd], "Unknown command");
 	client.setMessage("");
@@ -105,11 +106,14 @@ void Server::quit(Client &client)
 	{
 		if(client_it->second.getNickname() == client.getNickname())
 		{
-			getClients().erase(client_it);
+			int tmp_fd = client_it->first;
+			getClients().erase(tmp_fd);
 			break;
 		}
 	}
+	close(tmp_pfd);
 	deleteClientPfd(tmp_pfd);
+	pfd_count--;
 }
 
 void Server::pong(Client &client, Command &cmd)

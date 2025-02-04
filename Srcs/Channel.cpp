@@ -74,3 +74,11 @@ int Channel::getClientLimit() const
 {
     return(this->client_limit);
 }
+std::string Channel::getTopic() const
+{
+    return (this->topic);
+}
+void Channel::setTopic(std::string str)
+{
+    this->topic = str;
+}
