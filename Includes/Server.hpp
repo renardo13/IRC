@@ -34,7 +34,7 @@ public:
     int sendMessageToClient(Client &client, std::string msg);
     int sendMessageToEveryone(std::string msg, std::string chan);
     std::string getPassword() const;
-    Client &getOneClientByNickname(std::string nick);
+    Client *getOneClientByNickname(std::string nick);
     void setPassword(std::string password);
     //commands member function
     void handle_commands(int fd);

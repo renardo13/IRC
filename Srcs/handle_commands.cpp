@@ -54,6 +54,10 @@ void Server::handle_commands(int fd)
 	{
 		privmsg(client, cmd);
 	}
+	else if (cmd.getCmd() == "PONG")
+	{
+		privmsg(client, cmd);
+	}
 	else
 		sendMessageToClient(getClients()[fd], "Unknown command");
 	client.setMessage("");
@@ -97,7 +101,6 @@ void Server::join(Client &client, Command &cmd)
 	for (; chan_name != cmd.getChannel().end(); chan_name++)
 	{
 		std::vector<Channel>::iterator chan_find = findValue(getChannels(), &Channel::getName, *chan_name);
-
 		if (chan_find != getChannels().end())
 		{
 			if (client.getNbChannels() > 10)
@@ -211,23 +214,38 @@ void Server::user(Client &client, Command cmd)
 		sendMessageToClient(client, RPL_WELCOME(client).c_str());
 	}
 	else
-		client.setRegisterProcess(0);
+		sendMessageToClient(client, ERR_ALREADYREGISTRED);
 }
 
 void Server::privmsg(Client &client, Command cmd)
 {
 	
+	std::string msgval = client.getMessage().substr(client.getMessage().find(':') + 1);
+	if (msgval == client.getMessage())
+	{
+		sendMessageToClient(client, ERR_NOTEXTTOSEND(client));
+		return ;
+	}
 	std::vector<std::string> chan_names = cmd.getChannel();
 	std::vector <std::string>::iterator it_chname = chan_names.begin();
-	std::string msgval = client.getMessage().substr(client.getMessage().find(':') + 1);
 	if (it_chname == chan_names.end())
 	{
 		int first_space = client.getMessage().find(' ');
 		int second_space = client.getMessage().find(' ', first_space + 1);
+		if (second_space == (int)std::string::npos)
+		{
+			sendMessageToClient(client, ERR_NORECIPIENT(client));
+			return ;
+		}
 		std::string target_client_nickname = client.getMessage().substr(first_space + 1, second_space - first_space - 1);
-		Client& target_client = getOneClientByNickname(target_client_nickname);
-		std::cout << "TARGET: " << target_client.getPfd() << std::endl;
-		if (sendMessageToClient(target_client, CMSG_PRIVMSG_CL(client, target_client, msgval)) == -1)
+		Client* target_client = getOneClientByNickname(target_client_nickname);
+		if (!target_client)
+		{
+			sendMessageToClient(client, ERR_NOSUCHNICK(client, target_client_nickname));
+			return;
+		}
+		std::cout << "TARGET: " << target_client->getPfd() << std::endl;
+		if (sendMessageToClient(*target_client, CMSG_PRIVMSG_CL(client, target_client_nickname, msgval)) == -1)
 			std::cout << "Message is not sent" <<std::endl;
 		else
 			std::cout << "Message is sent succesfully" << std::endl;
@@ -238,7 +256,11 @@ void Server::privmsg(Client &client, Command cmd)
 		{
 			std::vector<Channel>::iterator it_ch = findValue(getChannels(),
 													&Channel::getName, *it_chname);
-
+			if (it_ch == getChannels().end())
+			{
+				sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *it_chname));
+				return ;
+			}
 			std::vector<Client>::iterator it_cli = it_ch->getClients().begin();
 			for (; it_cli != it_ch->getClients().end(); it_cli++)
 			{
