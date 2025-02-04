@@ -56,9 +56,9 @@ void Channel::setInviteOnly(bool flag)
     this->invite_only = flag;
 }
 
-void Channel::setClientLimit(bool flag)
+void Channel::setClientLimit(int limit)
 {
-    this->client_limit = flag;
+    this->client_limit = limit;
 }
 
 void Channel::setClients(Client& client)
@@ -70,7 +70,7 @@ bool Channel::getInviteOnly() const
 {
     return(this->invite_only);
 }
-bool Channel::getClientLimit() const
+int Channel::getClientLimit() const
 {
     return(this->client_limit);
 }

@@ -123,8 +123,8 @@ void Server::mode(Client &client, Command &cmd)
 						chan->getOperators().erase(user);
 				}
 				else if (cmd.getMode()[0] == "+t")
-					chan->setClientLimit(1);
-				else if (cmd.getMode()[0] == "+t")
+					chan->setClientLimit(atoi(cmd.getUser()[0].c_str()));
+				else if (cmd.getMode()[0] == "-t")
 					chan->setClientLimit(0);
 				else if (cmd.getMode()[0] == "+k")
 				{
@@ -146,7 +146,9 @@ void Server::mode(Client &client, Command &cmd)
 
 int Server::reach_channel(Client &client, Command &cmd, Channel &chan, std::string chan_name)
 {
-	if (chan.getClients().size() > MAX_CLIENTS || (chan.getClientLimit() && chan.getClients().size() > chan.getClientLimit()))
+	if (chan.getClients().size() > MAX_CLIENTS)
+		return (sendMessageToClient(client, ERR_TOOMANYCLIENTS(client.getNickname(), chan.getName())));
+	else if (chan.getClientLimit() != 0 && ((int)chan.getClients().size() > chan.getClientLimit()))
 		return (sendMessageToClient(client, ERR_TOOMANYCLIENTS(client.getNickname(), chan.getName())));
 	else if (client.getNbChannels() > 10)
 		return (sendMessageToClient(client, ERR_TOOMANYCHANNELS(client.getNickname(), chan.getName())));
@@ -160,9 +162,9 @@ int Server::reach_channel(Client &client, Command &cmd, Channel &chan, std::stri
 	client.IncreaseNbChannels();
 	chan.getClients().push_back(client);
 	sendMessageToEveryone(RPL_JOIN(client.getHostname(), chan_name), chan_name);
-	sendMessageToClient(client, RPL_JOIN(client.getHostname(), chan_name) + \
-	RPL_NAMES(client.getNickname(), chan_name, getClientsList(chan)) + \
-	RPL_ENDOFNAMES(client.getNickname(), chan_name));
+	sendMessageToClient(client, RPL_JOIN(client.getHostname(), chan_name) +
+									RPL_NAMES(client.getNickname(), chan_name, getClientsList(chan)) +
+									RPL_ENDOFNAMES(client.getNickname(), chan_name));
 	return (0);
 }
 
@@ -178,9 +180,9 @@ void Server::create_channel(Client &client, std::string chan_name)
 		getChannels().back().getOperators().push_back(client.getNickname());
 		getChannels().back().setClientLimit(MAX_CLIENTS);
 
-		sendMessageToClient(client, RPL_JOIN(client.getHostname(), chan_name) + \
-		RPL_NAMES(client.getNickname(), chan_name, "") + \
-		RPL_ENDOFNAMES(client.getNickname(), chan_name));
+		sendMessageToClient(client, RPL_JOIN(client.getHostname(), chan_name) +
+										RPL_NAMES(client.getNickname(), chan_name, "") +
+										RPL_ENDOFNAMES(client.getNickname(), chan_name));
 		client.IncreaseNbChannels();
 	}
 }

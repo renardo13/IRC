@@ -27,11 +27,11 @@ class Channel
         std::vector<Client>& getClients();
         std::vector<std::string>& getOperators();
         bool getInviteOnly() const;
-        bool getClientLimit() const;
+        int getClientLimit() const;
 
         void setPsswd(std::string key);
         void setClients(Client& client);
-        void setClientLimit(bool flag);
+        void setClientLimit(int limit);
         void setInviteOnly(bool flag);
 
 };
