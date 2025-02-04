@@ -127,7 +127,7 @@ int Server::set_server(char *port, char *passwd)
     std::vector<Channel> channels;
     Server server(clients, channels);
     server.setPassword(passwd);
-    struct pollfd pfds[10];
+    struct pollfd pfds[MAX_FDS];
     int pfd_count = 0;
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == -1)

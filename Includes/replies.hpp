@@ -11,14 +11,15 @@
 
 /* --------------------------- Error reply command -------------------------------------- */
 
-#define ERR_NEEDMOREPARAMS(nickname, command) ":" + nickname + ":" + command + ":Not enough parameters given" + "\r\n"
+#define ERR_NEEDMOREPARAMS(nickname, command) ":" + nickname + ":" + command + ":Not enough parameters given"
 #define ERR_NOSUCHCHANNEL(nickname, channel) ":localhost 403 " + nickname + " " + channel + " :No such channel"
-#define ERR_ALREADYREGISTRED (":localhost 462 :You may not reregister")
+#define ERR_ALREADYREGISTRED (":localhost 462 client :You may not reregister")
 #define ERR_TOOMANYCHANNELS(nickname, channel) (":localhost 405 " + nickname + " :#" + channel)
 #define ERR_NOTONCHANNEL(client, channel) (":irc_server 442 " + client.getNickname() + " " + channel + " :You're not on that channel")
 #define ERR_NOSUCHNICK(client, nick) (":localhost 401 " + client.getNickname() + " " + nick + " :No such nick")
 #define ERR_NOTEXTTOSEND(client) (":localhost 412 " + client.getNickname() + " :No text to send")
 #define ERR_NORECIPIENT(client) (":localhost 411 " + client.getNickname() + " :No recipient is given")
+#define ERR_PASSWDMISMATCH (":localhost 464 client :Password is incorrect")
 /* --------------------------- Custom reply -------------------------------------- */
 
 #define CRPL_NICKCHANGE(oldnick,newnick) (":" + oldnick + " NICK " + newnick)

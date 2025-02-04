@@ -171,11 +171,21 @@ void Server::password(Client &client, Command cmd, std::string server_pass)
 	if (client.getRegisterProcess() == 0)
 		{
 			std::string pass = client.getMessage().substr(client.getMessage().find(' ') + 1);
+			if (pass == client.getMessage())
+			{
+				sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "PASS"));
+				return;
+			}
 			client.setRegisterProcess(1);
 			if (pass == server_pass)
 			{
 				client.setRegisterProcess(1);
 				std::cout << "PASS IS CORRECT" << std::endl;
+			}
+			else
+			{
+				sendMessageToClient(client, ERR_PASSWDMISMATCH);
+				client.setRegisterProcess(0);
 			}
 		}
 		else
@@ -188,10 +198,15 @@ void Server::nick(Client &client, Command cmd)
 	if (client.getRegisterProcess() == 1)
 	{
 		std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
+		if (nick == client.getMessage())
+		{
+			sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "NICK"));
+			return;
+		}
 		client.setNickname(nick);
 		client.setRegisterProcess(2);
 	}
-	else
+	else if (client.getRegisterProcess() != 0)
 	{
 		std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
 		sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
@@ -199,21 +214,33 @@ void Server::nick(Client &client, Command cmd)
 	}
 }
 
+
+
 void Server::user(Client &client, Command cmd)
 {
+	//USER <username> <hostname> <servername> :<realname>
 	(void)cmd;
 	if (client.getRegisterProcess() == 2)
 	{
-		std::string user = client.getMessage().substr(client.getMessage().find(' ') + 1);
-		size_t first_space = user.find(' ');
-		std::string hostname = user.substr(first_space + 1,user.find(' ',first_space));
+		std::string raw_msg = client.getMessage();
+		int first_space = raw_msg.find(' ');
+		int second_space = raw_msg.find(' ', first_space + 1);
+		int third_space = raw_msg.find(' ', second_space + 1);
+		if (first_space == (int)std::string::npos || second_space == (int)std::string::npos || third_space == (int)std::string::npos)
+		{
+			sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "USER"));
+			return;
+		}
+		std::string username =  raw_msg.substr(first_space + 1, second_space - first_space - 1);
+		std::string hostname =  raw_msg.substr(first_space + 1, third_space - second_space - 1);
 		client.setHostname(hostname);
-		client.setUsername(user);
+		client.setUsername(username);
+		std::cout << "USERNAME :" << username << " HOSTNAME :" << hostname << std::endl;
 		client.SetIsRegistered(true);
 		client.setRegisterProcess(3);
 		sendMessageToClient(client, RPL_WELCOME(client).c_str());
 	}
-	else
+	else if (client.getRegisterProcess() != 0)
 		sendMessageToClient(client, ERR_ALREADYREGISTRED);
 }
 
@@ -271,3 +298,16 @@ void Server::privmsg(Client &client, Command cmd)
 		}
 	}
 }
+
+// void Server::quit(Client &client)
+// {
+// 	std::string raw_msg = client.getMessage();
+// 	std::string msg = raw_msg.substr(raw_msg.find(':'));
+// 	if (msg == raw_msg)
+// 		msg = "";
+	
+// 	//TO-DO
+// 	// Delete from pfds, clients, and channels(?)
+
+
+// }

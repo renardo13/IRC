@@ -45,5 +45,5 @@ public:
     void nick(Client &client, Command cmd);
     void user(Client &client, Command cmd);
     void privmsg(Client &client, Command cmd);
-
+    void quit(Client &client);
 };
