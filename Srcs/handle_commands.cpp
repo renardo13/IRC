@@ -72,8 +72,21 @@ void Server::handle_commands(int fd)
 	client.setNBytes(0);
 }
 
+int Server::getPfdIndexByPfd(int pfd)
+{
+	int i = 0;
+	while (i < MAX_FDS - 1)
+	{
+		if (pfds[i].fd == pfd)
+			return i;
+		i++;
+	}
+	return 0;
+}
+
 void Server::quit(Client &client)
 {
+	int tmp_pfd = client.getPfd();
 	std::vector<Channel>::iterator chan = getChannels().begin();
 	for(; chan != getChannels().end(); chan++)
 	{
@@ -96,6 +109,7 @@ void Server::quit(Client &client)
 			break;
 		}
 	}
+	deleteClientPfd(tmp_pfd);
 }
 
 void Server::pong(Client &client, Command &cmd)
@@ -327,7 +341,6 @@ void Server::nick(Client &client, Command cmd)
 
 void Server::user(Client &client, Command cmd)
 {
-	//USER <username> <hostname> <servername> :<realname>
 	(void)cmd;
 	if (client.getRegisterProcess() == 2)
 	{
@@ -408,15 +421,3 @@ void Server::privmsg(Client &client, Command cmd)
 	}
 }
 
-// void Server::quit(Client &client)
-// {
-// 	std::string raw_msg = client.getMessage();
-// 	std::string msg = raw_msg.substr(raw_msg.find(':'));
-// 	if (msg == raw_msg)
-// 		msg = "";
-	
-// 	//TO-DO
-// 	// Delete from pfds, clients, and channels(?)
-
-
-// }

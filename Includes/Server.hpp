@@ -39,9 +39,10 @@ public:
     std::string getPassword() const;
     Client *getOneClientByNickname(std::string nick);
     void setPassword(std::string password);
-    void handle_new_connection(int server_fd, struct pollfd pfds[], int *pfd_count);
-    void handle_message(struct pollfd pfds[], int *pfd_count, int i);
-
+    void handle_new_connection(int server_fd);
+    void handle_message(int i);
+    void deleteClientPfd(int i);
+    int getPfdIndexByPfd(int pfd);
     // commands member function
     void handle_commands(int fd);
     int join(Client &client, Command &cmd);

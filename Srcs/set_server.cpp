@@ -21,7 +21,7 @@ void bind_address(int port, int server_fd)
         throw std::runtime_error(ERR_SOCKET_BINDING);
 }
 
-void deleteClientPfd(struct pollfd pfds[MAX_FDS], int i)
+void Server::deleteClientPfd(int i)
 {
     while (i < MAX_FDS - 1)
     {
@@ -30,12 +30,12 @@ void deleteClientPfd(struct pollfd pfds[MAX_FDS], int i)
     }
 }
 
-void Server::handle_new_connection(int server_fd, struct pollfd pfds[], int *pfd_count)
+void Server::handle_new_connection(int server_fd)
 {
     int new_socket = accept(server_fd, NULL, NULL);
     if (new_socket > 0)
     {
-        if (*pfd_count > MAX_CLIENTS + 1)
+        if (pfd_count > MAX_CLIENTS + 1)
             throw std::runtime_error(ERR_SERVER_FULL);
         Client new_client(new_socket);
         addNewClient(new_client, new_socket);
@@ -43,8 +43,8 @@ void Server::handle_new_connection(int server_fd, struct pollfd pfds[], int *pfd
         new_pfd.fd = new_socket;
         new_pfd.events = POLLIN;
         new_pfd.revents = 0;
-        pfds[*pfd_count] = new_pfd;
-        *pfd_count += 1;
+        pfds[pfd_count] = new_pfd;
+        pfd_count += 1;
     }
 }
 
@@ -73,7 +73,7 @@ int crlfCheck(const char* buff)
     return -1;
 }
 
-void Server::handle_message(struct pollfd pfds[], int *pfd_count, int i)
+void Server::handle_message(int i)
 {
     char buff[512];
     std::map<int, Client>& clients = getClients();
@@ -86,8 +86,8 @@ void Server::handle_message(struct pollfd pfds[], int *pfd_count, int i)
             std::cout << "connection closed, client is removed";
             close(pfds[i].fd);
             clients.erase(clients.find(pfds[i].fd));
-            deleteClientPfd(pfds,i);
-            *pfd_count-=1;
+            deleteClientPfd(i);
+            pfd_count-=1;
         }
         else
             throw std::runtime_error(ERR_SOCKET_RECEIVE);
@@ -155,9 +155,9 @@ int Server::set_server(char *port, char *passwd)
             if (pfds[i].revents & (POLLIN | POLLHUP))
             {
                 if (pfds[i].fd == server_fd)
-                    handle_new_connection(server_fd, pfds, &pfd_count);
+                    handle_new_connection(server_fd);
                 else
-                    handle_message(pfds, &pfd_count, i);
+                    handle_message(i);
             }
         }
     }
