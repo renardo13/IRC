@@ -14,9 +14,9 @@
 
 /* --------------------------- Error reply command -------------------------------------- */
 
-#define ERR_NEEDMOREPARAMS(nickname, command) ":" + nickname + ":" + command + ":Not enough parameters given" + "\r\n"
+#define ERR_NEEDMOREPARAMS(nickname, command) ":" + nickname + ":" + command + ":Not enough parameters given"
 #define ERR_NOSUCHCHANNEL(nickname, channel) ":localhost 403 " + nickname + " " + channel + " :No such channel"
-#define ERR_ALREADYREGISTRED (":localhost 462 :You may not reregister")
+#define ERR_ALREADYREGISTRED (":localhost 462 client :You may not reregister")
 #define ERR_TOOMANYCHANNELS(nickname, channel) (":localhost 405 " + nickname + " :#" + channel)
 #define ERR_TOOMANYCLIENTS(nickname, channel) (":irc_server 471 " + nickname + channel + " :Too many clients")
 #define ERR_NOTONCHANNEL(client, channel) (":irc_server 442 " + client.getNickname() + " " + channel + " :You're not on that channel")
@@ -24,9 +24,13 @@
 #define ERR_NOTOPERATOR(nickname, channel) (":localhost 482 " + nickname + " #" + channel + " :You're not channel operator")
 #define ERR_PSSWD(nickname, channel) (":localhost 475 " + nickname + " #" + channel + " :Cannot join channel (+k) - bad key")
 
+#define ERR_NOSUCHNICK(client, nick) (":localhost 401 " + client.getNickname() + " " + nick + " :No such nick")
+#define ERR_NOTEXTTOSEND(client) (":localhost 412 " + client.getNickname() + " :No text to send")
+#define ERR_NORECIPIENT(client) (":localhost 411 " + client.getNickname() + " :No recipient is given")
+#define ERR_PASSWDMISMATCH (":localhost 464 client :Password is incorrect")
 /* --------------------------- Custom reply -------------------------------------- */
 
 #define CRPL_NICKCHANGE(oldnick,newnick) (":" + oldnick + " NICK " + newnick)
 
 #define CMSG_PRIVMSG_CH(client, chname, msg) (":" + client.getNickname() + "!" + client.getHostname() + "@" + client.getHostname() + " PRIVMSG #" + chname + " :" + msg)
-#define CMSG_PRIVMSG_CL(client, client_target, msg) (":" + client.getNickname() + "!" + client.getHostname() + "@" + client.getHostname() + " PRIVMSG " + client_target.getNickname() + " :" + msg)
+#define CMSG_PRIVMSG_CL(client, client_target_nick, msg) (":" + client.getNickname() + "!" + client.getHostname() + "@" + client.getHostname() + " PRIVMSG " + client_target_nick + " :" + msg)

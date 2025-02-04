@@ -124,8 +124,6 @@ After we need to link the struct with the socket with bind()*/
 int Server::set_server(char *port, char *passwd)
 {
     setPassword(passwd);
-    struct pollfd pfds[10];
-    int pfd_count = 0;
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (server_fd == -1)
         throw std::runtime_error(ERR_SOCKET_CREATION);

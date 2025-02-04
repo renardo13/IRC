@@ -278,8 +278,23 @@ void Server::password(Client &client, Command cmd, std::string server_pass)
 		client.setRegisterProcess(1);
 		if (pass == server_pass)
 		{
+			std::string pass = client.getMessage().substr(client.getMessage().find(' ') + 1);
+			if (pass == client.getMessage())
+			{
+				sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "PASS"));
+				return;
+			}
 			client.setRegisterProcess(1);
-			// std::cout << "PASS IS CORRECT" << std::endl;
+			if (pass == server_pass)
+			{
+				client.setRegisterProcess(1);
+				// std::cout << "PASS IS CORRECT" << std::endl;
+			}
+			else
+			{
+				sendMessageToClient(client, ERR_PASSWDMISMATCH);
+				client.setRegisterProcess(0);
+			}
 		}
 	}
 	else
@@ -292,10 +307,15 @@ void Server::nick(Client &client, Command cmd)
 	if (client.getRegisterProcess() == 1)
 	{
 		std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
+		if (nick == client.getMessage())
+		{
+			sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "NICK"));
+			return;
+		}
 		client.setNickname(nick);
 		client.setRegisterProcess(2);
 	}
-	else
+	else if (client.getRegisterProcess() != 0)
 	{
 		std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
 		sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
@@ -303,38 +323,66 @@ void Server::nick(Client &client, Command cmd)
 	}
 }
 
+
+
 void Server::user(Client &client, Command cmd)
 {
+	//USER <username> <hostname> <servername> :<realname>
 	(void)cmd;
 	if (client.getRegisterProcess() == 2)
 	{
-		std::string user = client.getMessage().substr(client.getMessage().find(' ') + 1);
-		user = user.substr(0, user.find(' '));
-		client.setUsername(user);
-		client.setHostname(client.getNickname() + "!" + client.getUsername());
+		std::string raw_msg = client.getMessage();
+		int first_space = raw_msg.find(' ');
+		int second_space = raw_msg.find(' ', first_space + 1);
+		int third_space = raw_msg.find(' ', second_space + 1);
+		if (first_space == (int)std::string::npos || second_space == (int)std::string::npos || third_space == (int)std::string::npos)
+		{
+			sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "USER"));
+			return;
+		}
+		std::string username =  raw_msg.substr(first_space + 1, second_space - first_space - 1);
+		std::string hostname =  raw_msg.substr(first_space + 1, third_space - second_space - 1);
+		client.setHostname(client.getNickname() + "!" + username);
+		client.setUsername(username);
+		// std::cout << "USERNAME :" << username << " HOSTNAME :" << hostname << std::endl;
 		client.SetIsRegistered(true);
 		client.setRegisterProcess(3);
 		sendMessageToClient(client, RPL_WELCOME(client).c_str());
 	}
-	else
-		client.setRegisterProcess(0);
+	else if (client.getRegisterProcess() != 0)
+		sendMessageToClient(client, ERR_ALREADYREGISTRED);
 }
 
 void Server::privmsg(Client &client, Command cmd)
 {
-
-	std::vector<std::string> chan_names = cmd.getChannel();
-	std::vector<std::string>::iterator it_chname = chan_names.begin();
+	
 	std::string msgval = client.getMessage().substr(client.getMessage().find(':') + 1);
+	if (msgval == client.getMessage())
+	{
+		sendMessageToClient(client, ERR_NOTEXTTOSEND(client));
+		return ;
+	}
+	std::vector<std::string> chan_names = cmd.getChannel();
+	std::vector <std::string>::iterator it_chname = chan_names.begin();
 	if (it_chname == chan_names.end())
 	{
 		int first_space = client.getMessage().find(' ');
 		int second_space = client.getMessage().find(' ', first_space + 1);
+		if (second_space == (int)std::string::npos)
+		{
+			sendMessageToClient(client, ERR_NORECIPIENT(client));
+			return ;
+		}
 		std::string target_client_nickname = client.getMessage().substr(first_space + 1, second_space - first_space - 1);
-		Client &target_client = getOneClientByNickname(target_client_nickname);
-		std::cout << "TARGET: " << target_client.getPfd() << std::endl;
-		if (sendMessageToClient(target_client, CMSG_PRIVMSG_CL(client, target_client, msgval)) == -1)
-			std::cout << "Message is not sent" << std::endl;
+		Client* target_client = getOneClientByNickname(target_client_nickname);
+		if (!target_client)
+		{
+			sendMessageToClient(client, ERR_NOSUCHNICK(client, target_client_nickname));
+			return;
+		}
+		std::cout << "TARGET: " << target_client->getPfd() << std::endl;
+		if (sendMessageToClient(*target_client, CMSG_PRIVMSG_CL(client, target_client_nickname, msgval)) == -1)
+			std::cout << "Message is not sent" <<std::endl;
 		else
 			std::cout << "Message is sent succesfully" << std::endl;
 	}
@@ -343,8 +391,12 @@ void Server::privmsg(Client &client, Command cmd)
 		while (it_chname != chan_names.end())
 		{
 			std::vector<Channel>::iterator it_ch = findValue(getChannels(),
-															 &Channel::getName, *it_chname);
-
+													&Channel::getName, *it_chname);
+			if (it_ch == getChannels().end())
+			{
+				sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *it_chname));
+				return ;
+			}
 			std::vector<Client>::iterator it_cli = it_ch->getClients().begin();
 			for (; it_cli != it_ch->getClients().end(); it_cli++)
 			{
@@ -355,3 +407,16 @@ void Server::privmsg(Client &client, Command cmd)
 		}
 	}
 }
+
+// void Server::quit(Client &client)
+// {
+// 	std::string raw_msg = client.getMessage();
+// 	std::string msg = raw_msg.substr(raw_msg.find(':'));
+// 	if (msg == raw_msg)
+// 		msg = "";
+	
+// 	//TO-DO
+// 	// Delete from pfds, clients, and channels(?)
+
+
+// }

@@ -15,7 +15,8 @@ private:
     std::map<int, Client> clients;
     std::vector<Channel> channels;
     std::string pass;
-
+    struct pollfd pfds[MAX_FDS];
+    int pfd_count;
 public:
     Server();
     ~Server();
@@ -36,7 +37,7 @@ public:
     int sendMessageToEveryone(std::string msg, std::string chan);
     std::string getClientsList(Channel &chan);
     std::string getPassword() const;
-    Client &getOneClientByNickname(std::string nick);
+    Client *getOneClientByNickname(std::string nick);
     void setPassword(std::string password);
     void handle_new_connection(int server_fd, struct pollfd pfds[], int *pfd_count);
     void handle_message(struct pollfd pfds[], int *pfd_count, int i);

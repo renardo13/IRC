@@ -8,7 +8,7 @@ Server::~Server()
 {
 }
 
-Server::Server(std::map<int, Client> &clients, std::vector<Channel> &channels) : clients(clients), channels(channels)
+Server::Server(std::map<int, Client>& clients, std::vector<Channel>& channels) : clients(clients), channels(channels), pfd_count(0)
 {
 }
 
@@ -113,15 +113,15 @@ void Server::setPassword(std::string password)
     this->pass = password;
 }
 
-Client &Server::getOneClientByNickname(std::string nickname)
+Client *Server::getOneClientByNickname(std::string nickname)
 {
     std::map<int, Client>::iterator it = getClients().begin();
     for (; it != getClients().end(); it++)
     {
         if (it->second.getNickname() == nickname)
         {
-            return (it->second);
+            return (&(it->second));
         }
     }
-    return it->second;
+    return (0);
 }
