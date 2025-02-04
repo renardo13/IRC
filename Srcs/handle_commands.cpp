@@ -54,9 +54,9 @@ void Server::handle_commands(int fd)
 	{
 		privmsg(client, cmd);
 	}
-	else if (cmd.getCmd() == "PONG")
+	else if (cmd.getCmd() == "PING")
 	{
-		privmsg(client, cmd);
+		ping(client);
 	}
 	else
 		sendMessageToClient(getClients()[fd], "Unknown command");
@@ -233,7 +233,7 @@ void Server::user(Client &client, Command cmd)
 		}
 		std::string username =  raw_msg.substr(first_space + 1, second_space - first_space - 1);
 		std::string hostname =  raw_msg.substr(first_space + 1, third_space - second_space - 1);
-		client.setHostname(hostname);
+		client.setHostname(client.getNickname() + "!" + username);
 		client.setUsername(username);
 		std::cout << "USERNAME :" << username << " HOSTNAME :" << hostname << std::endl;
 		client.SetIsRegistered(true);
@@ -297,6 +297,11 @@ void Server::privmsg(Client &client, Command cmd)
 			it_chname++;
 		}
 	}
+}
+
+void Server::ping(Client &client)
+{
+	sendMessageToClient(client, "PONG");
 }
 
 // void Server::quit(Client &client)

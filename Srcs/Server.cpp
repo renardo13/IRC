@@ -10,7 +10,7 @@ Server::~Server()
 
 }
 
-Server::Server(std::map<int, Client>& clients, std::vector<Channel>& channels) : clients(clients), channels(channels)
+Server::Server(std::map<int, Client>& clients, std::vector<Channel>& channels) : clients(clients), channels(channels), pfd_count(0)
 {
 }
 

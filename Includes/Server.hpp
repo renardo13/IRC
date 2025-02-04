@@ -15,6 +15,8 @@ private:
     std::map<int, Client> clients;
     std::vector<Channel> channels;
     std::string pass;
+    struct pollfd pfds[MAX_FDS];
+    int pfd_count;
 public:
     Server();
     ~Server();
@@ -46,4 +48,5 @@ public:
     void user(Client &client, Command cmd);
     void privmsg(Client &client, Command cmd);
     void quit(Client &client);
+    void ping(Client &client);
 };
