@@ -5,7 +5,7 @@
 /* --------------------------- Command reply -------------------------------------------- */
 
 #define WLC(client) "001 " + client.getNickName() + " :" "Welcome to IRC server, " + client.getNickname() + "[!<" + user + ">@<localhost>]"
-#define RPL_JOIN(client, channel_name) ":" + client.getNickname() + "@127.0.0.1 JOIN #" + channel_name + "\r\n"
+#define RPL_JOIN(hostname, channel_name) ":" + hostname + "@127.0.0.1 JOIN #" + channel_name + "\r\n"
 #define CHAN_WELC(nickname, channel) nickname + " has joined #"  + channel
 #define RPL_WELCOME(client) (":" + std::string("localhost") + " 001 " + (client).getNickname() + " :Welcome to the Internet Relay Network " + (client).getUsername())
 #define RPL_PART(nickname, username, channel, part_msg) (":" + nickname + "!~" + username + "@127.0.0.1 PART #" + channel + " " + part_msg)

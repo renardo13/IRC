@@ -66,7 +66,8 @@ public:
     void setHostname(std::string username);
     void setMessage(std::string message);
     void setAdmin(bool flag);
-    void setNbChannels(int increment);
+    void IncreaseNbChannels();
+    void DecreaseNbChannels();
 
     // void setChannel(std::vector<Channel> channels);
     void SetIsRegistered(bool status);

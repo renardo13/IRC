@@ -1,11 +1,12 @@
 #include "../Includes/Client.hpp"
 #include <sstream>
+#include <stdio.h>
 
 std::string Server::getClientsList(Channel &chan)
 {
+    printf(":getClientsList : ***--------------- Adresse de chan = %p ---------***\n", &chan);
+    std::string list = "";
     std::vector<Client>::iterator it = chan.getClients().begin();
-    std::string list;
-
     for (int i = 0; it != chan.getClients().end(); it++, i++)
     {
         if (i != 0)

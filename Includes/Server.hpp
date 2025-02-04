@@ -45,7 +45,7 @@ public:
     void handle_commands(int fd);
     void join(Client &client, Command &cmd);
     int reach_channel(Client &client, Command &cmd, Channel& chan, std::string chan_name);
-    void create_channel(Client &client, Channel& chan, std::string chan_name);
+    void create_channel(Client &client, std::string chan_name);
     void pong(Client &client, Command &cmd);
     void mode(Client &client, Command &cmd);
     void part(Client &client, Command &cmd);

@@ -1,7 +1,6 @@
 #include "../Includes/Client.hpp"
 #include <cstring>
 
-
 Client::Client()
 {
     std::cout << "A new client has been register" << std::endl;
@@ -69,17 +68,17 @@ bool Client::getIsRegistered() const
 
 std::string Client::getUsername() const
 {
-    return(this->username);
+    return (this->username);
 }
 
 std::string Client::getNickname() const
 {
-    return(this->nickname);
+    return (this->nickname);
 }
 
 std::string Client::getHostname() const
 {
-    return(this->hostname);
+    return (this->hostname);
 }
 
 int Client::getNBytes() const
@@ -87,14 +86,14 @@ int Client::getNBytes() const
     return nbytes;
 }
 
-int Client:: getRegisterProcess() const
+int Client::getRegisterProcess() const
 {
     return (this->register_process);
 }
 
 int Client::getNbChannels() const
 {
-    return(nb_channels);
+    return (nb_channels);
 }
 
 void Client::setUsername(std::string username)
@@ -129,7 +128,7 @@ void Client::setResMessage(std::string resMessage)
 
 bool Client::getAdmin() const
 {
-    return(admin);
+    return (admin);
 }
 
 void Client::setAdmin(bool flag)
@@ -137,21 +136,25 @@ void Client::setAdmin(bool flag)
     admin = flag;
 }
 
-void Client::setNbChannels(int increment)
+void Client::IncreaseNbChannels()
 {
-    this->nb_channels += increment;
+    this->nb_channels++;
 }
 
+void Client::DecreaseNbChannels()
+{
+    this->nb_channels--;
+}
 
 int Client::is_operator(std::vector<std::string> channel)
 {
-	std::vector<std::string>::iterator it = channel.begin();
-	for (; it != channel.end(); it++)
-	{
-		if (this->getNickname() == *it)
-			return (1);
-	}
-	return (0);
+    std::vector<std::string>::iterator it = channel.begin();
+    for (; it != channel.end(); it++)
+    {
+        if (this->getNickname() == *it)
+            return (1);
+    }
+    return (0);
 }
 
 // std::vector<Channel>& Client::getChannel()
