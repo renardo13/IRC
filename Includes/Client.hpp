@@ -13,9 +13,10 @@
 #include "error.hpp"
 #include "Server.hpp"
 #include <algorithm>
-#include "../Includes/Client.hpp"
-#include "../Includes/Channel.hpp"
-#include "../Includes/Command.hpp"
+#include "Client.hpp"
+#include "Channel.hpp"
+#include "Command.hpp"
+#include "colors.hpp"
 
 #define MAX_CLIENTS 512
 #define MAX_PORT 65535

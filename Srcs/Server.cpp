@@ -94,6 +94,7 @@ void Server::addNewClient(Client &client, int fd)
 int Server::sendMessageToClient(Client &client, std::string msg)
 {
     std::string irc_msg = msg + "\r\n";
+    std::cout << BOLD << RED << msg << RESET << std::endl;
     return (send(client.getPfd(), irc_msg.c_str(), irc_msg.size(), 0));
 }
 

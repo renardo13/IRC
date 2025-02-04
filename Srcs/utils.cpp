@@ -11,9 +11,14 @@ std::string Server::getClientsList(Channel &chan)
     {
         if (i != 0)
             list += ' ';
+        for (std::vector<std::string>::iterator admin = chan.getOperators().begin(); admin != chan.getOperators().end(); admin++)
+        {
+            if (it->getNickname() == *admin)
+                list += '@';
+        }
         list += it->getNickname();
     }
-    std::cout << "LIST = " << list << std::endl;
+    // std::cout << "LIST = " << list << std::endl;
     return (list);
 }
 
