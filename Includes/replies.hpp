@@ -27,6 +27,7 @@
 #define ERR_NOSUCHNICK(client, nick) (":localhost 401 " + client.getNickname() + " " + nick + " :No such nick")
 #define ERR_NOTEXTTOSEND(client) (":localhost 412 " + client.getNickname() + " :No text to send")
 #define ERR_NORECIPIENT(client) (":localhost 411 " + client.getNickname() + " :No recipient is given")
+#define ERR_NICKNAMEINUSE(nick) (":localhost 433 client " + nick + " :Nickname is already in use")
 #define ERR_PASSWDMISMATCH (":localhost 464 client :Password is incorrect")
 /* --------------------------- Custom reply -------------------------------------- */
 

@@ -112,7 +112,7 @@ void Server::quit(Client &client)
 		}
 	}
 	close(tmp_pfd);
-	deleteClientPfd(tmp_pfd);
+	deleteClientPfd(getPfdIndexByPfd(tmp_pfd));
 	pfd_count--;
 }
 
@@ -319,12 +319,30 @@ void Server::password(Client &client, Command cmd, std::string server_pass)
 		sendMessageToClient(client, ERR_ALREADYREGISTRED);
 }
 
+int isNickInUse(std::string nick, std::map<int, Client> clients)
+{
+	std::map<int, Client>::iterator it = clients.begin();
+	for(; it != clients.end(); it++)
+	{
+		if (it->second.getNickname() == nick)
+			return 1;
+	}
+	return 0;
+}
+
 void Server::nick(Client &client, Command cmd)
 {
 	(void)cmd;
+	std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
+	if (isNickInUse(nick, getClients()) == 1)
+		{
+			sendMessageToClient(client, ERR_NICKNAMEINUSE(nick));
+			client.setRegisterProcess(2);
+			client.setNickname("ft_irc_enjoyer");
+			return;
+		}
 	if (client.getRegisterProcess() == 1)
 	{
-		std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
 		if (nick == client.getMessage())
 		{
 			sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "NICK"));
@@ -335,9 +353,9 @@ void Server::nick(Client &client, Command cmd)
 	}
 	else if (client.getRegisterProcess() != 0)
 	{
-		std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
 		sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
 		client.setNickname(nick);
+		client.setHostname(client.getNickname() + "!" + client.getUsername());
 	}
 }
 
@@ -366,7 +384,7 @@ void Server::user(Client &client, Command cmd)
 		client.setRegisterProcess(3);
 		sendMessageToClient(client, RPL_WELCOME(client).c_str());
 	}
-	else if (client.getRegisterProcess() != 0)
+	else if (client.getRegisterProcess() != 2)
 		sendMessageToClient(client, ERR_ALREADYREGISTRED);
 }
 
