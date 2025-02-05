@@ -210,8 +210,8 @@ int Server::reach_channel(Client &client, Command &cmd, Channel &chan, std::stri
 	client.IncreaseNbChannels();
 	chan.getClients().push_back(client);
 	sendMessageToEveryone(RPL_JOIN(client.getHostname(), chan_name), chan_name);
-	sendMessageToClient(client, RPL_JOIN(client.getHostname(), chan_name) + \
-								RPL_NAMES(client.getNickname(), chan_name, getClientsList(chan)) + \
+	sendMessageToClient(client, RPL_JOIN(client.getHostname(), chan_name) + 
+								RPL_NAMES(client.getNickname(), chan_name, getClientsList(chan)) + 
 								RPL_ENDOFNAMES(client.getNickname(), chan_name));
 	return (0);
 }
@@ -230,8 +230,8 @@ void Server::create_channel(Client &client, std::string chan_name)
 
 
 		sendMessageToClient(client, RPL_JOIN(client.getHostname(), chan_name) +
-										RPL_NAMES(client.getNickname(), chan_name, '@' + client.getNickname()) +
-										RPL_ENDOFNAMES(client.getNickname(), chan_name));
+									RPL_NAMES(client.getNickname(), chan_name, '@' + client.getNickname()) +
+									RPL_ENDOFNAMES(client.getNickname(), chan_name));
 		client.IncreaseNbChannels();
 	}
 }
@@ -338,7 +338,8 @@ void Server::nick(Client &client, Command cmd)
 		{
 			sendMessageToClient(client, ERR_NICKNAMEINUSE(nick));
 			client.setRegisterProcess(2);
-			client.setNickname("ft_irc_enjoyer");
+			client.setNickname(nick);
+			client.setHostname(client.getNickname() + "!" + client.getUsername());
 			return;
 		}
 	if (client.getRegisterProcess() == 1)
@@ -350,6 +351,7 @@ void Server::nick(Client &client, Command cmd)
 		}
 		client.setNickname(nick);
 		client.setRegisterProcess(2);
+		client.setHostname(client.getNickname() + "!" + client.getUsername());
 	}
 	else if (client.getRegisterProcess() != 0)
 	{
