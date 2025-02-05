@@ -79,22 +79,19 @@ void Server::print()
 
 void Server::addNewClient(Client &client, int fd)
 {
-    // int same_nickname = 0;
-    // for (std::map<int, Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
-    //     if (it->second.getNickname() == client.getNickname())
-    //     {
-    //         client.setNickname(client.getNickname() + '_');
-    //         same_nickname = 1;
-    //         break;
-    //     }
+    for (std::map<int, Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
+        if (it->second.getNickname() == client.getNickname())
+        {
+            client.setNickname(client.getNickname() + '_');
+            break;
+        }
     this->clients.insert(std::pair<int, Client>(fd, client));
-    // if(same_nickname)
-    //     this->clients.pop()->second.setNickname(client.getNickname() + "_");
 }
+
 int Server::sendMessageToClient(Client &client, std::string msg)
 {
     std::string irc_msg = msg + "\r\n";
-    std::cout << BOLD << RED << msg << RESET << std::endl;
+    std::cout << BOLD << RED << "[RESPONSE] => " << msg << RESET << std::endl;
     return (send(client.getPfd(), irc_msg.c_str(), irc_msg.size(), 0));
 }
 

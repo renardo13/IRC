@@ -19,9 +19,9 @@ class Command
 
         void parseCmd(std::string message);
 
-        std::string getCmd() {return cmd;};
+        std::string getCmd() const {return cmd;};
         std::vector<std::string>& getChannel() {return channel;};
         std::vector<std::string>& getUser() {return user;};
-        std::string getMsg() {return msg;};
+        std::string getMsg() const {return msg;};
         std::vector<std::string>& getMode() {return mode;};
 };

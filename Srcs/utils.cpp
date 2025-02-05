@@ -4,21 +4,16 @@
 
 std::string Server::getClientsList(Channel &chan)
 {
-    printf(":getClientsList : ***--------------- Adresse de chan = %p ---------***\n", &chan);
     std::string list = "";
     std::vector<Client>::iterator it = chan.getClients().begin();
     for (int i = 0; it != chan.getClients().end(); it++, i++)
     {
         if (i != 0)
             list += ' ';
-        for (std::vector<std::string>::iterator admin = chan.getOperators().begin(); admin != chan.getOperators().end(); admin++)
-        {
-            if (it->getNickname() == *admin)
-                list += '@';
-        }
+        if (it->is_operator(chan))
+            list += '@';
         list += it->getNickname();
     }
-    // std::cout << "LIST = " << list << std::endl;
     return (list);
 }
 

@@ -25,7 +25,6 @@ size_t find_end(const std::string& msg, size_t start)
         end1 = msg.size();
     if (end2 == std::string::npos)
         end2 = msg.size();
-
     return std::min(end1, end2);
 }
 
@@ -35,13 +34,13 @@ void Command::parseCmd(std::string msg)
 
     end = msg.find_first_not_of(' ');
     size_t next_space = msg.find(' ', end);
-
+    memset(this, 0, sizeof(Command));
     if (next_space == std::string::npos)
         cmd = msg.substr(end);
     else
         cmd = msg.substr(end, next_space - end);
 
-    std::cout << std::endl << BOLD << GREEN << msg << RESET << std::endl;
+    std::cout << std::endl << BOLD << GREEN << "[IRSSI] => " << msg << RESET << std::endl;
     for (int i = cmd.size(); i < (int)msg.size(); i++)
     {
         if (msg[i] == '#')
@@ -88,7 +87,7 @@ void Command::parseCmd(std::string msg)
     // {
     //     std::cout << *user  << ", ";
     // }
-    // std::cout << std::endl;
-    // std::cout << "Message : " << msg << std::endl;
+        std::cout << std::endl;
+        // std::cout << "Message in command : " << msg << std::endl;
 }
 

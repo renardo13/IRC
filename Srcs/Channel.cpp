@@ -18,6 +18,7 @@ Channel::Channel(std::string chan_name)
 {
     memset(this, 0, sizeof(*this));
     name = chan_name;
+    client_limit = MAX_CLIENTS;
 }
 
 Channel const &Channel::operator=(Channel const &obj)

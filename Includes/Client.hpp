@@ -60,7 +60,7 @@ public:
     int getRegisterProcess() const;
     int getNBytes() const;
     bool getIsRegistered() const;
-    int is_operator(std::vector<std::string> channels);
+    int is_operator(Channel& chan);
 
     void setUsername(std::string username);
     void setNickname(std::string username);
