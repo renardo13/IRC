@@ -40,7 +40,7 @@ void Command::parseCmd(std::string message)
     else
         cmd = message.substr(end, next_space - end);
 
-    std::cout << std::endl << BOLD << GREEN << "[IRSSI] => " << message << RESET << std::endl;
+    std::cout << std::endl << BOLD << GREEN << "[IRSSI] => " << message << RESET;
     for (int i = cmd.size(); i < (int)message.size(); i++)
     {
         if (message[i] == '#')
@@ -88,6 +88,6 @@ void Command::parseCmd(std::string message)
     //     std::cout << *user  << ", ";
     // }
         std::cout << std::endl;
-        std::cout << "Message in command : " << msg << std::endl;
+        // std::cout << "Message in command : " << msg << std::endl;
 }
 

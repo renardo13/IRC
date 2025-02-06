@@ -28,7 +28,7 @@ void Server::handle_commands(int fd)
 	if (cmd.getCmd() == "PASS")
 		password(client, cmd, this->getPassword());
 	else if (cmd.getCmd() == "PING")
-		pong(client, cmd);
+		pong(client);
 	else if (cmd.getCmd() == "JOIN")
 		join(client, cmd);
 	else if (cmd.getCmd() == "PART")
@@ -43,11 +43,15 @@ void Server::handle_commands(int fd)
 		privmsg(client, cmd);
 	else if (cmd.getCmd() == "MODE")
 		mode(client, cmd);
-	
-	// else if (cmd.getCmd() == "TOPIC")
-	// 	topic(client, cmd);
 	else if (cmd.getCmd() == "QUIT")
+	{
 		quit(client);
+		return ;
+	}
+	else if (cmd.getCmd() == "TOPIC")
+	{
+		topic(client,cmd);
+	}
 	else if (cmd.getCmd() != "CAP LS" || cmd.getCmd() != "WHOIS" || cmd.getCmd() != "WHO")
 		sendMessageToClient(getClients()[fd], "Unknown command");
 	client.setMessage("");
@@ -97,9 +101,9 @@ void Server::quit(Client &client)
 	pfd_count--;
 }
 
-void Server::pong(Client &client, Command &cmd)
+void Server::pong(Client &client)
 {
-	sendMessageToClient(client, "PONG " + cmd.getCmd());
+	sendMessageToClient(client, "PONG localhost");
 }
 
 int Server::kick(Client &client, Command &cmd)
@@ -123,13 +127,12 @@ int Server::kick(Client &client, Command &cmd)
 							chan->getOperators().erase(admin);
 					}
 				}
-				std::cout << "message = " << cmd.getMsg() << std::endl;
 				sendMessageToEveryone(RPL_KICK(client.getNickname(), client.getUsername(), chan->getName(), clients->getNickname(), cmd.getMsg()), chan->getName());
-				sendMessageToClient(*clients, RPL_KICK(client.getNickname(), client.getUsername(), chan->getName(), clients->getNickname(), cmd.getMsg()));
-				break;
+				return(sendMessageToClient(*clients, RPL_KICK(client.getNickname(), client.getUsername(), chan->getName(), clients->getNickname(), cmd.getMsg())));
 			}
 		}
 	}
+	// sendMessageToClient(client, ERR_NOSUCHNICK(client, cmd.getUser()[0]));
 	return (0);
 }
 
@@ -199,10 +202,6 @@ int Server::reach_channel(Client &client, Command &cmd, Channel &chan, std::stri
 {
 	if (findValue(chan.getClients(), &Client::getNickname, client.getNickname()) != chan.getClients().end())
 		return (0);
-	// if (chan.getClients().size() > MAX_CLIENTS)
-	// 	return (sendMessageToClient(client, ERR_TOOMANYCLIENTS(client.getNickname(), chan.getName())));
-	// else if (chan.getClientLimit() != 0 && ((int)chan.getClients().size() >= chan.getClientLimit()))
-	// 	return (sendMessageToClient(client, ERR_TOOMANYCLIENTS(client.getNickname(), chan.getName())));
 	if ((int)chan.getClients().size() >= chan.getClientLimit())
 		return (sendMessageToClient(client, ERR_TOOMANYCLIENTS(client.getNickname(), chan.getName())));
 	else if (client.getNbChannels() > 10)
@@ -219,7 +218,13 @@ int Server::reach_channel(Client &client, Command &cmd, Channel &chan, std::stri
 	client.IncreaseNbChannels();
 	sendMessageToEveryone(RPL_JOIN(client.getHostname(), chan_name), chan_name);
 	chan.getClients().push_back(client);
-	sendMessageToClient(client, RPL_JOIN(client.getHostname(), chan_name) +
+	if(chan.getTopic().empty())
+		sendMessageToClient(client, RPL_JOIN(client.getHostname(), chan_name) +
+									RPL_NAMES(client.getNickname(), chan_name, getClientsList(chan)) +
+									RPL_ENDOFNAMES(client.getNickname(), chan_name));
+	else
+		sendMessageToClient(client, RPL_JOIN(client.getHostname(), chan_name) +
+									RPL_TOPIC(client.getNickname(), chan_name, chan.getTopic()) +
 									RPL_NAMES(client.getNickname(), chan_name, getClientsList(chan)) +
 									RPL_ENDOFNAMES(client.getNickname(), chan_name));
 	return (0);
@@ -311,7 +316,6 @@ void Server::password(Client &client, Command &cmd, std::string server_pass)
 			if (pass == server_pass)
 			{
 				client.setRegisterProcess(1);
-				// std::cout << "PASS IS CORRECT" << std::endl;
 			}
 			else
 			{
@@ -338,32 +342,22 @@ int isNickInUse(std::string nick, std::map<int, Client> clients)
 void Server::nick(Client &client)
 {
 	std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
+	//TODO - multiple parameter error
 	if (isNickInUse(nick, getClients()) == 1)
 	{
-		sendMessageToClient(client, ERR_NICKNAMEINUSE(nick));
-		client.setRegisterProcess(2);
-		client.setNickname(nick);
-		client.setHostname(client.getNickname() + "!" + client.getUsername());
+			sendMessageToClient(client, ERR_NICKNAMEINUSE(nick));
+			return;
+	}
+	if (nick == client.getMessage())
+	{
+		sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "NICK"));
 		return;
 	}
-	if (client.getRegisterProcess() == 1)
-	{
-		if (nick == client.getMessage())
-		{
-			sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "NICK"));
-			return;
-		}
-		client.setNickname(nick);
-		client.setHostname(client.getNickname() + "!" + client.getUsername());
-		client.setRegisterProcess(2);
-		client.setHostname(client.getNickname() + "!" + client.getUsername());
-	}
-	else if (client.getRegisterProcess() != 0)
-	{
-		sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
-		client.setNickname(nick);
-		client.setHostname(client.getNickname() + "!" + client.getUsername());
-	}
+	sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
+	client.setNickname(nick);
+	int rp = client.getRegisterProcess();
+	client.setRegisterProcess(rp + 1);
+	client.setHostname(client.getNickname() + "!" + client.getUsername());
 }
 
 void Server::user(Client &client)
@@ -388,7 +382,7 @@ void Server::user(Client &client)
 		client.setRegisterProcess(3);
 		sendMessageToClient(client, RPL_WELCOME(client).c_str());
 	}
-	else if (client.getRegisterProcess() != 2)
+	else if (client.getRegisterProcess() > 2)
 		sendMessageToClient(client, ERR_ALREADYREGISTRED);
 }
 
@@ -419,11 +413,7 @@ void Server::privmsg(Client &client, Command &cmd)
 			sendMessageToClient(client, ERR_NOSUCHNICK(client, target_client_nickname));
 			return;
 		}
-		std::cout << "TARGET: " << target_client->getPfd() << std::endl;
-		if (sendMessageToClient(*target_client, RPL_PRIVMSG(client.getNickname(), target_client->getNickname(), msgval)) == -1)
-			std::cout << "Message is not sent" << std::endl;
-		else
-			std::cout << "Message is sent succesfully" << std::endl;
+		sendMessageToClient(*target_client, RPL_PRIVMSG(client.getNickname(), target_client->getNickname(), msgval));
 	}
 	else
 	{
@@ -446,3 +436,63 @@ void Server::privmsg(Client &client, Command &cmd)
 		}
 	}
 }
+
+bool isClientInChannel(Client &client, Channel &ch)
+{
+	std::vector<Client>::iterator client_it = ch.getClients().begin();
+	for (;client_it != ch.getClients().end();client_it++)
+	{
+		if (getRealNickname(client_it->getNickname()) == client.getNickname())
+			return true;
+	}
+	return false;
+}
+
+void Server::sendMessageToEveryClientInChannel(std::string msg, Channel &channel)
+{
+	std::vector<Client>::iterator client_it = channel.getClients().begin();
+	for (; client_it != channel.getClients().end(); client_it++)
+	{
+		sendMessageToClient(*client_it, msg);
+	}
+}
+
+bool isClientOp(Client &client, Channel &channel)
+{
+	std::vector<std::string>::iterator chan_it = channel.getOperators().begin();
+	for (; chan_it != channel.getOperators().end() ; chan_it++)
+	{
+		if (client.getNickname() == *chan_it)
+			return true;
+	}
+	return false;
+}
+
+
+
+int Server::topic(Client &client, Command &cmd)
+{
+	std::string raw_msg = client.getMessage();
+	std::string topic_str = raw_msg.substr(raw_msg.find(':') + 1);
+	std::vector<std::string>::iterator ch_names = cmd.getChannel().begin();
+	if (ch_names == cmd.getChannel().end())
+		return(sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "TOPIC")));
+	std::vector<Channel>::iterator it_ch = findValue(getChannels(),
+													&Channel::getName, *ch_names);
+	if (it_ch == getChannels().end())
+		return(sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *ch_names)));
+	if (!isClientInChannel(client, *it_ch))
+		return(sendMessageToClient(client, ERR_NOTONCHANNEL(client, *ch_names)));
+	if (topic_str == raw_msg)
+		return(sendMessageToClient(client, RPL_TOPIC(client.getNickname(), *ch_names,it_ch->getTopic())));
+	else if (it_ch->getTopicOp() && !isClientOp(client, *it_ch))
+		return(sendMessageToClient(client, ERR_CHANOPRIVSNEEDED(client, *ch_names)));
+	else
+	{
+		it_ch->setTopic(topic_str);
+		sendMessageToEveryClientInChannel(TOPIC(client, cmd.getChannel()[0], topic_str), *it_ch);
+	}
+	// std::cout << it_ch->getTopicOp() << " " << isClientOp(client, *it_ch) << std::endl;
+	return (0);
+}
+

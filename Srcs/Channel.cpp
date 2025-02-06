@@ -1,6 +1,6 @@
 #include "../Includes/Channel.hpp"
 
-Channel::Channel() {}
+Channel::Channel() {memset(this, 0, sizeof(*this));}
 
 Channel::~Channel()
 {
@@ -14,16 +14,19 @@ Channel::Channel(Channel const &obj)
     }
 }
 
-Channel::Channel(std::string chan_name)
+Channel::Channel(std::string chan_name) : topic("")
 {
     memset(this, 0, sizeof(*this));
     name = chan_name;
     client_limit = MAX_CLIENTS;
+    topic_op = true;
 }
 
 Channel const &Channel::operator=(Channel const &obj)
 {
     this->name = obj.name;
+    this->topic_op = obj.topic_op;
+    this->topic = obj.topic;
     return (*this);
 }
 
@@ -82,4 +85,14 @@ std::string Channel::getTopic() const
 void Channel::setTopic(std::string str)
 {
     this->topic = str;
+}
+
+void Channel::setTopicOp(bool flag)
+{
+    this->topic_op = flag;
+}
+
+bool Channel::getTopicOp() const
+{
+    return (this->topic_op);
 }

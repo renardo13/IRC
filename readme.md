@@ -30,8 +30,9 @@ renvoyer une reponse approprie a unknown command
 
 
 bonus
-/set dcc_download_path /home/melmarti/chemin_de_preference
+irssi -> /set dcc_download_path /home/melmarti/chemin_de_preference
+
+
 
 /dcc send mel /home/melmarti/doggo.jpg
-
 -> /dcc get
