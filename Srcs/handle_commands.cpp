@@ -67,6 +67,10 @@ void Server::handle_commands(int fd)
 		quit(client);
 		return ;
 	}
+	else if (cmd.getCmd() == "TOPIC")
+	{
+		topic(client,cmd);
+	}
 	else if (cmd.getCmd() != "CAP LS" || cmd.getCmd() != "WHOIS" || cmd.getCmd() != "WHO")
 		sendMessageToClient(getClients()[fd], "Unknown command");
 	client.setMessage("");
@@ -306,7 +310,6 @@ void Server::password(Client &client, Command cmd, std::string server_pass)
 			if (pass == server_pass)
 			{
 				client.setRegisterProcess(1);
-				// std::cout << "PASS IS CORRECT" << std::endl;
 			}
 			else
 			{
@@ -334,29 +337,22 @@ void Server::nick(Client &client, Command cmd)
 {
 	(void)cmd;
 	std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
+	//TODO - multiple parameter error
 	if (isNickInUse(nick, getClients()) == 1)
-		{
+	{
 			sendMessageToClient(client, ERR_NICKNAMEINUSE(nick));
-			client.setRegisterProcess(2);
-			client.setNickname("ft_irc_enjoyer");
 			return;
-		}
-	if (client.getRegisterProcess() == 1)
-	{
-		if (nick == client.getMessage())
-		{
-			sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "NICK"));
-			return;
-		}
-		client.setNickname(nick);
-		client.setRegisterProcess(2);
 	}
-	else if (client.getRegisterProcess() != 0)
+	if (nick == client.getMessage())
 	{
-		sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
-		client.setNickname(nick);
-		client.setHostname(client.getNickname() + "!" + client.getUsername());
+		sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "NICK"));
+		return;
 	}
+	sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
+	client.setNickname(nick);
+	int rp = client.getRegisterProcess();
+	client.setRegisterProcess(rp + 1);
+	client.setHostname(client.getNickname() + "!" + client.getUsername());
 }
 
 
@@ -384,7 +380,7 @@ void Server::user(Client &client, Command cmd)
 		client.setRegisterProcess(3);
 		sendMessageToClient(client, RPL_WELCOME(client).c_str());
 	}
-	else if (client.getRegisterProcess() != 2)
+	else if (client.getRegisterProcess() > 2)
 		sendMessageToClient(client, ERR_ALREADYREGISTRED);
 }
 
@@ -441,5 +437,83 @@ void Server::privmsg(Client &client, Command cmd)
 			it_chname++;
 		}
 	}
+}
+
+bool isClientInChannel(Client &client, Channel &ch)
+{
+	std::vector<Client>::iterator client_it = ch.getClients().begin();
+	for (;client_it != ch.getClients().end();client_it++)
+	{
+		if (getRealNickname(client_it->getNickname()) == client.getNickname())
+			return true;
+	}
+	return false;
+}
+
+void Server::sendMessageToEveryClientInChannel(std::string msg, Channel &channel)
+{
+	std::vector<Client>::iterator client_it = channel.getClients().begin();
+	for (; client_it != channel.getClients().end(); client_it++)
+	{
+		sendMessageToClient(*client_it, msg);
+	}
+}
+
+bool isClientOp(Client &client, Channel &channel)
+{
+	std::vector<std::string>::iterator chan_it = channel.getOperators().begin();
+	for (; chan_it != channel.getOperators().end() ; chan_it++)
+	{
+		if (client.getNickname() == *chan_it)
+			return true;
+	}
+	return false;
+}
+
+void Server::topic(Client &client, Command &cmd)
+{
+	std::string raw_msg = client.getMessage();
+	std::string topic_str = raw_msg.substr(raw_msg.find(':') + 1);
+	std::vector<std::string>::iterator ch_names = cmd.getChannel().begin();
+	if (ch_names == cmd.getChannel().end())
+	{
+		//no channel given;
+		sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "TOPIC"));
+		std::cout << "No channel given" << std::endl;
+		return ;
+	}
+	std::vector<Channel>::iterator it_ch = findValue(getChannels(),
+													&Channel::getName, *ch_names);
+	if (it_ch == getChannels().end())
+	{
+		//channel doesnt exist
+		std::cout << "No such channel" << std::endl;
+		sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *ch_names));
+		return ;
+	}
+	if (!isClientInChannel(client, *it_ch))
+	{
+		sendMessageToClient(client, ERR_NOTONCHANNEL(client, *ch_names));
+		std::cout << "Client is not in this channel" << std::endl;
+		return;
+	}
+	if (topic_str == raw_msg)
+	{
+		sendMessageToClient(client, RPL_TOPIC(client, *ch_names,it_ch->getTopic()));
+		std::cout << "No topic str given" << std::endl;
+		return ;
+	}
+	else if (it_ch->getTopicOp() && !isClientOp(client, *it_ch))
+	{
+		//client is not operator
+		sendMessageToClient(client, ERR_CHANOPRIVSNEEDED(client, *ch_names));
+		return;
+	}
+	else
+	{
+		it_ch->setTopic(topic_str);
+		sendMessageToEveryClientInChannel(TOPIC(client, cmd.getChannel()[0], topic_str), *it_ch);
+	}
+	std::cout << it_ch->getTopicOp() << " " << isClientOp(client, *it_ch) << std::endl;
 }
 

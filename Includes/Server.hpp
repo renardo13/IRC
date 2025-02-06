@@ -43,6 +43,7 @@ public:
     void handle_message(int i);
     void deleteClientPfd(int i);
     int getPfdIndexByPfd(int pfd);
+    void sendMessageToEveryClientInChannel(std::string msg, Channel &channel); 
     // commands member function
     void handle_commands(int fd);
     int join(Client &client, Command &cmd);
@@ -57,4 +58,5 @@ public:
     void user(Client &client, Command cmd);
     void privmsg(Client &client, Command cmd);
     void quit(Client &client);
+    void topic(Client &client, Command &cmd);
 };

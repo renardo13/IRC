@@ -12,6 +12,7 @@ class Channel
         std::string psswd;
         std::string topic;
         bool invite_only;
+        bool topic_op;
         int client_limit;
         std::vector<Client> clients;
         std::vector<std::string> operators;
@@ -30,11 +31,11 @@ class Channel
         std::string getTopic() const;
         bool getInviteOnly() const;
         int getClientLimit() const;
-
+        bool getTopicOp() const;
         void setPsswd(std::string key);
         void setClients(Client& client);
         void setClientLimit(int limit);
         void setInviteOnly(bool flag);
         void setTopic(std::string str);
-
+        void setTopicOp(bool flag);
 };
