@@ -79,12 +79,6 @@ void Server::print()
 
 void Server::addNewClient(Client &client, int fd)
 {
-    for (std::map<int, Client>::iterator it = this->clients.begin(); it != this->clients.end(); ++it)
-        if (it->second.getNickname() == client.getNickname())
-        {
-            client.setNickname(client.getNickname() + '_');
-            break;
-        }
     this->clients.insert(std::pair<int, Client>(fd, client));
 }
 

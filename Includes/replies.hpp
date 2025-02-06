@@ -34,6 +34,9 @@
 #define ERR_NICKNAMEINUSE(nick) (":localhost 433 client " + nick + " :Nickname is already in use")
 #define ERR_PASSWDMISMATCH (":localhost 464 client :Password is incorrect")
 # define ERR_UNKNOWNMODE(nickname, char) (":localhost 472 " + nickname + " :" + char)
+# define ERR_USERNOTINCHAN2(nickname, target, channel) (":localhost 442 " + nickname + " " + target + " #" + channel + " :They aren't on that channel")
+# define ERR_NEEDMOREPARAMSMODE(nickname, mode) (":localhost 461 " + nickname + " :MODE " + mode + " Not enough parameters")
+
 /* --------------------------- Custom reply -------------------------------------- */
 
 #define CRPL_NICKCHANGE(oldnick,newnick) (":" + oldnick + " NICK " + newnick)

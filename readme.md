@@ -9,10 +9,8 @@ order for registeration is :
 USER <username> <hostname> <servername> :<realname>
 
 
-<<<<<<< HEAD
 hostname = nickname!username
 
-=======
 
     ERR_NOSUCHNICK (401)   X
     ERR_NOSUCHSERVER (402) 
@@ -23,4 +21,17 @@ hostname = nickname!username
     ERR_NOTOPLEVEL (413)
     ERR_WILDTOPLEVEL (414)
     RPL_AWAY (301)
->>>>>>> fb80a56d6a27b945fe775bbc764185fc2fe99b7e
+
+check si un client est dans le channel avant de lui donenrd es droits
+
+check si un clint existe avant de l oinvite 
+
+renvoyer une reponse approprie a unknown command
+
+
+bonus
+/set dcc_download_path /home/melmarti/chemin_de_preference
+
+/dcc send mel /home/melmarti/doggo.jpg
+
+-> /dcc get

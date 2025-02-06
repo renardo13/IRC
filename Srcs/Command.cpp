@@ -28,45 +28,45 @@ size_t find_end(const std::string& msg, size_t start)
     return std::min(end1, end2);
 }
 
-void Command::parseCmd(std::string msg)
+void Command::parseCmd(std::string message)
 {
     size_t end;
 
-    end = msg.find_first_not_of(' ');
-    size_t next_space = msg.find(' ', end);
+    end = message.find_first_not_of(' ');
+    size_t next_space = message.find(' ', end);
     memset(this, 0, sizeof(Command));
     if (next_space == std::string::npos)
-        cmd = msg.substr(end);
+        cmd = message.substr(end);
     else
-        cmd = msg.substr(end, next_space - end);
+        cmd = message.substr(end, next_space - end);
 
-    std::cout << std::endl << BOLD << GREEN << "[IRSSI] => " << msg << RESET << std::endl;
-    for (int i = cmd.size(); i < (int)msg.size(); i++)
+    std::cout << std::endl << BOLD << GREEN << "[IRSSI] => " << message << RESET << std::endl;
+    for (int i = cmd.size(); i < (int)message.size(); i++)
     {
-        if (msg[i] == '#')
+        if (message[i] == '#')
         {
-            end = find_end(msg, i);
-            channel.push_back(msg.substr(i + 1, end - i - 1));
+            end = find_end(message, i);
+            channel.push_back(message.substr(i + 1, end - i - 1));
             i = end;
         }
-        else if (msg[i] == '+' || msg[i] == '-')
+        else if (message[i] == '+' || message[i] == '-')
         {
-            end = find_end(msg, i);
-            mode.push_back(msg.substr(i, end - i));
+            end = find_end(message, i);
+            mode.push_back(message.substr(i, end - i));
             i = end - 1;
         }
-        else if (msg[i] != ' ' && msg[i] != ':')
+        else if (message[i] != ' ' && message[i] != ':')
         {
-            end = msg.find(' ', i);
+            end = message.find(' ', i);
             if (end == std::string::npos)
-                end = msg.size();
+                end = message.size();
 
-            user.push_back(msg.substr(i, end - i));
+            user.push_back(message.substr(i, end - i));
             i = end - 1;
         }
-        else if (msg[i] == ':')
+        else if (message[i] == ':')
         {
-            msg = msg.substr(i + 1);
+            msg = message.substr(i + 1);
             break;
         }
     }
@@ -88,6 +88,6 @@ void Command::parseCmd(std::string msg)
     //     std::cout << *user  << ", ";
     // }
         std::cout << std::endl;
-        // std::cout << "Message in command : " << msg << std::endl;
+        std::cout << "Message in command : " << msg << std::endl;
 }
 
