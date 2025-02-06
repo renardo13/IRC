@@ -49,7 +49,7 @@ public:
     int join(Client &client, Command &cmd);
     int reach_channel(Client &client, Command &cmd, Channel &chan, std::string chan_name);
     void create_channel(Client &client, std::string chan_name);
-    void pong(Client &client);
+    void pong(Client &client, Command &cmd);
     int mode(Client &client, Command &cmd);
     int part(Client &client, Command &cmd);
     int kick(Client &client, Command &cmd);

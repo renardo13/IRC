@@ -50,7 +50,6 @@ public:
     Client(int socket);
 
     int getPfd() const;
-    // std::vector<Channel> &getChannel();
     std::string getUsername() const;
     std::string getNickname() const;
     std::string getHostname() const;
@@ -70,7 +69,6 @@ public:
     void IncreaseNbChannels();
     void DecreaseNbChannels();
 
-    // void setChannel(std::vector<Channel> channels);
     void SetIsRegistered(bool status);
     void setNBytes(int);
     void setResMessage(std::string resMessage);

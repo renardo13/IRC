@@ -2,14 +2,22 @@
 
 Server::Server()
 {
+    clients = std::map<int, Client>();
+    channels = std::vector<Channel>();
+    pass = "";
+    pfd_count = 0;
+    memset(pfds, 0, sizeof(pfds));
 }
 
 Server::~Server()
 {
 }
 
-Server::Server(std::map<int, Client>& clients, std::vector<Channel>& channels) : clients(clients), channels(channels), pfd_count(0)
+Server::Server(std::map<int, Client>& clients, std::vector<Channel>& channels) : clients(clients), channels(channels)
 {
+    pass = "";
+    pfd_count = 0;
+    memset(pfds, 0, sizeof(pfds));
 }
 
 Server::Server(Server const &obj)

@@ -1,6 +1,15 @@
 #include "../Includes/Channel.hpp"
 
-Channel::Channel() {memset(this, 0, sizeof(*this));}
+Channel::Channel()
+{
+    topic = "";
+    client_limit = MAX_CLIENTS;
+    topic_op = true;
+    psswd = "";
+    invite_only = 0;
+    clients = std::vector<Client>();
+    operators = std::vector<std::string>();
+}
 
 Channel::~Channel()
 {
@@ -14,25 +23,28 @@ Channel::Channel(Channel const &obj)
     }
 }
 
-Channel::Channel(std::string chan_name) : topic("")
+Channel::Channel(std::string chan_name) : name(chan_name)
 {
-    memset(this, 0, sizeof(*this));
-    name = chan_name;
+    topic = "";
     client_limit = MAX_CLIENTS;
     topic_op = true;
+    psswd = "";
+    invite_only = 0;
+    clients = std::vector<Client>();
+    operators = std::vector<std::string>();
 }
 
 Channel const &Channel::operator=(Channel const &obj)
 {
-    this->name = obj.name;
-    this->topic_op = obj.topic_op;
-    this->topic = obj.topic;
+    name = obj.name;
+    topic_op = obj.topic_op;
+    topic = obj.topic;
     return (*this);
 }
 
 std::string Channel::getPsswd() const
 {
-    return(psswd);
+    return (psswd);
 }
 
 void Channel::setPsswd(std::string key)
@@ -45,14 +57,14 @@ std::string Channel::getName() const
     return (name);
 }
 
-std::vector<Client> &Channel::getClients() 
+std::vector<Client> &Channel::getClients()
 {
     return (this->clients);
 }
 
-std::vector<std::string>& Channel::getOperators()
+std::vector<std::string> &Channel::getOperators()
 {
-    return(this->operators);
+    return (this->operators);
 }
 
 void Channel::setInviteOnly(bool flag)
@@ -65,18 +77,18 @@ void Channel::setClientLimit(int limit)
     this->client_limit = limit;
 }
 
-void Channel::setClients(Client& client)
+void Channel::setClients(Client &client)
 {
     this->clients.push_back(client);
 }
 
 bool Channel::getInviteOnly() const
 {
-    return(this->invite_only);
+    return (this->invite_only);
 }
 int Channel::getClientLimit() const
 {
-    return(this->client_limit);
+    return (this->client_limit);
 }
 std::string Channel::getTopic() const
 {

@@ -5,7 +5,6 @@
 void signalHandler(int s_num)
 {
     (void)s_num;
-    
     exit(0);
 }
 

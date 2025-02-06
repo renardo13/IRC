@@ -28,7 +28,7 @@ void Server::handle_commands(int fd)
 	if (cmd.getCmd() == "PASS")
 		password(client, cmd, this->getPassword());
 	else if (cmd.getCmd() == "PING")
-		pong(client);
+		pong(client, cmd);
 	else if (cmd.getCmd() == "JOIN")
 		join(client, cmd);
 	else if (cmd.getCmd() == "PART")
@@ -46,14 +46,14 @@ void Server::handle_commands(int fd)
 	else if (cmd.getCmd() == "QUIT")
 	{
 		quit(client);
-		return ;
+		return;
 	}
 	else if (cmd.getCmd() == "TOPIC")
 	{
-		topic(client,cmd);
+		topic(client, cmd);
 	}
-	else if (cmd.getCmd() != "CAP LS" || cmd.getCmd() != "WHOIS" || cmd.getCmd() != "WHO")
-		sendMessageToClient(getClients()[fd], "Unknown command");
+	else if (cmd.getCmd() != "CAP" || cmd.getCmd() != "WHOIS" || cmd.getCmd() != "WHO")
+		sendMessageToClient(client, ERR_UNKNOWNCOMMAND(client.getNickname(), cmd.getCmd()));
 	client.setMessage("");
 	client.setNBytes(0);
 }
@@ -101,9 +101,9 @@ void Server::quit(Client &client)
 	pfd_count--;
 }
 
-void Server::pong(Client &client)
+void Server::pong(Client &client, Command &cmd)
 {
-	sendMessageToClient(client, "PONG localhost");
+	sendMessageToClient(client, "PONG " + cmd.getUser()[0]);
 }
 
 int Server::kick(Client &client, Command &cmd)
@@ -111,6 +111,14 @@ int Server::kick(Client &client, Command &cmd)
 	std::vector<Channel>::iterator chan = findValue(getChannels(), &Channel::getName, cmd.getChannel()[0]);
 	if (!client.is_operator(*chan))
 		return (sendMessageToClient(client, ERR_NOTOPERATOR(client.getNickname(), chan->getName())));
+	std::map<int, Client>::iterator clients_in_serv = getClients().begin();
+	for (; clients_in_serv != getClients().end(); clients_in_serv++)
+	{
+		if (clients_in_serv->second.getNickname() == cmd.getUser()[0])
+			break;
+	}
+	if (clients_in_serv == getClients().end())
+		return (sendMessageToClient(client, ERR_NOSUCHNICK(client.getNickname(), cmd.getUser()[0])));
 	for (std::vector<std::string>::iterator users = cmd.getUser().begin(); users != cmd.getUser().end(); users++)
 	{
 		for (std::vector<Client>::iterator clients = chan->getClients().begin(); clients != chan->getClients().end(); clients++)
@@ -128,12 +136,11 @@ int Server::kick(Client &client, Command &cmd)
 					}
 				}
 				sendMessageToEveryone(RPL_KICK(client.getNickname(), client.getUsername(), chan->getName(), clients->getNickname(), cmd.getMsg()), chan->getName());
-				return(sendMessageToClient(*clients, RPL_KICK(client.getNickname(), client.getUsername(), chan->getName(), clients->getNickname(), cmd.getMsg())));
+				return (sendMessageToClient(*clients, RPL_KICK(client.getNickname(), client.getUsername(), chan->getName(), clients->getNickname(), cmd.getMsg())));
 			}
 		}
 	}
-	// sendMessageToClient(client, ERR_NOSUCHNICK(client, cmd.getUser()[0]));
-	return (0);
+	return(sendMessageToClient(client, ERR_USERNOTINCHAN2(client.getNickname(), cmd.getUser()[0], cmd.getChannel()[0])));
 }
 
 int Server::sendMessageToEveryone(std::string msg, std::string chan_name)
@@ -168,6 +175,8 @@ int Server::mode(Client &client, Command &cmd)
 		chan->setInviteOnly(0);
 	else if (cmd.getMode()[0] == "+o")
 	{
+		if(findValue(chan->getClients(), &Client::getNickname, cmd.getUser()[0]) == chan->getClients().end())
+			return(sendMessageToClient(client, ERR_NOSUCHNICK(client.getNickname(), cmd.getUser()[0])));
 		std::vector<std::string>::iterator user = cmd.getUser().begin();
 		for (; user != cmd.getUser().end(); user++)
 			chan->getOperators().push_back(*user);
@@ -183,7 +192,7 @@ int Server::mode(Client &client, Command &cmd)
 		int limit = atoi(cmd.getUser()[0].c_str());
 		if (limit <= 1)
 			limit = 1;
-		if(limit > 512)
+		if (limit > 512)
 			limit = 512;
 		chan->setClientLimit(limit);
 	}
@@ -193,8 +202,8 @@ int Server::mode(Client &client, Command &cmd)
 		chan->setPsswd(cmd.getUser()[0]);
 	else if (cmd.getMode()[0] == "-k")
 		chan->setPsswd("");
-	else if(!mode.empty())
-		return(sendMessageToClient(client, ERR_UNKNOWNMODE(client.getNickname(), mode)));
+	else if (!mode.empty())
+		return (sendMessageToClient(client, ERR_UNKNOWNMODE(client.getNickname(), mode)));
 	return (sendMessageToEveryone(RPL_CHANGEMODE(client.getHostname(), chan->getName(), cmd.getMode()[0], arg), chan->getName()));
 }
 
@@ -218,15 +227,15 @@ int Server::reach_channel(Client &client, Command &cmd, Channel &chan, std::stri
 	client.IncreaseNbChannels();
 	sendMessageToEveryone(RPL_JOIN(client.getHostname(), chan_name), chan_name);
 	chan.getClients().push_back(client);
-	if(chan.getTopic().empty())
+	if (chan.getTopic().empty())
 		sendMessageToClient(client, RPL_JOIN(client.getHostname(), chan_name) +
-									RPL_NAMES(client.getNickname(), chan_name, getClientsList(chan)) +
-									RPL_ENDOFNAMES(client.getNickname(), chan_name));
+										RPL_NAMES(client.getNickname(), chan_name, getClientsList(chan)) +
+										RPL_ENDOFNAMES(client.getNickname(), chan_name));
 	else
 		sendMessageToClient(client, RPL_JOIN(client.getHostname(), chan_name) +
-									RPL_TOPIC(client.getNickname(), chan_name, chan.getTopic()) +
-									RPL_NAMES(client.getNickname(), chan_name, getClientsList(chan)) +
-									RPL_ENDOFNAMES(client.getNickname(), chan_name));
+										RPL_TOPIC(client.getNickname(), chan_name, chan.getTopic()) +
+										RPL_NAMES(client.getNickname(), chan_name, getClientsList(chan)) +
+										RPL_ENDOFNAMES(client.getNickname(), chan_name));
 	return (0);
 }
 
@@ -342,15 +351,17 @@ int isNickInUse(std::string nick, std::map<int, Client> clients)
 void Server::nick(Client &client)
 {
 	std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
-	//TODO - multiple parameter error
+	// TODO - multiple parameter error
 	if (isNickInUse(nick, getClients()) == 1)
 	{
-			sendMessageToClient(client, ERR_NICKNAMEINUSE(nick));
-			return;
+		sendMessageToClient(client, ERR_NICKNAMEINUSE(nick));
+		std::cout << "Deja utilise\n";
+		return;
 	}
 	if (nick == client.getMessage())
 	{
 		sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "NICK"));
+		std::cout << "Besoin de plus de param\n";
 		return;
 	}
 	sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
@@ -410,7 +421,7 @@ void Server::privmsg(Client &client, Command &cmd)
 		Client *target_client = getOneClientByNickname(target_client_nickname);
 		if (!target_client)
 		{
-			sendMessageToClient(client, ERR_NOSUCHNICK(client, target_client_nickname));
+			sendMessageToClient(client, ERR_NOSUCHNICK(client.getNickname(), target_client_nickname));
 			return;
 		}
 		sendMessageToClient(*target_client, RPL_PRIVMSG(client.getNickname(), target_client->getNickname(), msgval));
@@ -440,7 +451,7 @@ void Server::privmsg(Client &client, Command &cmd)
 bool isClientInChannel(Client &client, Channel &ch)
 {
 	std::vector<Client>::iterator client_it = ch.getClients().begin();
-	for (;client_it != ch.getClients().end();client_it++)
+	for (; client_it != ch.getClients().end(); client_it++)
 	{
 		if (getRealNickname(client_it->getNickname()) == client.getNickname())
 			return true;
@@ -460,7 +471,7 @@ void Server::sendMessageToEveryClientInChannel(std::string msg, Channel &channel
 bool isClientOp(Client &client, Channel &channel)
 {
 	std::vector<std::string>::iterator chan_it = channel.getOperators().begin();
-	for (; chan_it != channel.getOperators().end() ; chan_it++)
+	for (; chan_it != channel.getOperators().end(); chan_it++)
 	{
 		if (client.getNickname() == *chan_it)
 			return true;
@@ -468,25 +479,23 @@ bool isClientOp(Client &client, Channel &channel)
 	return false;
 }
 
-
-
 int Server::topic(Client &client, Command &cmd)
 {
 	std::string raw_msg = client.getMessage();
 	std::string topic_str = raw_msg.substr(raw_msg.find(':') + 1);
 	std::vector<std::string>::iterator ch_names = cmd.getChannel().begin();
 	if (ch_names == cmd.getChannel().end())
-		return(sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "TOPIC")));
+		return (sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "TOPIC")));
 	std::vector<Channel>::iterator it_ch = findValue(getChannels(),
-													&Channel::getName, *ch_names);
+													 &Channel::getName, *ch_names);
 	if (it_ch == getChannels().end())
-		return(sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *ch_names)));
+		return (sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *ch_names)));
 	if (!isClientInChannel(client, *it_ch))
-		return(sendMessageToClient(client, ERR_NOTONCHANNEL(client, *ch_names)));
+		return (sendMessageToClient(client, ERR_NOTONCHANNEL(client, *ch_names)));
 	if (topic_str == raw_msg)
-		return(sendMessageToClient(client, RPL_TOPIC(client.getNickname(), *ch_names,it_ch->getTopic())));
+		return (sendMessageToClient(client, RPL_TOPIC(client.getNickname(), *ch_names, it_ch->getTopic())));
 	else if (it_ch->getTopicOp() && !isClientOp(client, *it_ch))
-		return(sendMessageToClient(client, ERR_CHANOPRIVSNEEDED(client, *ch_names)));
+		return (sendMessageToClient(client, ERR_CHANOPRIVSNEEDED(client, *ch_names)));
 	else
 	{
 		it_ch->setTopic(topic_str);
@@ -495,4 +504,3 @@ int Server::topic(Client &client, Command &cmd)
 	// std::cout << it_ch->getTopicOp() << " " << isClientOp(client, *it_ch) << std::endl;
 	return (0);
 }
-

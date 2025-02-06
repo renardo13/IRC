@@ -11,8 +11,16 @@ Client::~Client() {}
 
 Client::Client(int pfd) : pfd(pfd)
 {
-    memset(this, 0, sizeof(*this));
-    this->pfd = pfd;
+    nbytes = 0;
+    message = "";
+    resMessage = "";
+    username = "";
+    nickname = "";
+    hostname = "";
+    isRegistered = "";
+    admin = "";
+    register_process = 0;
+    nb_channels = 0;
 };
 
 Client::Client(Client const &obj)

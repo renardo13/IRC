@@ -34,13 +34,12 @@ void Command::parseCmd(std::string message)
 
     end = message.find_first_not_of(' ');
     size_t next_space = message.find(' ', end);
-    memset(this, 0, sizeof(Command));
     if (next_space == std::string::npos)
         cmd = message.substr(end);
     else
         cmd = message.substr(end, next_space - end);
 
-    std::cout << std::endl << BOLD << GREEN << "[IRSSI] => " << message << RESET;
+    std::cout << std::endl << BOLD << GREEN << "[IRSSI] => " << message << RESET << std::endl;
     for (int i = cmd.size(); i < (int)message.size(); i++)
     {
         if (message[i] == '#')
@@ -64,16 +63,17 @@ void Command::parseCmd(std::string message)
             user.push_back(message.substr(i, end - i));
             i = end - 1;
         }
-        else if (message[i] == ':')
+        else if (message[i] == ':' && message[i + 1])
         {
             msg = message.substr(i + 1);
             break;
         }
     }
+    // std::cout << std::endl << "Command : " << cmd;
     // std::cout << std::endl << "Mode : ";
-    // for (std::vector<std::string>::iterator mode = cmd.mode.begin(); mode != cmd.mode.end(); mode++)
+    // for (std::vector<std::string>::iterator mod = mode.begin(); mod != mode.end(); mod++)
     // {
-    //     std::cout << *mode << ", ";
+    //     std::cout << *mod << ", ";
     // }
     // std::cout << std::endl;
     // std::cout << "Channel : ";
@@ -83,11 +83,11 @@ void Command::parseCmd(std::string message)
     // }
     // std::cout << std::endl;
     // std::cout << "User : ";
-    // for (std::vector<std::string>::iterator user = cmd.user.begin(); user != cmd.user.end(); user++)
+    // for (std::vector<std::string>::iterator use = user.begin(); use != user.end(); use++)
     // {
-    //     std::cout << *user  << ", ";
+    //     std::cout << *use  << ", ";
     // }
-        std::cout << std::endl;
-        // std::cout << "Message in command : " << msg << std::endl;
+    // std::cout << std::endl;
+    // std::cout << "Message in command : " << msg << std::endl;
 }
 
