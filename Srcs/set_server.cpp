@@ -48,31 +48,6 @@ void Server::handle_new_connection(int server_fd)
     }
 }
 
-int getCrlfAmount(const char* buff)
-{
-    int i = 0;
-    int n = 0;
-    while (buff[i])
-    {
-        if (buff[i] == '\r' && buff[i + 1] == '\n')
-            n++;
-        i++;
-    }
-    return n;
-}
-
-int crlfCheck(const char* buff)
-{
-    int i = 0;
-    while (buff[i])
-    {
-        if (buff[i] == '\r' && buff[i + 1] == '\n')
-            return i;
-        i++;
-    }
-    return -1;
-}
-
 void Server::handle_message(int i)
 {
     char buff[512];

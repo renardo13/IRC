@@ -33,8 +33,6 @@ Client::Client(Client const &obj)
 
 Client const &Client::operator=(Client const &obj)
 {
-    this->username = obj.username;
-    this->nickname = obj.nickname;
     this->pfd = obj.pfd;
     this->message_timer = obj.message_timer;
     this->nbytes = obj.nbytes;

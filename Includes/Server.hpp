@@ -17,6 +17,7 @@ private:
     std::string pass;
     struct pollfd pfds[MAX_FDS];
     int pfd_count;
+
 public:
     Server();
     ~Server();
@@ -43,21 +44,26 @@ public:
     void handle_message(int i);
     void deleteClientPfd(int i);
     int getPfdIndexByPfd(int pfd);
-    void sendMessageToEveryClientInChannel(std::string msg, Channel &channel); 
+    int getCrlfAmount(const char *buff);
+    int crlfCheck(const char *buff);
+    void sendMessageToEveryClientInChannel(std::string msg, Channel &channel);
     // commands member function
-    void handle_commands(int fd);
+    int handle_commands(int fd);
     int join(Client &client, Command &cmd);
     int reach_channel(Client &client, Command &cmd, Channel &chan, std::string chan_name);
     void create_channel(Client &client, std::string chan_name);
     void pong(Client &client, Command &cmd);
     int mode(Client &client, Command &cmd);
+    int add_operator(Client &client, Command &cmd, Channel &chan);
+    int remove_operator(Command &cmd, Channel &chan);
     int part(Client &client, Command &cmd);
     int kick(Client &client, Command &cmd);
+    int set_limit(Channel &chan, Command &cmd);
     // int topic(Client &client, Command &cmd);
-    void password(Client &client, Command &cmd, std::string server_pass);
+    void password(Client &client, std::string server_pass);
     void nick(Client &client);
     void user(Client &client);
     void privmsg(Client &client, Command &cmd);
-    void quit(Client &client);
+    int quit(Client &client);
     int topic(Client &client, Command &cmd);
 };

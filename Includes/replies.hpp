@@ -32,7 +32,7 @@
 #define INVITE_ONLY(nickname, channel) (":localhost 473 " + nickname + " #" + channel + " :Cannot join channel (+i)")
 #define ERR_NOTOPERATOR(nickname, channel) (":localhost 482 " + nickname + " #" + channel + " :You're not channel operator")
 #define ERR_PSSWD(nickname, channel) (":localhost 475 " + nickname + " #" + channel + " :Cannot join channel (+k) - bad key")
-# define ERR_USERNOTINCHAN2(nickname, target, channel) (":localhost 442 " + nickname + " " + target + " #" + channel + " :Not on that channel")
+# define ERR_USERNOTINCHAN2(nickname, target, channel) (":localhost 442 " + nickname + " " + target + " #" + channel + " :They aren't on that channel")
 #define ERR_NOSUCHNICK(nickname, target) (":localhost 401 " + nickname + " " + target + " :No such nick")
 #define ERR_NOTEXTTOSEND(client) (":localhost 412 " + client.getNickname() + " :No text to send")
 #define ERR_NORECIPIENT(client) (":localhost 411 " + client.getNickname() + " :No recipient is given")

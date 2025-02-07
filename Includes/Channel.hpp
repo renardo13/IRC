@@ -28,6 +28,7 @@ class Channel
         std::string getName() const;
         std::vector<Client>& getClients();
         std::vector<std::string>& getOperators();
+        int is_operator(std::string name);
         
         std::string getTopic() const;
         bool getInviteOnly() const;

@@ -6,7 +6,7 @@ Channel::Channel()
     client_limit = MAX_CLIENTS;
     topic_op = true;
     psswd = "";
-    invite_only = 0;
+    invite_only = false;
     clients = std::vector<Client>();
     operators = std::vector<std::string>();
 }
@@ -29,7 +29,7 @@ Channel::Channel(std::string chan_name) : name(chan_name)
     client_limit = MAX_CLIENTS;
     topic_op = true;
     psswd = "";
-    invite_only = 0;
+    invite_only = false;
     clients = std::vector<Client>();
     operators = std::vector<std::string>();
 }
@@ -39,6 +39,11 @@ Channel const &Channel::operator=(Channel const &obj)
     name = obj.name;
     topic_op = obj.topic_op;
     topic = obj.topic;
+    invite_only = obj.invite_only;
+    client_limit = obj.client_limit;
+    clients = obj.clients;
+    operators = obj.operators;
+    psswd = obj.psswd;
     return (*this);
 }
 
@@ -107,4 +112,17 @@ void Channel::setTopicOp(bool flag)
 bool Channel::getTopicOp() const
 {
     return (this->topic_op);
+}
+
+int Channel::is_operator(std::string name)
+{
+    std::vector<std::string>::iterator it;
+
+    it = getOperators().begin();
+    for (it = getOperators().begin(); it != getOperators().end(); it++)
+    {
+        if (name == *it)
+            return (1);
+    }
+    return (0);
 }

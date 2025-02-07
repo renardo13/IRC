@@ -2,6 +2,57 @@
 #include <sstream>
 #include <stdio.h>
 
+// Generic function to find a value of a certain type in a certain container type. ("::Value_type" is the type of elements that the container store)
+template <typename Container, typename AttributeType,
+		  typename Value>
+typename Container::iterator findValue(Container &container,
+									   AttributeType (Container::value_type::*getter)() const, const Value value)
+{
+	typename Container::iterator it = container.begin();
+	for (; it != container.end(); it++)
+	{
+		if (((*it).*getter)() == value)
+			return (it);
+	}
+	return (container.end());
+}
+
+int Server::sendMessageToEveryone(std::string msg, std::string chan_name)
+{
+	std::vector<Channel>::iterator chan = findValue(getChannels(), &Channel::getName, chan_name);
+
+	if (chan == getChannels().end())
+		return (-1);
+	for (std::vector<Client>::iterator clients = chan->getClients().begin(); clients != chan->getClients().end(); clients++)
+		sendMessageToClient(*clients, msg);
+	return (0);
+}
+
+int Server::getCrlfAmount(const char* buff)
+{
+    int i = 0;
+    int n = 0;
+    while (buff[i])
+    {
+        if (buff[i] == '\r' && buff[i + 1] == '\n')
+            n++;
+        i++;
+    }
+    return n;
+}
+
+int Server::crlfCheck(const char* buff)
+{
+    int i = 0;
+    while (buff[i])
+    {
+        if (buff[i] == '\r' && buff[i + 1] == '\n')
+            return i;
+        i++;
+    }
+    return -1;
+}
+
 std::string Server::getClientsList(Channel &chan)
 {
     std::string list = "";
@@ -43,4 +94,16 @@ std::string getRealNickname(std::string nick)
     }
     else
         return nick;
+}
+
+int Server::getPfdIndexByPfd(int pfd)
+{
+	int i = 0;
+	while (i < MAX_FDS - 1)
+	{
+		if (pfds[i].fd == pfd)
+			return i;
+		i++;
+	}
+	return 0;
 }
