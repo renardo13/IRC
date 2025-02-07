@@ -156,10 +156,10 @@ void Client::DecreaseNbChannels()
 
 int Client::is_operator(Channel& channel)
 {
-    std::vector<std::string>::iterator it = channel.getOperators().begin();
+    std::vector<Client>::iterator it = channel.getOperators().begin();
     for (; it != channel.getOperators().end(); it++)
     {
-        if (this->getNickname() == *it)
+        if (getNickname() == it->getNickname())
             return (1);
     }
     return (0);

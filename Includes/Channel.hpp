@@ -15,7 +15,7 @@ class Channel
         bool topic_op;
         int client_limit;
         std::vector<Client> clients;
-        std::vector<std::string> operators;
+        std::vector<Client> operators;
         std::vector<std::string> invite_list;
     public:
         Channel();
@@ -27,8 +27,7 @@ class Channel
         std::string getPsswd() const;
         std::string getName() const;
         std::vector<Client>& getClients();
-        std::vector<std::string>& getOperators();
-        int is_operator(std::string name);
+        std::vector<Client>& getOperators();
         
         std::string getTopic() const;
         bool getInviteOnly() const;

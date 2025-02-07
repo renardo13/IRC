@@ -69,15 +69,16 @@ void Server::print()
         for (; client_it != ite->getClients().end(); client_it++)
         {
             std::cout << "    - " << client_it->getNickname();
-            std::vector<std::string>::iterator admin = ite->getOperators().begin();
-            for (; admin != ite->getOperators().end(); admin++)
-            {
-                if (*admin == client_it->getNickname())
-                {
-                    std::cout << " -> operator";
-                    break;
-                }
-            }
+            // std::vector<std::string>::iterator admin = ite->getOperators().begin();
+
+            // for (; admin != ite->getOperators().end(); admin++)
+            // {
+                // if (admin == client_it->getNickname())
+                // {
+                //     std::cout << " -> operator";
+                //     break;
+                // }
+            // }
             std::cout << std::endl;
         }
     }

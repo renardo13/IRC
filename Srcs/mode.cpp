@@ -15,25 +15,24 @@ typename Container::iterator findValue(Container &container,
     }
     return (container.end());
 }
+Client *client = (it != container.end()) ? &(*it) : nullptr;
+
 
 int Server::add_operator(Client &client, Command &cmd, Channel &chan)
 {
-    if (findValue(chan.getClients(), &Client::getNickname, cmd.getUser()[0]) == chan.getClients().end())
+    std::vector<Client>::iterator target = findValue(chan.getClients(), &Client::getNickname, cmd.getUser()[0]);
+    if (target == chan.getClients().end())
         return (sendMessageToClient(client, ERR_NOSUCHNICK(client.getNickname(), cmd.getUser()[0])));
-    std::vector<std::string>::iterator user = cmd.getUser().begin();
-    for (; user != cmd.getUser().end(); user++)
-    {
-        if (!chan.is_operator(*user))
-            chan.getOperators().push_back(*user);
-    }
+    if (!target->is_operator(chan))
+        chan.getOperators().push_back(*target);
     return (0);
 }
 
 int Server::remove_operator(Command &cmd, Channel &chan)
 {
-    std::vector<std::string>::iterator user = cmd.getUser().begin();
-    for (; user != cmd.getUser().end(); user++)
-        chan.getOperators().erase(user);
+    std::vector<Client>::iterator target = findValue(chan.getClients(), &Client::getNickname, cmd.getUser()[0]);
+    if (target->is_operator(chan))
+        chan.getOperators().erase(target);
     return (0);
 }
 
@@ -45,7 +44,7 @@ int Server::set_limit(Channel &chan, Command &cmd)
     if (limit > 512)
         limit = 512;
     chan.setClientLimit(limit);
-    return(0);
+    return (0);
 }
 
 int Server::mode(Client &client, Command &cmd)

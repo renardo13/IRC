@@ -31,7 +31,7 @@ void Server::password(Client &client, std::string server_pass)
 		sendMessageToClient(client, ERR_ALREADYREGISTRED);
 }
 
-int isNickInUse(std::string nick, std::map<int, Client> clients)
+int isNickInUse(std::string nick, std::map<int, Client>& clients)
 {
 	std::map<int, Client>::iterator it = clients.begin();
 	for (; it != clients.end(); it++)

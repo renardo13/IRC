@@ -48,9 +48,7 @@ int Server::handle_commands(int fd)
 	else if (cmd.getCmd() == "TOPIC")
 		topic(client, cmd);
 	else if (cmd.getCmd() == "INVITE")
-	{
 		invite(client, cmd);
-	}
 	else if (cmd.getCmd() != "CAP" || cmd.getCmd() != "WHOIS" || cmd.getCmd() != "WHO")
 		sendMessageToClient(client, ERR_UNKNOWNCOMMAND(client.getNickname(), cmd.getCmd()));
 	client.setMessage("");
@@ -68,30 +66,19 @@ int Server::part(Client &client, Command &cmd)
 	std::vector<Channel>::iterator chan = findValue(getChannels(),
 													&Channel::getName, cmd.getChannel()[0]);
 	if (chan == getChannels().end())
-	{
 		return (sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *cmd.getChannel().begin())));
-	}
 	std::vector<Client>::iterator client_it;
 	client_it = findValue(chan->getClients(),
 						  &Client::getNickname, client.getNickname());
-	if (client_it != chan->getClients().end())
-	{
-		sendMessageToEveryone(RPL_PART(client_it->getNickname(), client_it->getUsername(), chan->getName(), cmd.getMsg()), chan->getName());
-		client_it->DecreaseNbChannels();
-		chan->getClients().erase(client_it);
-		for (std::vector<std::string>::iterator admin = chan->getOperators().begin(); admin != chan->getOperators().end(); admin++)
-		{
-			if (client.getNickname() == *admin)
-			{
-				chan->getOperators().erase(admin);
-				break;
-			}
-		}
-		if (chan->getClients().size() == 0)
-			getChannels().erase(chan);
-	}
-	else
-		sendMessageToClient(client, ERR_NOTONCHANNEL(client, chan->getName()));
+	if (client_it == chan->getClients().end())
+		return (sendMessageToClient(client, ERR_NOTONCHANNEL(client, chan->getName())));
+	sendMessageToEveryone(RPL_PART(client_it->getNickname(), client_it->getUsername(), chan->getName(), cmd.getMsg()), chan->getName());
+	client_it->DecreaseNbChannels();
+	chan->getClients().erase(client_it);
+	if (client.is_operator(*chan))
+		chan->getOperators().erase(client_it);
+	if (chan->getClients().size() == 0)
+		getChannels().erase(chan);
 	return (0);
 }
 
@@ -110,20 +97,7 @@ void Server::sendMessageToEveryClientInChannel(std::string msg, Channel &channel
 {
 	std::vector<Client>::iterator client_it = channel.getClients().begin();
 	for (; client_it != channel.getClients().end(); client_it++)
-	{
 		sendMessageToClient(*client_it, msg);
-	}
-}
-
-bool isClientOp(Client &client, Channel &channel)
-{
-	std::vector<std::string>::iterator chan_it = channel.getOperators().begin();
-	for (; chan_it != channel.getOperators().end(); chan_it++)
-	{
-		if (client.getNickname() == *chan_it)
-			return true;
-	}
-	return false;
 }
 
 int Server::topic(Client &client, Command &cmd)
@@ -141,7 +115,7 @@ int Server::topic(Client &client, Command &cmd)
 		return ((it_ch->getTopic() == "") ? sendMessageToClient(client, RPL_NOTOPIC(client, *ch_names)) : sendMessageToClient(client, RPL_TOPIC(client.getNickname(), *ch_names, it_ch->getTopic())));
 	if (!isClientInChannel(client, *it_ch))
 		return (sendMessageToClient(client, ERR_NOTONCHANNEL(client, *ch_names)));
-	else if (it_ch->getTopicOp() && !isClientOp(client, *it_ch))
+	else if (it_ch->getTopicOp() && !client.is_operator(*it_ch))
 		return (sendMessageToClient(client, ERR_CHANOPRIVSNEEDED(client, *ch_names)));
 	else
 	{
@@ -162,7 +136,7 @@ void Server::invite(Client &client, Command &cmd)
 		sendMessageToClient(client, ERR_NORECIPIENT(client));
 		return;
 	}
-	if(cmd.getChannel().begin() == cmd.getChannel().end())
+	if (cmd.getChannel().begin() == cmd.getChannel().end())
 	{
 		sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "INVITE"));
 		return;
@@ -175,21 +149,21 @@ void Server::invite(Client &client, Command &cmd)
 		return;
 	}
 	std::vector<Channel>::iterator it_ch = findValue(getChannels(),
-				&Channel::getName, *ch_names);
+													 &Channel::getName, *ch_names);
 	if (it_ch == getChannels().end())
 	{
 		sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *ch_names));
-		return ;
+		return;
 	}
 	if (!isClientInChannel(client, *it_ch))
 	{
 		sendMessageToClient(client, ERR_NOTONCHANNEL(client, it_ch->getName()));
-		return ;
+		return;
 	}
 	if (isClientInChannel(*target_client, *it_ch))
 	{
-		sendMessageToClient(client, ERR_USERONCHANNEL(client, target_client_nickname,*ch_names));
-		return ;
+		sendMessageToClient(client, ERR_USERONCHANNEL(client, target_client_nickname, *ch_names));
+		return;
 	}
 	sendMessageToClient(client, RPL_INVITING(client, target_client_nickname, *ch_names));
 	sendMessageToClient(*target_client, INVITE(client, target_client_nickname));
