@@ -36,10 +36,7 @@ int Server::handle_commands(int fd)
 	else if (cmd.getCmd() == "KICK")
 		kick(client, cmd);
 	else if (cmd.getCmd() == "NICK")
-	{
 		nick(client);
-		std::cout << "Name = " << client.getNickname() << std::endl;
-	}
 	else if (cmd.getCmd() == "USER")
 		user(client);
 	else if (cmd.getCmd() == "PRIVMSG")
@@ -50,6 +47,10 @@ int Server::handle_commands(int fd)
 		return (quit(client));
 	else if (cmd.getCmd() == "TOPIC")
 		topic(client, cmd);
+	else if (cmd.getCmd() == "INVITE")
+	{
+		invite(client, cmd);
+	}
 	else if (cmd.getCmd() != "CAP" || cmd.getCmd() != "WHOIS" || cmd.getCmd() != "WHO")
 		sendMessageToClient(client, ERR_UNKNOWNCOMMAND(client.getNickname(), cmd.getCmd()));
 	client.setMessage("");
@@ -136,10 +137,10 @@ int Server::topic(Client &client, Command &cmd)
 													 &Channel::getName, *ch_names);
 	if (it_ch == getChannels().end())
 		return (sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *ch_names)));
+	if (topic_str == raw_msg)
+		return ((it_ch->getTopic() == "") ? sendMessageToClient(client, RPL_NOTOPIC(client, *ch_names)) : sendMessageToClient(client, RPL_TOPIC(client.getNickname(), *ch_names, it_ch->getTopic())));
 	if (!isClientInChannel(client, *it_ch))
 		return (sendMessageToClient(client, ERR_NOTONCHANNEL(client, *ch_names)));
-	if (topic_str == raw_msg)
-		return (sendMessageToClient(client, RPL_TOPIC(client.getNickname(), *ch_names, it_ch->getTopic())));
 	else if (it_ch->getTopicOp() && !isClientOp(client, *it_ch))
 		return (sendMessageToClient(client, ERR_CHANOPRIVSNEEDED(client, *ch_names)));
 	else
@@ -147,6 +148,49 @@ int Server::topic(Client &client, Command &cmd)
 		it_ch->setTopic(topic_str);
 		sendMessageToEveryClientInChannel(TOPIC(client, cmd.getChannel()[0], topic_str), *it_ch);
 	}
-	// std::cout << it_ch->getTopicOp() << " " << isClientOp(client, *it_ch) << std::endl;
 	return (0);
+}
+
+void Server::invite(Client &client, Command &cmd)
+{
+	std::string raw_msg = client.getMessage();
+	int first_space = client.getMessage().find(' ');
+	int second_space = raw_msg.find(' ', first_space + 1);
+	std::vector<std::string>::iterator ch_names = cmd.getChannel().begin();
+	if (second_space == (int)std::string::npos)
+	{
+		sendMessageToClient(client, ERR_NORECIPIENT(client));
+		return;
+	}
+	if(cmd.getChannel().begin() == cmd.getChannel().end())
+	{
+		sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "INVITE"));
+		return;
+	}
+	std::string target_client_nickname = client.getMessage().substr(first_space + 1, second_space - first_space - 1);
+	Client *target_client = getOneClientByNickname(target_client_nickname);
+	if (!target_client)
+	{
+		sendMessageToClient(client, ERR_NOSUCHNICK(client.getNickname(), target_client_nickname));
+		return;
+	}
+	std::vector<Channel>::iterator it_ch = findValue(getChannels(),
+				&Channel::getName, *ch_names);
+	if (it_ch == getChannels().end())
+	{
+		sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *ch_names));
+		return ;
+	}
+	if (!isClientInChannel(client, *it_ch))
+	{
+		sendMessageToClient(client, ERR_NOTONCHANNEL(client, it_ch->getName()));
+		return ;
+	}
+	if (isClientInChannel(*target_client, *it_ch))
+	{
+		sendMessageToClient(client, ERR_USERONCHANNEL(client, target_client_nickname,*ch_names));
+		return ;
+	}
+	sendMessageToClient(client, RPL_INVITING(client, target_client_nickname, *ch_names));
+	sendMessageToClient(*target_client, INVITE(client, target_client_nickname));
 }
