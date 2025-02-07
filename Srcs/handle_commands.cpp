@@ -440,7 +440,7 @@ void Server::privmsg(Client &client, Command &cmd)
 			std::vector<Client>::iterator it_cli = it_ch->getClients().begin();
 			for (; it_cli != it_ch->getClients().end(); it_cli++)
 			{
-				if (getRealNickname(it_cli->getNickname()) != client.getNickname())
+				if (it_cli->getPfd() != client.getPfd())
 					sendMessageToClient(*it_cli, CMSG_PRIVMSG_CH(client, *it_chname, msgval));
 			}
 			it_chname++;
@@ -490,10 +490,10 @@ int Server::topic(Client &client, Command &cmd)
 													 &Channel::getName, *ch_names);
 	if (it_ch == getChannels().end())
 		return (sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *ch_names)));
+	if (topic_str == raw_msg)
+		return ((it_ch->getTopic() == "") ? sendMessageToClient(client, RPL_NOTOPIC(client, *ch_names)) : sendMessageToClient(client, RPL_TOPIC(client.getNickname(), *ch_names, it_ch->getTopic())));
 	if (!isClientInChannel(client, *it_ch))
 		return (sendMessageToClient(client, ERR_NOTONCHANNEL(client, *ch_names)));
-	if (topic_str == raw_msg)
-		return (sendMessageToClient(client, RPL_TOPIC(client.getNickname(), *ch_names, it_ch->getTopic())));
 	else if (it_ch->getTopicOp() && !isClientOp(client, *it_ch))
 		return (sendMessageToClient(client, ERR_CHANOPRIVSNEEDED(client, *ch_names)));
 	else
@@ -501,6 +501,5 @@ int Server::topic(Client &client, Command &cmd)
 		it_ch->setTopic(topic_str);
 		sendMessageToEveryClientInChannel(TOPIC(client, cmd.getChannel()[0], topic_str), *it_ch);
 	}
-	// std::cout << it_ch->getTopicOp() << " " << isClientOp(client, *it_ch) << std::endl;
 	return (0);
 }
