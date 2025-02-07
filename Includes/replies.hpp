@@ -20,6 +20,7 @@
 #define TOPIC(client, channel, new_topic) (":" + client.getHostname() + "@host" + " TOPIC " + "#" + channel + " :" + new_topic)
 #define RPL_TOPIC(nickname, ch_name, topic) (":localhost 332 " + nickname + " #" + ch_name + " :" + topic + "\r\n")
 #define RPL_NOTOPIC(client, ch_name) (":localhost 331 " + client.getNickname() + " #" + ch_name + " :No topic is set for this channel")
+#define RPL_INVITING(client, nick, channel) (":localhost 341 " + client.getNickname() + " " + nick + " " + channel)
 /* --------------------------- Error reply command -------------------------------------- */
 
 #define ERR_UNKNOWNCOMMAND(nickname, command) (":localhost 421 " + nickname + " " + command + " :Unknown command")
@@ -29,6 +30,7 @@
 #define ERR_TOOMANYCHANNELS(nickname, channel) (":localhost 405 " + nickname + " :#" + channel)
 #define ERR_TOOMANYCLIENTS(nickname, channel) (":localhost 471 " + nickname + " #" + channel + " :Cannot join channel (+l)")
 #define ERR_NOTONCHANNEL(client, channel) (":irc_server 442 " + client.getNickname() + " " + channel + " :You're not on that channel")
+#define ERR_USERONCHANNEL(client, nick, channel) (":localhost 443 " + client.getNickname() + " " + nick + " " + channel + " :is already on channel")
 #define INVITE_ONLY(nickname, channel) (":localhost 473 " + nickname + " #" + channel + " :Cannot join channel (+i)")
 #define ERR_NOTOPERATOR(nickname, channel) (":localhost 482 " + nickname + " #" + channel + " :You're not channel operator")
 #define ERR_PSSWD(nickname, channel) (":localhost 475 " + nickname + " #" + channel + " :Cannot join channel (+k) - bad key")
@@ -48,3 +50,4 @@
 
 #define CMSG_PRIVMSG_CH(client, chname, msg) (":" + client.getNickname() + "!" + client.getHostname() + "@" + client.getHostname() + " PRIVMSG #" + chname + " :" + msg)
 #define RPL_PRIVMSG(nickname, target, msg) (":" + nickname + " PRIVMSG " + target + " :" + msg)
+#define INVITE(inviter, invited) (":" + inviter.getHostname() + "@localhost" + " INVITE " + invited)

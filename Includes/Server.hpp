@@ -60,4 +60,5 @@ public:
     void privmsg(Client &client, Command &cmd);
     void quit(Client &client);
     int topic(Client &client, Command &cmd);
+    void invite(Client &client, Command &cmd);
 };

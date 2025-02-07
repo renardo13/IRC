@@ -16,7 +16,7 @@ class Channel
         int client_limit;
         std::vector<Client> clients;
         std::vector<std::string> operators;
-        
+        std::vector<std::string> invite_list;
     public:
         Channel();
         ~Channel();

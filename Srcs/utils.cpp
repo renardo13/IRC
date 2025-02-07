@@ -44,3 +44,5 @@ std::string getRealNickname(std::string nick)
     else
         return nick;
 }
+
+
