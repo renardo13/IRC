@@ -45,4 +45,11 @@ std::string getRealNickname(std::string nick)
         return nick;
 }
 
+bool isNickErroneous(std::string nick)
+{
+    if (nick.find(' ') != std::string::npos || nick.find('@') != std::string::npos)
+        return true;
+    else
+        return false;
+}
 

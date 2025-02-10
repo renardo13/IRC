@@ -33,11 +33,13 @@ class Channel
         bool getInviteOnly() const;
         int getClientLimit() const;
         bool getTopicOp() const;
-
+        bool isClientInInviteList(std::string nick);
         void setPsswd(std::string key);
         void setClients(Client& client);
         void setClientLimit(int limit);
         void setInviteOnly(bool flag);
         void setTopic(std::string str);
         void setTopicOp(bool flag);
+        void addClientToInviteList(std::string client_nickname);
+        void removeClientFromInviteList(std::string client_nickname);
 };

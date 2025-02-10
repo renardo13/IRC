@@ -3,8 +3,8 @@
 #include "Client.hpp"
 #include <map>
 #include "Channel.hpp"
-
 #define MAX_FDS 10
+
 class Client;
 class Channel;
 class Command;
@@ -62,3 +62,5 @@ public:
     int topic(Client &client, Command &cmd);
     void invite(Client &client, Command &cmd);
 };
+
+bool isNickErroneous(std::string nick);

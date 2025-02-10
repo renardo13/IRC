@@ -108,3 +108,32 @@ bool Channel::getTopicOp() const
 {
     return (this->topic_op);
 }
+
+void Channel::addClientToInviteList(std::string client_nickname)
+{
+    if (!isClientInInviteList(client_nickname))
+        this->invite_list.push_back(client_nickname);
+}
+
+void Channel::removeClientFromInviteList(std::string client_nickname)
+{
+    std::vector<std::string>::iterator it = invite_list.begin();
+    for(; it!= invite_list.end(); it++)
+    {
+        if (*it == client_nickname)
+            break;
+    }
+    if (it != invite_list.end())
+        invite_list.erase(it);
+}
+
+bool Channel::isClientInInviteList(std::string nick)
+{
+    std::vector<std::string>::iterator it = invite_list.begin();
+    for(; it!= invite_list.end(); it++)
+    {
+        if (*it == nick)
+            break;
+    }
+    return (it != invite_list.end());
+}

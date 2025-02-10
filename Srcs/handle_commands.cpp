@@ -219,7 +219,7 @@ int Server::reach_channel(Client &client, Command &cmd, Channel &chan, std::stri
 		return (sendMessageToClient(client, ERR_TOOMANYCLIENTS(client.getNickname(), chan.getName())));
 	else if (client.getNbChannels() > 10)
 		return (sendMessageToClient(client, ERR_TOOMANYCHANNELS(client.getNickname(), chan.getName())));
-	else if (chan.getInviteOnly())
+	else if (chan.getInviteOnly() && !chan.isClientInInviteList(client.getNickname()))
 		return (sendMessageToClient(client, INVITE_ONLY(client.getNickname(), chan.getName())));
 	else if (!chan.getPsswd().empty())
 	{
@@ -366,6 +366,11 @@ void Server::nick(Client &client)
 	{
 		sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "NICK"));
 		std::cout << "Besoin de plus de param\n";
+		return;
+	}
+	if (isNickErroneous(nick))
+	{
+		sendMessageToClient(client, ERR_ERRONEUSNICKNAME(nick));
 		return;
 	}
 	sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
@@ -549,4 +554,5 @@ void Server::invite(Client &client, Command &cmd)
 	}
 	sendMessageToClient(client, RPL_INVITING(client, target_client_nickname, *ch_names));
 	sendMessageToClient(*target_client, INVITE(client, target_client_nickname));
+	it_ch->addClientToInviteList(target_client_nickname);
 }
