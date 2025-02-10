@@ -49,7 +49,7 @@ int Server::handle_commands(int fd)
 		topic(client, cmd);
 	else if (cmd.getCmd() == "INVITE")
 		invite(client, cmd);
-	else if (cmd.getCmd() != "CAP" || cmd.getCmd() != "WHOIS" || cmd.getCmd() != "WHO")
+	else if (cmd.getCmd() != "CAP" && cmd.getCmd() != "WHOIS" && cmd.getCmd() != "WHO")
 		sendMessageToClient(client, ERR_UNKNOWNCOMMAND(client.getNickname(), cmd.getCmd()));
 	client.setMessage("");
 	client.setNBytes(0);
@@ -74,8 +74,9 @@ int Server::part(Client &client, Command &cmd)
 	sendMessageToEveryone(RPL_PART(client.getNickname(), client.getUsername(), chan->getName(), cmd.getMsg()), chan->getName());
 	client.DecreaseNbChannels();
 	chan->getClients().erase(client_it);
-	if (client.getOperator(*chan) != chan->getOperators().end())
-		chan->getOperators().erase(client_it);
+	std::vector<Client *>::iterator client_op = client.getOperator(*chan);
+	if (client_op != chan->getOperators().end())
+		chan->getOperators().erase(client_op);
 	if (chan->getClients().size() == 0)
 		getChannels().erase(chan);
 	return (0);
