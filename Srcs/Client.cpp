@@ -152,29 +152,29 @@ void Client::DecreaseNbChannels()
     this->nb_channels--;
 }
 
-int Client::is_operator(Channel &channel)
+std::vector<Client*>::iterator Client::getOperator(Channel &channel)
 {
-    std::vector<Client>::iterator it = channel.getOperators().begin();
-    for (; it != channel.getOperators().end(); it++)
+    std::vector<Client*>::iterator it = channel.getOperators().begin();
+    for (int i = 1; it != channel.getOperators().end(); it++, i++)
     {
-        std::cout << "Client : " << it->getNickname() << std::endl;
-        if (getNickname() == it->getNickname())
-            return (1);
+        if (getNickname() == (*it)->getNickname())
+            return (it);
     }
-    return (0);
+    return (channel.getOperators().end());
+}
+
+std::vector<Client*>::iterator Client::getOperator(Channel &channel, std::string name)
+{
+    std::vector<Client*>::iterator it = channel.getOperators().begin();
+    for (int i = 1; it != channel.getOperators().end(); it++, i++)
+    {
+        if (name == (*it)->getNickname())
+            return (it);
+    }
+    return (channel.getOperators().end());
 }
 
 void Client::setRegisterProcess(int rp)
 {
     this->register_process = rp;
-}
-
-bool Client::operator==(const Client &other) const
-{
-    return this->getNickname() == other.getNickname();
-}
-
-bool Client::operator!=(const Client &other) const
-{
-    return this->getNickname() != other.getNickname();
 }

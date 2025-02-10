@@ -1,28 +1,27 @@
 #include "../Includes/Server.hpp"
 #include "../Includes/replies.hpp"
-#include "../Includes/Client.hpp"
 
 int Server::add_operator(Client &client, Command &cmd, Channel &chan)
 {
-    Client *target = findValue(chan.getClients(), &Client::getNickname, cmd.getUser()[0]);
-    if (target == NULL)
+    if (getClient(cmd.getUser()[0]) == getClients().end())
         return (sendMessageToClient(client, ERR_NOSUCHNICK(client.getNickname(), cmd.getUser()[0])));
-    if (!target->is_operator(chan))
-    {
-        chan.getOperators().push_back(*target);
-    }
-    std::cout << "Adresse de :" << client.getNickname();
-    printf("%p\n", &client);
+    std::vector<Client *>::iterator target = chan.isClientInChan(cmd.getUser()[0]);
+    if ((*target)->getOperator(chan) == chan.getClients().end())
+        return (sendMessageToClient(client, ERR_USERNOTINCHAN2(client.getNickname(), cmd.getUser()[0], chan.getName())));
+    chan.getOperators().push_back(*target);
     return (0);
 }
 
-int Server::remove_operator(Command &cmd, Channel &chan)
+int Server::remove_operator(Client &client, Command &cmd, Channel &chan)
 {
-    Client *target = findValue(chan.getClients(), &Client::getNickname, cmd.getUser()[0]);
-    if (!target || !target->is_operator(chan))
-        return (-1);
-    std::vector<Client>::iterator it = std::find(chan.getOperators().begin(), chan.getOperators().end(), *target);
-    chan.getOperators().erase(it);
+    if (getClient(cmd.getUser()[0]) == getClients().end())
+        return (sendMessageToClient(client, ERR_NOSUCHNICK(client.getNickname(), cmd.getUser()[0])));
+    std::vector<Client *>::iterator target = chan.isClientInChan(cmd.getUser()[0]);
+    if ((*target)->getOperator(chan) == chan.getClients().end())
+        return (sendMessageToClient(client, ERR_USERNOTINCHAN2(client.getNickname(), cmd.getUser()[0], chan.getName())));
+    std::vector<Client *>::iterator target_op = (*target)->getOperator(chan);
+    if (target_op != chan.getOperators().end())
+        chan.getOperators().erase(target_op);
     return (0);
 }
 
@@ -41,9 +40,11 @@ int Server::mode(Client &client, Command &cmd)
 {
     if (cmd.getChannel().empty() || cmd.getMode().empty())
         return (-1);
-    Channel *chan = findValue(getChannels(), &Channel::getName, cmd.getChannel()[0]);
-    if (!client.is_operator(*chan))
-        return (sendMessageToClient(client, ERR_NOTOPERATOR(client.getNickname(), chan->getName())));
+    std::vector<Channel>::iterator chan = isChannelInServer(cmd.getChannel()[0]);
+    if (client.getOperator(*chan) == chan->getOperators().end() && chan->getTopicOp())
+		{std::cout << "Not op in mode\n";
+
+        return (sendMessageToClient(client, ERR_NOTOPERATOR(client.getNickname(), chan->getName())));}
     std::string arg;
     if (cmd.getUser().empty())
         arg = "";
@@ -59,7 +60,7 @@ int Server::mode(Client &client, Command &cmd)
     else if (cmd.getMode()[0] == "+o")
         add_operator(client, cmd, *chan);
     else if (cmd.getMode()[0] == "-o")
-        remove_operator(cmd, *chan);
+        remove_operator(client, cmd, *chan);
     else if (cmd.getMode()[0] == "+l")
         set_limit(*chan, cmd);
     else if (cmd.getMode()[0] == "-l")

@@ -14,8 +14,8 @@ class Channel
         bool invite_only;
         bool topic_op;
         int client_limit;
-        std::vector<Client> clients;
-        std::vector<Client> operators;
+        std::vector<Client*> clients;
+        std::vector<Client*> operators;
         std::vector<std::string> invite_list;
     public:
         Channel();
@@ -26,8 +26,8 @@ class Channel
 
         std::string getPsswd() const;
         std::string getName() const;
-        std::vector<Client>& getClients();
-        std::vector<Client>& getOperators();
+        std::vector<Client*>& getClients();
+        std::vector<Client*>& getOperators();
         
         std::string getTopic() const;
         bool getInviteOnly() const;
@@ -41,7 +41,7 @@ class Channel
         void setTopic(std::string str);
         void setTopicOp(bool flag);
 
-         bool operator==(const std::string& other) const {
-        return this->getName() == other; // Comparaison entre le champ 'name' et une std::string
-    }
+        std::vector<Client*>::iterator isClientInChan(Client& client);
+        std::vector<Client*>::iterator isClientInChan(std::string client);
+
 };

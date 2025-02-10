@@ -7,8 +7,8 @@ Channel::Channel()
     topic_op = true;
     psswd = "";
     invite_only = false;
-    clients = std::vector<Client>();
-    operators = std::vector<Client>();
+    clients = std::vector<Client*>();
+    operators = std::vector<Client*>();
 }
 
 Channel::~Channel()
@@ -30,8 +30,8 @@ Channel::Channel(std::string chan_name) : name(chan_name)
     topic_op = true;
     psswd = "";
     invite_only = false;
-    clients = std::vector<Client>();
-    operators = std::vector<Client>();
+    clients = std::vector<Client*>();
+    operators = std::vector<Client*>();
 }
 
 Channel const &Channel::operator=(Channel const &obj)
@@ -62,12 +62,12 @@ std::string Channel::getName() const
     return (name);
 }
 
-std::vector<Client> &Channel::getClients()
+std::vector<Client*> &Channel::getClients()
 {
     return (this->clients);
 }
 
-std::vector<Client> &Channel::getOperators()
+std::vector<Client*> &Channel::getOperators()
 {
     return (this->operators);
 }
@@ -84,7 +84,7 @@ void Channel::setClientLimit(int limit)
 
 void Channel::setClients(Client &client)
 {
-    this->clients.push_back(client);
+    this->clients.push_back(&client);
 }
 
 bool Channel::getInviteOnly() const

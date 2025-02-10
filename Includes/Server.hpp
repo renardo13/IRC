@@ -56,7 +56,7 @@ public:
     void pong(Client &client, Command &cmd);
     int mode(Client &client, Command &cmd);
     int add_operator(Client &client, Command &cmd, Channel &chan);
-    int remove_operator(Command &cmd, Channel &chan);
+    int remove_operator(Client &client, Command &cmd, Channel &chan);
     int part(Client &client, Command &cmd);
     int kick(Client &client, Command &cmd);
     int set_limit(Channel &chan, Command &cmd);
@@ -68,4 +68,7 @@ public:
     int quit(Client &client);
     int topic(Client &client, Command &cmd);
     void invite(Client &client, Command &cmd);
+    std::vector<Channel>::iterator isChannelInServer(std::string chan);
+    std::map<int, Client>::iterator getClient(Client& client);
+    std::map<int, Client>::iterator getClient(std::string client);
 };

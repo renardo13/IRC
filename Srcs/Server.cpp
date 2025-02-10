@@ -56,8 +56,6 @@ void Server::print()
         std::cout << std::string(40, '_');
         std::cout << "\nClient " << i << std::endl;
         i++;
-        std::cout << it->second.getNickname() << " ";
-        printf("%p\n", &(*it));
     }
 
     std::vector<Channel>::iterator ite = getChannels().begin();
@@ -66,11 +64,10 @@ void Server::print()
         if (i == 1)
             std::cout << "\n- Channels list -\n";
         std::cout << "Chan " << i << " : " << ite->getName() << std::endl;
-        std::vector<Client>::iterator client_it = ite->getClients().begin();
+        std::vector<Client*>::iterator client_it = ite->getClients().begin();
         for (; client_it != ite->getClients().end(); client_it++)
         {
-            std::cout << "    - " << client_it->getNickname() << " ";
-            printf("%p\n", &(*it));
+            std::cout << "    - " << (*client_it)->getNickname();
             // std::vector<std::string>::iterator admin = ite->getOperators().begin();
 
             // for (; admin != ite->getOperators().end(); admin++)
@@ -126,4 +123,25 @@ Client *Server::getOneClientByNickname(std::string nickname)
         }
     }
     return (0);
+}
+
+std::map<int, Client>::iterator Server::getClient(Client& client)
+{
+    for(std::map<int, Client>::iterator it = getClients().begin(); it != getClients().end(); it++)
+    {
+        if(it->second.getNickname() == client.getNickname())
+            return(it);
+    }
+    return(getClients().end());
+}
+
+
+std::map<int, Client>::iterator Server::getClient(std::string name)
+{
+    for(std::map<int, Client>::iterator it = getClients().begin(); it != getClients().end(); it++)
+    {
+        if(it->second.getNickname() == name)
+            return(it);
+    }
+    return(getClients().end());
 }

@@ -12,6 +12,8 @@
 #define RPL_NAMES(nickname, channel, clientslist) (": 353 " + nickname + " @ #" + channel + " :" + clientslist + "\r\n")
 #define RPL_ENDOFNAMES(nickname, channel) (": 366 " + nickname + " #" + channel + " :END of /NAMES list")
 #define RPL_KICK(nickname, username, channel, person_kicked, reason) (":" + nickname + "!~" + username + "@127.0.0.1 KICK #" + channel + " " + person_kicked + " :" + reason)
+# define SHOW_TOPIC(hostname, channel, topic) (":" + hostname + "@127.0.0.1 TOPIC #" + channel + " :" + topic)
+
 
 // For every modes
 # define RPL_CHANGEMODE(hostname, channel, mode, args) (":" + hostname + " MODE #" + channel + " " + mode + " " + args)

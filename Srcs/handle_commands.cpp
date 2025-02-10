@@ -5,12 +5,24 @@
 #include <vector>
 #include <stdio.h>
 
+// Generic function to find a value of a certain type in a certain container type. ("::Value_type" is the type of elements that the container store)
+template <typename Container, typename AttributeType,
+		  typename Value>
+typename Container::iterator findValue(Container &container,
+									   AttributeType (Container::value_type::*getter)() const, const Value value)
+{
+	typename Container::iterator it = container.begin();
+	for (; it != container.end(); it++)
+	{
+		if (((*it).*getter)() == value)
+			return (it);
+	}
+	return (container.end());
+}
+
 int Server::handle_commands(int fd)
 {
 	Client &client = getClients()[fd];
-    std::cout << "Handle commad: Adresse de :" << client.getNickname() << " ";
-    printf("%p\n", &client);
-
 	Command cmd;
 	cmd.parseCmd(client.getMessage());
 	if (cmd.getCmd() == "PASS")
@@ -41,7 +53,6 @@ int Server::handle_commands(int fd)
 		sendMessageToClient(client, ERR_UNKNOWNCOMMAND(client.getNickname(), cmd.getCmd()));
 	client.setMessage("");
 	client.setNBytes(0);
-	print();
 	return (0);
 }
 
@@ -52,41 +63,29 @@ void Server::pong(Client &client, Command &cmd)
 
 int Server::part(Client &client, Command &cmd)
 {
-	Channel* chan = findValue(getChannels(),
+	std::vector<Channel>::iterator chan = findValue(getChannels(),
 													&Channel::getName, cmd.getChannel()[0]);
-	if (chan != NULL)
+	if (chan == getChannels().end())
 		return (sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *cmd.getChannel().begin())));
-	Client* client_it;
-	client_it = findValue(chan->getClients(),
-						  &Client::getNickname, client.getNickname());
-	if (client_it == NULL)
-		return (sendMessageToClient(client, ERR_NOTONCHANNEL(client, chan->getName())));
-	sendMessageToEveryone(RPL_PART(client_it->getNickname(), client_it->getUsername(), chan->getName(), cmd.getMsg()), chan->getName());
-	client_it->DecreaseNbChannels();
-	chan->getClients().erase(std::find(chan->getClients().begin(), chan->getClients().end(), client));
-	if (client.is_operator(*chan))
-		chan->getOperators().erase(std::find(chan->getOperators().begin(), chan->getOperators().end(), client.getNickname()));
-	if (chan->getClients().size() == 0)
-		getChannels().erase(std::find(getChannels().begin(), getChannels().end(), chan->getName()));
-	return (0);
-}
 
-bool isClientInChannel(Client &client, Channel &ch)
-{
-	std::vector<Client>::iterator client_it = ch.getClients().begin();
-	for (; client_it != ch.getClients().end(); client_it++)
-	{
-		if (getRealNickname(client_it->getNickname()) == client.getNickname())
-			return true;
-	}
-	return false;
+	std::vector<Client *>::iterator client_it = chan->isClientInChan(client);
+	if (client_it == chan->getClients().end())
+		return (sendMessageToClient(client, ERR_NOTONCHANNEL(client, chan->getName())));
+	sendMessageToEveryone(RPL_PART(client.getNickname(), client.getUsername(), chan->getName(), cmd.getMsg()), chan->getName());
+	client.DecreaseNbChannels();
+	chan->getClients().erase(client_it);
+	if (client.getOperator(*chan) != chan->getOperators().end())
+		chan->getOperators().erase(client_it);
+	if (chan->getClients().size() == 0)
+		getChannels().erase(chan);
+	return (0);
 }
 
 void Server::sendMessageToEveryClientInChannel(std::string msg, Channel &channel)
 {
-	std::vector<Client>::iterator client_it = channel.getClients().begin();
+	std::vector<Client *>::iterator client_it = channel.getClients().begin();
 	for (; client_it != channel.getClients().end(); client_it++)
-		sendMessageToClient(*client_it, msg);
+		sendMessageToClient(*(*client_it), msg);
 }
 
 int Server::topic(Client &client, Command &cmd)
@@ -96,21 +95,27 @@ int Server::topic(Client &client, Command &cmd)
 	std::vector<std::string>::iterator ch_names = cmd.getChannel().begin();
 	if (ch_names == cmd.getChannel().end())
 		return (sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "TOPIC")));
-	Channel* it_ch = findValue(getChannels(),
+	std::vector<Channel>::iterator it_ch = findValue(getChannels(),
 													 &Channel::getName, *ch_names);
-	if (it_ch != NULL)
+
+	if (it_ch == getChannels().end())
 		return (sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *ch_names)));
-	if (topic_str == raw_msg)
-		return ((it_ch->getTopic() == "") ? sendMessageToClient(client, RPL_NOTOPIC(client, *ch_names)) : sendMessageToClient(client, RPL_TOPIC(client.getNickname(), *ch_names, it_ch->getTopic())));
-	if (!isClientInChannel(client, *it_ch))
-		return (sendMessageToClient(client, ERR_NOTONCHANNEL(client, *ch_names)));
-	else if (it_ch->getTopicOp() && !client.is_operator(*it_ch))
-		return (sendMessageToClient(client, ERR_CHANOPRIVSNEEDED(client, *ch_names)));
-	else
+	if (it_ch->isClientInChan(client) != it_ch->getClients().end())
 	{
-		it_ch->setTopic(topic_str);
-		sendMessageToEveryClientInChannel(TOPIC(client, cmd.getChannel()[0], topic_str), *it_ch);
+		if (topic_str == raw_msg)
+			return ((it_ch->getTopic() == "") ? sendMessageToClient(client, RPL_NOTOPIC(client, *ch_names)) : sendMessageToClient(client, RPL_TOPIC(client.getNickname(), *ch_names, it_ch->getTopic())));
+		if (it_ch->isClientInChan(client) == it_ch->getClients().end())
+			return (sendMessageToClient(client, ERR_NOTONCHANNEL(client, *ch_names)));
+		else if (it_ch->getTopicOp() && client.getOperator(*it_ch) == it_ch->getOperators().end())
+			return (sendMessageToClient(client, ERR_NOTOPERATOR(client.getNickname(), *ch_names)));
+		else
+		{
+			it_ch->setTopic(topic_str);
+			sendMessageToEveryClientInChannel(TOPIC(client, cmd.getChannel()[0], topic_str), *it_ch);
+		}
 	}
+	else
+		sendMessageToClient(client, RPL_TOPIC(client.getNickname(), it_ch->getName(), it_ch->getTopic()));
 	return (0);
 }
 
@@ -137,19 +142,19 @@ void Server::invite(Client &client, Command &cmd)
 		sendMessageToClient(client, ERR_NOSUCHNICK(client.getNickname(), target_client_nickname));
 		return;
 	}
-	Channel* it_ch = findValue(getChannels(),
+	std::vector<Channel>::iterator it_ch = findValue(getChannels(),
 													 &Channel::getName, *ch_names);
-	if (it_ch != NULL)
+	if (it_ch == getChannels().end())
 	{
 		sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *ch_names));
 		return;
 	}
-	if (!isClientInChannel(client, *it_ch))
+	if (it_ch->isClientInChan(client) == it_ch->getClients().end())
 	{
 		sendMessageToClient(client, ERR_NOTONCHANNEL(client, it_ch->getName()));
 		return;
 	}
-	if (isClientInChannel(*target_client, *it_ch))
+	if (it_ch->isClientInChan(client) != it_ch->getClients().end())
 	{
 		sendMessageToClient(client, ERR_USERONCHANNEL(client, target_client_nickname, *ch_names));
 		return;
