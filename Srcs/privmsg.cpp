@@ -1,21 +1,6 @@
 #include "../Includes/Server.hpp"
 #include "../Includes/replies.hpp"
 
-// Generic function to find a value of a certain type in a certain container type. ("::Value_type" is the type of elements that the container store)
-template <typename Container, typename AttributeType,
-		  typename Value>
-typename Container::iterator findValue(Container &container,
-									   AttributeType (Container::value_type::*getter)() const, const Value value)
-{
-	typename Container::iterator it = container.begin();
-	for (; it != container.end(); it++)
-	{
-		if (((*it).*getter)() == value)
-			return (it);
-	}
-	return (container.end());
-}
-
 void Server::privmsg(Client &client, Command &cmd)
 {
 
@@ -49,9 +34,9 @@ void Server::privmsg(Client &client, Command &cmd)
 	{
 		while (it_chname != chan_names.end())
 		{
-			std::vector<Channel>::iterator it_ch = findValue(getChannels(),
+			Channel* it_ch = findValue(getChannels(),
 															 &Channel::getName, *it_chname);
-			if (it_ch == getChannels().end())
+			if (it_ch != NULL)
 			{
 				sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *it_chname));
 				return;

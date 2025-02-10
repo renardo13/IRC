@@ -56,7 +56,8 @@ void Server::print()
         std::cout << std::string(40, '_');
         std::cout << "\nClient " << i << std::endl;
         i++;
-        std::cout << "Nick name: " << it->second.getNickname() << ", Client message: " << it->second.getMessage() << std::endl;
+        std::cout << it->second.getNickname() << " ";
+        printf("%p\n", &(*it));
     }
 
     std::vector<Channel>::iterator ite = getChannels().begin();
@@ -68,7 +69,8 @@ void Server::print()
         std::vector<Client>::iterator client_it = ite->getClients().begin();
         for (; client_it != ite->getClients().end(); client_it++)
         {
-            std::cout << "    - " << client_it->getNickname();
+            std::cout << "    - " << client_it->getNickname() << " ";
+            printf("%p\n", &(*it));
             // std::vector<std::string>::iterator admin = ite->getOperators().begin();
 
             // for (; admin != ite->getOperators().end(); admin++)

@@ -61,6 +61,8 @@ void Server::nick(Client &client)
 	int rp = client.getRegisterProcess();
 	client.setRegisterProcess(rp + 1);
 	client.setHostname(client.getNickname() + "!" + client.getUsername());
+	std::cout << "Nick: Adresse de :" << client.getNickname() << " ";
+    printf("%p\n", &client);
 }
 
 void Server::user(Client &client)

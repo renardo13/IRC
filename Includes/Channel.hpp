@@ -40,4 +40,8 @@ class Channel
         void setInviteOnly(bool flag);
         void setTopic(std::string str);
         void setTopicOp(bool flag);
+
+         bool operator==(const std::string& other) const {
+        return this->getName() == other; // Comparaison entre le champ 'name' et une std::string
+    }
 };

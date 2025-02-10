@@ -3,6 +3,7 @@
 #include "Client.hpp"
 #include <map>
 #include "Channel.hpp"
+#include <stdio.h>
 
 #define MAX_FDS 10
 class Client;

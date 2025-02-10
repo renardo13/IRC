@@ -60,7 +60,12 @@ public:
     int getNBytes() const;
     bool getIsRegistered() const;
     int is_operator(Channel& chan);
+    bool operator==(const Client& other) const;
+    bool operator==(const std::string& other) const {
+        return this->getNickname() == other; // Comparaison entre le champ 'name' et une std::string
+    }
 
+    bool operator!=(const Client& other) const;
     void setUsername(std::string username);
     void setNickname(std::string username);
     void setHostname(std::string username);
@@ -81,3 +86,8 @@ public:
 int atoi(char *str);
 std::string toStdString(char *str);
 std::string getRealNickname(std::string nick);
+template <typename Container, typename AttributeType, typename Value>
+typename Container::value_type* findValue(Container &container,
+                                       AttributeType (Container::value_type::*getter)() const,
+                                       const Value value);
+

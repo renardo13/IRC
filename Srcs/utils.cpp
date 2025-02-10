@@ -5,23 +5,23 @@
 // Generic function to find a value of a certain type in a certain container type. ("::Value_type" is the type of elements that the container store)
 template <typename Container, typename AttributeType,
 		  typename Value>
-typename Container::iterator findValue(Container &container,
+typename Container::value_type* findValue(Container &container,
 									   AttributeType (Container::value_type::*getter)() const, const Value value)
 {
 	typename Container::iterator it = container.begin();
 	for (; it != container.end(); it++)
 	{
 		if (((*it).*getter)() == value)
-			return (it);
+			return (&(*it));
 	}
-	return (container.end());
+	return (NULL);
 }
 
 int Server::sendMessageToEveryone(std::string msg, std::string chan_name)
 {
-	std::vector<Channel>::iterator chan = findValue(getChannels(), &Channel::getName, chan_name);
+	Channel* chan = findValue(getChannels(), &Channel::getName, chan_name);
 
-	if (chan == getChannels().end())
+	if (chan != NULL)
 		return (-1);
 	for (std::vector<Client>::iterator clients = chan->getClients().begin(); clients != chan->getClients().end(); clients++)
 		sendMessageToClient(*clients, msg);
