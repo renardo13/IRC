@@ -155,7 +155,7 @@ void Server::invite(Client &client, Command &cmd)
 		sendMessageToClient(client, ERR_NOTONCHANNEL(client, it_ch->getName()));
 		return;
 	}
-	if (it_ch->isClientInChan(client) != it_ch->getClients().end())
+	if (it_ch->isClientInChan(target_client_nickname) != it_ch->getClients().end()) //WARNING
 	{
 		sendMessageToClient(client, ERR_USERONCHANNEL(client, target_client_nickname, *ch_names));
 		return;

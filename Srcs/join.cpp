@@ -21,6 +21,7 @@ std::vector<Client*>::iterator Channel::isClientInChan(Client& client)
 {
     for(std::vector<Client*>::iterator it = getClients().begin(); it != getClients().end(); it++)
     {
+        std::cout << (*it)->getNickname() << " " << client.getNickname() << std::endl;
         if((*it)->getNickname() == client.getNickname())
             return(it);
     }
