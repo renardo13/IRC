@@ -1,6 +1,8 @@
 #include "Client.hpp"
 #include "Server.hpp"
 
+extern int isRunning;
+
 void reuse_local_address(int server_fd)
 {
     int opt = 1;
@@ -118,10 +120,13 @@ int Server::set_server(char *port, char *passwd)
     serverpfd.events = POLLIN;
     pfds[0] = serverpfd;
     pfd_count = 1;
-    while (1)
+    while (isRunning)
     {
         if ((poll(pfds, pfd_count, -1)) < 0)
-            throw std::runtime_error(ERR_POLL_FAILURE);        
+        {
+            if (isRunning == 1)
+                throw std::runtime_error(ERR_POLL_FAILURE);        
+        }
         for (int i = 0; i < pfd_count; i++)
         {
             int flags = fcntl(pfds[i].fd, F_GETFL, 0);
@@ -139,6 +144,8 @@ int Server::set_server(char *port, char *passwd)
                     handle_message(i);
             }
         }
-    }
+    }   
+    closeAllClientPfds();
     close(server_fd);
+    return 1;
 }

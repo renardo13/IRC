@@ -44,8 +44,11 @@ int isNickInUse(std::string nick, std::map<int, Client>& clients)
 
 void Server::nick(Client &client)
 {
+	int first_space = client.getMessage().find(' ');
+	int second_space = client.getMessage().find(' ', first_space + 1);
+	if (second_space != (int)std::string::npos)
+		sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "NICK"));
 	std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
-	// TODO - multiple parameter error
 	if (isNickInUse(nick, getClients()) == 1)
 	{
 		sendMessageToClient(client, ERR_NICKNAMEINUSE(nick));

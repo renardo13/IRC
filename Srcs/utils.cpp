@@ -114,3 +114,4 @@ bool isNickErroneous(std::string nick)
         return false;
 }
 
+

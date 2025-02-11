@@ -145,3 +145,12 @@ std::map<int, Client>::iterator Server::getClient(std::string name)
     }
     return(getClients().end());
 }
+
+void Server::closeAllClientPfds()
+{
+    std::map<int, Client>::iterator it = getClients().begin();
+    for (;it != getClients().end(); it++)
+    {
+        close(it->first);
+    }
+}
