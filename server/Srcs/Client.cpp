@@ -3,7 +3,6 @@
 
 Client::Client()
 {
-    std::cout << "A new client has been register" << std::endl;
 }
 
 Client::~Client() {}
@@ -132,15 +131,15 @@ void Client::setResMessage(std::string resMessage)
     this->resMessage = resMessage;
 }
 
-bool Client::getAdmin() const
-{
-    return (admin);
-}
+// bool Client::getAdmin() const
+// {
+//     return (admin);
+// }
 
-void Client::setAdmin(bool flag)
-{
-    admin = flag;
-}
+// void Client::setAdmin(bool flag)
+// {
+//     admin = flag;
+// }
 
 void Client::IncreaseNbChannels()
 {

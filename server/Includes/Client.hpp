@@ -55,7 +55,6 @@ public:
     std::string getHostname() const;
     std::string getMessage();
     std::string getResMessage() const;
-    bool getAdmin() const;
     int getRegisterProcess() const;
     int getNBytes() const;
     bool getIsRegistered() const;
@@ -65,7 +64,6 @@ public:
     void setNickname(std::string username);
     void setHostname(std::string username);
     void setMessage(std::string message);
-    void setAdmin(bool flag);
     void IncreaseNbChannels();
     void DecreaseNbChannels();
 

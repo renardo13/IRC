@@ -60,7 +60,7 @@ std::string Server::getClientsList(Channel &chan)
     {
         if (i != 0)
             list += ' ';
-        if ((*it) && *(*it)->getOperator(chan))
+        if ((*it)->getOperator(chan) != chan.getOperators().end())
             list += '@';
         list += (*it)->getNickname();
     }

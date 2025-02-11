@@ -95,7 +95,7 @@ int Server::topic(Client &client, Command &cmd)
 	std::string topic_str = cmd.getMsg();
 	std::vector<std::string>::iterator ch_names = cmd.getChannel().begin();
 	if (ch_names == cmd.getChannel().end())
-		return (sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "TOPIC")));
+		return (sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), cmd.getCmd())));
 	std::vector<Channel>::iterator it_ch = findValue(getChannels(),
 													 &Channel::getName, *ch_names);
 
@@ -133,7 +133,7 @@ void Server::invite(Client &client, Command &cmd)
 	}
 	if (cmd.getChannel().begin() == cmd.getChannel().end())
 	{
-		sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "INVITE"));
+		sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), cmd.getCmd()));
 		return;
 	}
 	std::string target_client_nickname = client.getMessage().substr(first_space + 1, second_space - first_space - 1);
@@ -155,12 +155,12 @@ void Server::invite(Client &client, Command &cmd)
 		sendMessageToClient(client, ERR_NOTONCHANNEL(client, it_ch->getName()));
 		return;
 	}
-	if (it_ch->isClientInChan(client) != it_ch->getClients().end())
+	if (it_ch->isClientInChan(target_client_nickname) != it_ch->getClients().end()) //WARNING
 	{
 		sendMessageToClient(client, ERR_USERONCHANNEL(client, target_client_nickname, *ch_names));
 		return;
 	}
-	sendMessageToClient(client, RPL_INVITING(client, target_client_nickname, *ch_names));
 	sendMessageToClient(*target_client, INVITE(client, target_client_nickname));
+	sendMessageToClient(client, RPL_INVITING(client, target_client_nickname, *ch_names));
 	it_ch->addClientToInviteList(target_client_nickname);
 }
