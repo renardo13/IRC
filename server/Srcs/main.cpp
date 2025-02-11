@@ -2,10 +2,12 @@
 #include "Server.hpp"
 #include <csignal>
 
+int isRunning = 0;
+
 void signalHandler(int s_num)
 {
     (void)s_num;
-    exit(0);
+    isRunning = 0;
 }
 
 int main(int ac, char **av)
@@ -16,10 +18,12 @@ int main(int ac, char **av)
     try
     {
         Server server;
+        isRunning = 1;
         server.set_server(av[1], av[2]);
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
     }
+    return 1;
 }

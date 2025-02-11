@@ -6,25 +6,19 @@ void Server::password(Client &client, std::string server_pass)
 	if (client.getRegisterProcess() == 0)
 	{
 		std::string pass = client.getMessage().substr(client.getMessage().find(' ') + 1);
-		client.setRegisterProcess(1);
-		if (pass == server_pass)
+		if (pass == client.getMessage())
 		{
-			std::string pass = client.getMessage().substr(client.getMessage().find(' ') + 1);
-			if (pass == client.getMessage())
-			{
-				sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "PASS"));
-				return;
-			}
-			client.setRegisterProcess(1);
-			if (pass == server_pass)
-			{
-				client.setRegisterProcess(1);
-			}
-			else
-			{
-				sendMessageToClient(client, ERR_PASSWDMISMATCH);
-				client.setRegisterProcess(0);
-			}
+			sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "PASS"));
+			quit(client);
+		}
+		else if (pass != server_pass)
+		{
+			sendMessageToClient(client, ERR_PASSWDMISMATCH);
+			quit(client);
+		}
+		else
+		{
+			client.setMessage("");
 		}
 	}
 	else
@@ -42,30 +36,55 @@ int isNickInUse(std::string nick, std::map<int, Client>& clients)
 	return 0;
 }
 
+std::string nicknameGenerator(std::string nickname)
+{
+	nickname += "_";
+	if (nickname.size() > 9)
+		return "";
+	else
+		return nickname;
+}
+
 void Server::nick(Client &client)
 {
+	int first_space = client.getMessage().find(' ');
+	int second_space = client.getMessage().find(' ', first_space + 1);
+	if (second_space != (int)std::string::npos)
+		sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "NICK"));
 	std::string nick = client.getMessage().substr(client.getMessage().find(' ') + 1);
-	// TODO - multiple parameter error
-	if (isNickInUse(nick, getClients()) == 1)
-	{
-		sendMessageToClient(client, ERR_NICKNAMEINUSE(nick));
-		return;
-	}
 	if (nick == client.getMessage())
 	{
 		sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "NICK"));
 		return;
 	}
-	sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
+	if (isNickInUse(nick, getClients()) == 1)
+	{
+		if (client.getRegisterProcess() == 1)
+			sendMessageToClient(client, ERR_NICKNAMEINUSE(nick));
+		else
+		{
+			std::string newNick = nicknameGenerator(nick);
+			while(isNickInUse(newNick, getClients()) == 1 && newNick != "")
+				newNick = nicknameGenerator(newNick);
+			if (newNick != "")
+				nick = newNick;
+			else
+			{
+			std::cout << "QUITTTTIN" << std::endl;
+			quit(client);
+			return;
+			}
+		}
+	}
 	client.setNickname(nick);
-	int rp = client.getRegisterProcess();
-	client.setRegisterProcess(rp + 1);
+	sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
 	client.setHostname(client.getNickname() + "!" + client.getUsername());
+	client.setMessage("");
 }
 
 void Server::user(Client &client)
 {
-	if (client.getRegisterProcess() == 2)
+	if (client.getRegisterProcess() == 0)
 	{
 		std::string raw_msg = client.getMessage();
 		int first_space = raw_msg.find(' ');
@@ -81,9 +100,9 @@ void Server::user(Client &client)
 		client.setHostname(client.getNickname() + "!" + username);
 		client.setUsername(username);
 		client.SetIsRegistered(true);
-		client.setRegisterProcess(3);
+		client.setRegisterProcess(1);
 		sendMessageToClient(client, RPL_WELCOME(client).c_str());
 	}
-	else if (client.getRegisterProcess() > 2)
+	else
 		sendMessageToClient(client, ERR_ALREADYREGISTRED);
 }

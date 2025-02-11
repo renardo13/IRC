@@ -1,6 +1,8 @@
 #include "Client.hpp"
 #include "Server.hpp"
 
+extern int isRunning;
+
 void reuse_local_address(int server_fd)
 {
     int opt = 1;
@@ -28,6 +30,7 @@ void Server::deleteClientPfd(int i)
         pfds[i] = pfds[i + 1];
         i++;
     }
+    pfd_count--;
 }
 
 void Server::handle_new_connection(int server_fd)
@@ -56,6 +59,7 @@ void Server::handle_message(int i)
 {
     char buff[512];
     std::map<int, Client>& clients = getClients();
+    int recent_pfd = pfds[i].fd;
     int nbytes = recv(pfds[i].fd, buff, 512, 0);
     clients[pfds[i].fd].setNBytes(clients[pfds[i].fd].getNBytes() + nbytes);
     if (nbytes <= 0)
@@ -85,6 +89,8 @@ void Server::handle_message(int i)
                 clients[pfds[i].fd].setResMessage(buff_str.substr(limiter + 1));
                 clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str.substr(0, limiter));
                 handle_commands(pfds[i].fd);
+                if (recent_pfd != pfds[i].fd)
+                    return;
                 buff_str = buff_str.substr(limiter + 2);
                 nCrlf = getCrlfAmount(buff_str.c_str());
             }
@@ -118,10 +124,13 @@ int Server::set_server(char *port, char *passwd)
     serverpfd.events = POLLIN;
     pfds[0] = serverpfd;
     pfd_count = 1;
-    while (1)
+    while (isRunning)
     {
         if ((poll(pfds, pfd_count, -1)) < 0)
-            throw std::runtime_error(ERR_POLL_FAILURE);        
+        {
+            if (isRunning == 1)
+                throw std::runtime_error(ERR_POLL_FAILURE);        
+        }
         for (int i = 0; i < pfd_count; i++)
         {
             int flags = fcntl(pfds[i].fd, F_GETFL, 0);
@@ -139,6 +148,8 @@ int Server::set_server(char *port, char *passwd)
                     handle_message(i);
             }
         }
-    }
+    }   
+    closeAllClientPfds();
     close(server_fd);
+    return 1;
 }

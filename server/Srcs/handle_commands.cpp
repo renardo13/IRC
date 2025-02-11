@@ -26,7 +26,10 @@ int Server::handle_commands(int fd)
 	Command cmd;
 	cmd.parseCmd(client.getMessage());
 	if (cmd.getCmd() == "PASS")
+	{
 		password(client, getPassword());
+		return 1;
+	}
 	else if (cmd.getCmd() == "PING")
 		pong(client, cmd);
 	else if (cmd.getCmd() == "JOIN")
@@ -36,7 +39,10 @@ int Server::handle_commands(int fd)
 	else if (cmd.getCmd() == "KICK")
 		kick(client, cmd);
 	else if (cmd.getCmd() == "NICK")
+	{
 		nick(client);
+		return 1;
+	}
 	else if (cmd.getCmd() == "USER")
 		user(client);
 	else if (cmd.getCmd() == "PRIVMSG")
@@ -160,7 +166,7 @@ void Server::invite(Client &client, Command &cmd)
 		sendMessageToClient(client, ERR_USERONCHANNEL(client, target_client_nickname, *ch_names));
 		return;
 	}
-	sendMessageToClient(*target_client, INVITE(client, target_client_nickname));
 	sendMessageToClient(client, RPL_INVITING(client, target_client_nickname, *ch_names));
+	sendMessageToClient(*target_client, INVITE(client, target_client_nickname, *ch_names));
 	it_ch->addClientToInviteList(target_client_nickname);
 }

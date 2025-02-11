@@ -24,7 +24,7 @@
 #define RPL_NOTOPIC(client, ch_name) (":localhost 331 " + client.getNickname() + " #" + ch_name + " :No topic is set for this channel")
 #define RPL_INVITING(client, nick, channel) (":localhost 341 " + client.getNickname() + " " + nick + " " + channel)
 /* --------------------------- Error reply command -------------------------------------- */
-
+#define ERROR(msg) ("ERROR :" + msg)
 #define ERR_UNKNOWNCOMMAND(nickname, command) (":localhost 421 " + nickname + " " + command + " :Unknown command")
 #define ERR_NEEDMOREPARAMS(nickname, cmd) (":localhost 461 " + nickname + " " + cmd + " :Not enough parameters")
 #define ERR_NOSUCHCHANNEL(nickname, channel) ":localhost 403 " + nickname + " #" + channel + " :No such channel"
@@ -54,4 +54,4 @@
 
 #define CMSG_PRIVMSG_CH(client, chname, msg) (":" + client.getNickname() + "!" + client.getHostname() + "@" + client.getHostname() + " PRIVMSG #" + chname + " :" + msg)
 #define RPL_PRIVMSG(nickname, target, msg) (":" + nickname + " PRIVMSG " + target + " :" + msg)
-#define INVITE(inviter, invited) (":" + inviter.getHostname() + "@localhost" + " INVITE " + invited)
+#define INVITE(inviter, invited, channel) (":" + inviter.getNickname() + " INVITE " + invited + " :" + channel)

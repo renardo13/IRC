@@ -61,6 +61,7 @@ public:
     int part(Client &client, Command &cmd);
     int kick(Client &client, Command &cmd);
     int set_limit(Channel &chan, Command &cmd);
+    void closeAllClientPfds();
     // int topic(Client &client, Command &cmd);
     void password(Client &client, std::string server_pass);
     void nick(Client &client);

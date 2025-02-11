@@ -67,6 +67,7 @@ std::string Server::getClientsList(Channel &chan)
     return (list);
 }
 
+
 int atoi(char *str)
 {
     std::istringstream iss(str);
@@ -113,4 +114,5 @@ bool isNickErroneous(std::string nick)
     else
         return false;
 }
+
 
