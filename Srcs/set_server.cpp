@@ -30,6 +30,7 @@ void Server::deleteClientPfd(int i)
         pfds[i] = pfds[i + 1];
         i++;
     }
+    pfd_count--;
 }
 
 void Server::handle_new_connection(int server_fd)
@@ -58,6 +59,7 @@ void Server::handle_message(int i)
 {
     char buff[512];
     std::map<int, Client>& clients = getClients();
+    int recent_pfd = pfds[i].fd;
     int nbytes = recv(pfds[i].fd, buff, 512, 0);
     clients[pfds[i].fd].setNBytes(clients[pfds[i].fd].getNBytes() + nbytes);
     if (nbytes <= 0)
@@ -87,6 +89,8 @@ void Server::handle_message(int i)
                 clients[pfds[i].fd].setResMessage(buff_str.substr(limiter + 1));
                 clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str.substr(0, limiter));
                 handle_commands(pfds[i].fd);
+                if (recent_pfd != pfds[i].fd)
+                    return;
                 buff_str = buff_str.substr(limiter + 2);
                 nCrlf = getCrlfAmount(buff_str.c_str());
             }

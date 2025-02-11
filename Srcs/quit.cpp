@@ -3,6 +3,7 @@
 
 int Server::quit(Client &client)
 {
+    sendMessageToClient(client,ERROR(std::string("Quit")));
     int tmp_pfd = client.getPfd();
 
     std::vector<Channel>::iterator chan = getChannels().begin();
@@ -41,6 +42,5 @@ int Server::quit(Client &client)
     if(tmp_pfd)
         close(tmp_pfd);
     deleteClientPfd(getPfdIndexByPfd(tmp_pfd));
-    pfd_count--;
     return 0;
 }

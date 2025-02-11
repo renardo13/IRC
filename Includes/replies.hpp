@@ -24,7 +24,7 @@
 #define RPL_NOTOPIC(client, ch_name) (":localhost 331 " + client.getNickname() + " #" + ch_name + " :No topic is set for this channel")
 #define RPL_INVITING(client, nick, channel) (":localhost 341 " + client.getNickname() + " " + nick + " " + channel)
 /* --------------------------- Error reply command -------------------------------------- */
-
+#define ERROR(msg) ("ERROR :" + msg)
 #define ERR_UNKNOWNCOMMAND(nickname, command) (":localhost 421 " + nickname + " " + command + " :Unknown command")
 #define ERR_NEEDMOREPARAMS(nickname, command) ":" + nickname + ":" + command + " :Not enough parameters given"
 #define ERR_NOSUCHCHANNEL(nickname, channel) ":localhost 403 " + nickname + " #" + channel + " :No such channel"
