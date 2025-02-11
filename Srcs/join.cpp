@@ -77,12 +77,10 @@ void Server::create_channel(Client &client, std::string chan_name)
     else
     {
         Channel channel(chan_name);
+        channel.getClients().push_back(&client);
+        channel.getOperators().push_back(&client);
+        channel.setClientLimit(MAX_CLIENTS);
         setChannel(channel);
-        getChannels().back().getClients().push_back(&client);
-        Client* admin = getChannels().back().getClients().back();
-        getChannels().back().getOperators().push_back(admin);
-        // getChannels().back().getOperators().push_back(client);
-        getChannels().back().setClientLimit(MAX_CLIENTS);
         sendMessageToClient(client, RPL_JOIN(client.getHostname(), chan_name) +
                                         RPL_NAMES(client.getNickname(), chan_name, '@' + client.getNickname()) +
                                         RPL_ENDOFNAMES(client.getNickname(), chan_name));
