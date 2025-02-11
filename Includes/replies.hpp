@@ -40,9 +40,11 @@
 #define ERR_NOSUCHNICK(nickname, target) (":localhost 401 " + nickname + " " + target + " :No such nick")
 #define ERR_NOTEXTTOSEND(client) (":localhost 412 " + client.getNickname() + " :No text to send")
 #define ERR_NORECIPIENT(client) (":localhost 411 " + client.getNickname() + " :No recipient is given")
+#define ERR_ERRONEUSNICKNAME(nick) (":localhost 432 c " + nick + " :Erroneus nickname.")
 #define ERR_NICKNAMEINUSE(nick) (":localhost 433 c " + nick + " :Nickname is already in use")
 #define ERR_PASSWDMISMATCH (":localhost 464 client :Password is incorrect")
 # define ERR_UNKNOWNMODE(nickname, char) (":localhost 472 " + nickname + " :" + char)
+#define ERR_INVITEONLYCHAN(nickname, chname) (":localhost 473 " + nickname + " #" + chname + " :Cannot join channel (+i)")
 # define ERR_NEEDMOREPARAMSMODE(nickname, mode) (":localhost 461 " + nickname + " :MODE " + mode + " Not enough parameters")
 
 #define ERR_CHANOPRIVSNEEDED(client, chname) (":localhost 482 " + client.getNickname() + " #" + chname + " :You're not channel operator")

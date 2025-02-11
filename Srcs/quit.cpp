@@ -33,7 +33,7 @@ int Server::quit(Client &client)
         if (client_it->second.getNickname() == client.getNickname())
         {
             tmp_fd = client_it->first;
-            // getClients().erase(client_it);
+            getClients().erase(client_it);
             break;
         }
         ++client_it;

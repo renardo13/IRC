@@ -106,3 +106,11 @@ int Server::getPfdIndexByPfd(int pfd)
     }
     return 0;
 }
+bool isNickErroneous(std::string nick)
+{
+    if (nick.find(' ') != std::string::npos || nick.find('@') != std::string::npos)
+        return true;
+    else
+        return false;
+}
+

@@ -33,7 +33,7 @@ class Channel
         bool getInviteOnly() const;
         int getClientLimit() const;
         bool getTopicOp() const;
-
+        bool isClientInInviteList(std::string nick);
         void setPsswd(std::string key);
         void setClients(Client& client);
         void setClientLimit(int limit);
@@ -44,4 +44,6 @@ class Channel
         std::vector<Client*>::iterator isClientInChan(Client& client);
         std::vector<Client*>::iterator isClientInChan(std::string client);
 
+        void addClientToInviteList(std::string client_nickname);
+        void removeClientFromInviteList(std::string client_nickname);
 };

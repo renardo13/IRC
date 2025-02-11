@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #define MAX_FDS 10
+
 class Client;
 class Channel;
 class Command;
@@ -72,3 +73,5 @@ public:
     std::map<int, Client>::iterator getClient(Client& client);
     std::map<int, Client>::iterator getClient(std::string client);
 };
+
+bool isNickErroneous(std::string nick);

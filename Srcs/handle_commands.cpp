@@ -162,4 +162,5 @@ void Server::invite(Client &client, Command &cmd)
 	}
 	sendMessageToClient(client, RPL_INVITING(client, target_client_nickname, *ch_names));
 	sendMessageToClient(*target_client, INVITE(client, target_client_nickname));
+	it_ch->addClientToInviteList(target_client_nickname);
 }

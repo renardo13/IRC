@@ -35,8 +35,12 @@ void Server::handle_new_connection(int server_fd)
     int new_socket = accept(server_fd, NULL, NULL);
     if (new_socket > 0)
     {
-        if (pfd_count > MAX_CLIENTS + 1)
-            throw std::runtime_error(ERR_SERVER_FULL);
+        if (pfd_count > MAX_FDS - 1)
+        {
+            send(new_socket,"Server is full.",16,0);
+            close(new_socket);
+            return ;
+        }
         Client new_client(new_socket);
         addNewClient(new_client, new_socket);
         struct pollfd new_pfd;

@@ -46,7 +46,7 @@ int Server::reach_channel(Client &client, Command &cmd, Channel &chan, std::stri
         return (sendMessageToClient(client, ERR_TOOMANYCLIENTS(client.getNickname(), chan.getName())));
     else if (client.getNbChannels() > 10)
         return (sendMessageToClient(client, ERR_TOOMANYCHANNELS(client.getNickname(), chan.getName())));
-    else if (chan.getInviteOnly())
+    else if (chan.getInviteOnly() && (chan.getInviteOnly() && !chan.isClientInInviteList(client.getNickname())))
         return (sendMessageToClient(client, INVITE_ONLY(client.getNickname(), chan.getName())));
     else if (!chan.getPsswd().empty())
     {
