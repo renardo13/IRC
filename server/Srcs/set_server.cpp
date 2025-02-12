@@ -137,11 +137,7 @@ int Server::set_server(char *port, char *passwd)
         }
         for (int i = 0; i < pfd_count; i++)
         {
-            int flags = fcntl(pfds[i].fd, F_GETFL, 0);
-            if (flags == -1) {
-                throw std::runtime_error("fcntl F_GETFL failed");
-            }
-            if (fcntl(pfds[i].fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+            if (fcntl(pfds[i].fd, F_SETFL, O_NONBLOCK) == -1) {
                 throw std::runtime_error("fcntl F_SETFL failed");
             }
             if (pfds[i].revents & (POLLIN | POLLHUP))
