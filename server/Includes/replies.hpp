@@ -26,7 +26,7 @@
 /* --------------------------- Error reply command -------------------------------------- */
 #define ERROR(msg) ("ERROR :" + msg)
 #define ERR_UNKNOWNCOMMAND(nickname, command) (":localhost 421 " + nickname + " " + command + " :Unknown command")
-#define ERR_NEEDMOREPARAMS(nickname, command) ":" + nickname + ":" + command + " :Not enough parameters given"
+#define ERR_NEEDMOREPARAMS(nickname, cmd) (":localhost 461 " + nickname + " " + cmd + " :Not enough parameters")
 #define ERR_NOSUCHCHANNEL(nickname, channel) ":localhost 403 " + nickname + " #" + channel + " :No such channel"
 #define ERR_ALREADYREGISTRED (":localhost 462 client :You may not reregister")
 #define ERR_TOOMANYCHANNELS(nickname, channel) (":localhost 405 " + nickname + " :#" + channel)
