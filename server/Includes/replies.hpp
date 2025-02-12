@@ -12,8 +12,8 @@
 #define RPL_NAMES(nickname, channel, clientslist) (": 353 " + nickname + " @ #" + channel + " :" + clientslist + "\r\n")
 #define RPL_ENDOFNAMES(nickname, channel) (": 366 " + nickname + " #" + channel + " :END of /NAMES list")
 #define RPL_KICK(nickname, username, channel, person_kicked, reason) (":" + nickname + "!~" + username + "@127.0.0.1 KICK #" + channel + " " + person_kicked + " :" + reason)
+#define QUIT(client, msg) (":" + client.getHostname() + "@localhost QUIT :Quit: " + msg)
 # define SHOW_TOPIC(hostname, channel, topic) (":" + hostname + "@127.0.0.1 TOPIC #" + channel + " :" + topic)
-
 
 // For every modes
 # define RPL_CHANGEMODE(hostname, channel, mode, args) (":" + hostname + " MODE #" + channel + " " + mode + " " + args)
@@ -52,6 +52,9 @@
 
 #define CRPL_NICKCHANGE(oldnick,newnick) (":" + oldnick + " NICK " + newnick)
 
-#define CMSG_PRIVMSG_CH(client, chname, msg) (":" + client.getNickname() + "!" + client.getHostname() + "@" + client.getHostname() + " PRIVMSG #" + chname + " :" + msg)
+#define CMSG_PRIVMSG_CH(client, chname, msg) (":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname() + " PRIVMSG #" + chname + " :" + msg)
 #define RPL_PRIVMSG(nickname, target, msg) (":" + nickname + " PRIVMSG " + target + " :" + msg)
 #define INVITE(inviter, invited, channel) (":" + inviter.getNickname() + " INVITE " + invited + " :" + channel)
+#define CRPL_PASSWORD_ERROR ("Password is wrong")
+#define CRPL_TERMINAL_LOST ("Cannot get signal from terminal")
+#define CRPLY_NICK_CHANGE_REQUIRED ("Please change your nick")

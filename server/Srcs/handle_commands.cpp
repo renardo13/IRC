@@ -50,7 +50,7 @@ int Server::handle_commands(int fd)
 	else if (cmd.getCmd() == "MODE")
 		mode(client, cmd);
 	else if (cmd.getCmd() == "QUIT")
-		return (quit(client));
+		return (quit(client, "QUIT"));
 	else if (cmd.getCmd() == "TOPIC")
 		topic(client, cmd);
 	else if (cmd.getCmd() == "INVITE")
