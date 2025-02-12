@@ -46,7 +46,10 @@
 # define ERR_UNKNOWNMODE(nickname, char) (":localhost 472 " + nickname + " :" + char)
 #define ERR_INVITEONLYCHAN(nickname, chname) (":localhost 473 " + nickname + " #" + chname + " :Cannot join channel (+i)")
 # define ERR_NEEDMOREPARAMSMODE(nickname, mode) (":localhost 461 " + nickname + " :MODE " + mode + " Not enough parameters")
-
+#define ERR_NOMOTD(client) (":localhost 422" + client.getNickname() + " :MOTD File is missing")
+#define RPL_MOTDSTART(client) (":localhost 375 " + client.getNickname() + " :- server Message of the day - ")
+#define RPL_MOTD(client, line) (":localhost 372 " + client.getNickname() + " :" + line)
+#define RPL_ENDOFMOTD(client) (":localhost 376 " + client.getNickname() + " :End of /MOTD command.")
 #define ERR_CHANOPRIVSNEEDED(client, chname) (":localhost 482 " + client.getNickname() + " #" + chname + " :You're not channel operator")
 /* --------------------------- Custom reply -------------------------------------- */
 

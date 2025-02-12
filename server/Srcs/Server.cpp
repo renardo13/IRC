@@ -4,6 +4,7 @@ Server::Server()
 {
     clients = std::map<int, Client>();
     channels = std::vector<Channel>();
+    motd_file = "/home/bince/Desktop/ft_irc_git/IRC/server/MOTD";
     pass = "";
     pfd_count = 0;
     memset(pfds, 0, sizeof(pfds));
