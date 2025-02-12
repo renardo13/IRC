@@ -72,7 +72,7 @@ void Server::handle_message(int i)
         else
             throw std::runtime_error(ERR_SOCKET_RECEIVE);
     }
-    else if (nbytes > 2)
+    else if (nbytes > 1)
     {
         buff[nbytes] = '\0';
         std::string buff_str = std::string(buff);
@@ -100,6 +100,8 @@ void Server::handle_message(int i)
         else
             clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str);
     }
+    else
+        std::cout << "bunemkk" << std::endl;
 }
 
 /* First create and fd witch a socket

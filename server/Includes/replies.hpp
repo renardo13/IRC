@@ -55,6 +55,6 @@
 #define CMSG_PRIVMSG_CH(client, chname, msg) (":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname() + " PRIVMSG #" + chname + " :" + msg)
 #define RPL_PRIVMSG(nickname, target, msg) (":" + nickname + " PRIVMSG " + target + " :" + msg)
 #define INVITE(inviter, invited, channel) (":" + inviter.getNickname() + " INVITE " + invited + " :" + channel)
-#define CRPL_PASSWORD_ERROR ("Password is wrong")
+#define CRPL_PASSWORD_ERROR ("Password is wrong, connect again.")
 #define CRPL_TERMINAL_LOST ("Cannot get signal from terminal")
 #define CRPLY_NICK_CHANGE_REQUIRED ("Please change your nick")

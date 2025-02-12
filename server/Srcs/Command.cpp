@@ -33,6 +33,8 @@ void Command::parseCmd(std::string message)
     size_t end;
 
     end = message.find_first_not_of(' ');
+    if (end == std::string::npos)
+        return ;
     size_t next_space = message.find(' ', end);
     if (next_space == std::string::npos)
         cmd = message.substr(end);
