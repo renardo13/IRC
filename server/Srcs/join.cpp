@@ -21,7 +21,6 @@ std::vector<Client*>::iterator Channel::isClientInChan(Client& client)
 {
     for(std::vector<Client*>::iterator it = getClients().begin(); it != getClients().end(); it++)
     {
-        std::cout << (*it)->getNickname() << " " << client.getNickname() << std::endl;
         if((*it)->getNickname() == client.getNickname())
             return(it);
     }
@@ -51,9 +50,9 @@ int Server::reach_channel(Client &client, Command &cmd, Channel &chan, std::stri
         return (sendMessageToClient(client, INVITE_ONLY(client.getNickname(), chan.getName())));
     else if (!chan.getPsswd().empty())
     {
-        if (cmd.getUser().empty())
+        if (cmd.getArg().empty())
             return (sendMessageToClient(client, ERR_PSSWD(client.getNickname(), chan.getName())));
-        if (cmd.getUser()[0] != chan.getPsswd())
+        if (cmd.getArg()[0] != chan.getPsswd())
             return (sendMessageToClient(client, ERR_PSSWD(client.getNickname(), chan.getName())));
     }
     client.IncreaseNbChannels();

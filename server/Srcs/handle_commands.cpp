@@ -25,6 +25,7 @@ int Server::handle_commands(int fd)
 	Client &client = getClients()[fd];
 	Command cmd;
 	cmd.parseCmd(client.getMessage());
+	std::cout << std::endl << BOLD << GREEN << "[CLIENT] => " << client.getMessage() << RESET << std::endl;
 	if (cmd.getCmd() == "PASS")
 	{
 		password(client, getPassword());
@@ -64,7 +65,7 @@ int Server::handle_commands(int fd)
 
 void Server::pong(Client &client, Command &cmd)
 {
-	sendMessageToClient(client, "PONG " + cmd.getUser()[0]);
+	sendMessageToClient(client, "PONG " + cmd.getArg()[0]);
 }
 
 int Server::part(Client &client, Command &cmd)

@@ -3,22 +3,24 @@
 
 int Server::add_operator(Client &client, Command &cmd, Channel &chan)
 {
-    if (getClient(cmd.getUser()[0]) == getClients().end())
-        return (sendMessageToClient(client, ERR_NOSUCHNICK(client.getNickname(), cmd.getUser()[0])));
-    std::vector<Client *>::iterator target = chan.isClientInChan(cmd.getUser()[0]);
+    std::string user = cmd.getArg()[0];
+    if (getClient(user) == getClients().end())
+        return (sendMessageToClient(client, ERR_NOSUCHNICK(client.getNickname(), user)));
+    std::vector<Client *>::iterator target = chan.isClientInChan(user);
     if ((*target)->getOperator(chan) == chan.getClients().end())
-        return (sendMessageToClient(client, ERR_USERNOTINCHAN2(client.getNickname(), cmd.getUser()[0], chan.getName())));
+        return (sendMessageToClient(client, ERR_USERNOTINCHAN2(client.getNickname(), user, chan.getName())));
     chan.getOperators().push_back(*target);
     return (0);
 }
 
 int Server::remove_operator(Client &client, Command &cmd, Channel &chan)
 {
-    if (getClient(cmd.getUser()[0]) == getClients().end())
-        return (sendMessageToClient(client, ERR_NOSUCHNICK(client.getNickname(), cmd.getUser()[0])));
-    std::vector<Client *>::iterator target = chan.isClientInChan(cmd.getUser()[0]);
+    std::string user = cmd.getArg()[0];
+    if (getClient(user) == getClients().end())
+        return (sendMessageToClient(client, ERR_NOSUCHNICK(client.getNickname(), user)));
+    std::vector<Client *>::iterator target = chan.isClientInChan(user);
     if ((*target)->getOperator(chan) == chan.getClients().end())
-        return (sendMessageToClient(client, ERR_USERNOTINCHAN2(client.getNickname(), cmd.getUser()[0], chan.getName())));
+        return (sendMessageToClient(client, ERR_USERNOTINCHAN2(client.getNickname(), user, chan.getName())));
     std::vector<Client *>::iterator target_op = (*target)->getOperator(chan);
     if (target_op != chan.getOperators().end())
         chan.getOperators().erase(target_op);
@@ -27,7 +29,7 @@ int Server::remove_operator(Client &client, Command &cmd, Channel &chan)
 
 int Server::set_limit(Channel &chan, Command &cmd)
 {
-    int limit = atoi(cmd.getUser()[0].c_str());
+    int limit = atoi(cmd.getArg()[0].c_str());
     if (limit <= 1)
         limit = 1;
     if (limit > 512)
@@ -46,10 +48,10 @@ int Server::mode(Client &client, Command &cmd)
 
         return (sendMessageToClient(client, ERR_NOTOPERATOR(client.getNickname(), chan->getName())));}
     std::string arg;
-    if (cmd.getUser().empty())
+    if (cmd.getArg().empty())
         arg = "";
     else
-        arg = cmd.getUser()[0];
+        arg = cmd.getArg()[0];
     std::string mode = cmd.getMode()[0];
     if (arg == "" && (mode == "+k" || mode == "+o" || mode == "-o" || mode == "+l"))
         return (sendMessageToClient(client, ERR_NEEDMOREPARAMSMODE(client.getNickname(), cmd.getMode()[0])));
@@ -70,7 +72,7 @@ int Server::mode(Client &client, Command &cmd)
     else if (cmd.getMode()[0] == "-t")
         chan->setTopicOp(false);
     else if (cmd.getMode()[0] == "+k")
-        chan->setPsswd(cmd.getUser()[0]);
+        chan->setPsswd(cmd.getArg()[0]);
     else if (cmd.getMode()[0] == "-k")
         chan->setPsswd("");
     else if (!mode.empty())

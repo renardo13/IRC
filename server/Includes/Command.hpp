@@ -8,7 +8,7 @@ class Command
     private:
         std::string cmd;
         std::vector<std::string> channel;
-        std::vector<std::string> user;
+        std::vector<std::string> arg;
         std::string msg;
         std::vector<std::string> mode;
     public:
@@ -20,8 +20,8 @@ class Command
         void parseCmd(std::string message);
 
         std::string getCmd() const {return cmd;};
-        std::vector<std::string>& getChannel() {return channel;};
-        std::vector<std::string>& getUser() {return user;};
+        std::vector<std::string> getChannel() {return channel;};
+        std::vector<std::string> getArg() {return arg;};
         std::string getMsg() const {return msg;};
         std::vector<std::string>& getMode() {return mode;};
 };
