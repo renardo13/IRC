@@ -1,9 +1,9 @@
 #include "../Includes/Server.hpp"
 #include "../Includes/replies.hpp"
 
-int Server::quit(Client &client)
+int Server::quit(Client &client, std::string msg)
 {
-    sendMessageToClient(client,ERROR(std::string("Quit")));
+    sendMessageToClient(client,ERROR(msg));
     int tmp_pfd = client.getPfd();
 
     std::vector<Channel>::iterator chan = getChannels().begin();
