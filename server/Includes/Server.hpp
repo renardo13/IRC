@@ -4,6 +4,7 @@
 #include <map>
 #include "Channel.hpp"
 #include <stdio.h>
+#include <fstream>
 
 #define MAX_FDS 10
 
@@ -17,6 +18,7 @@ private:
     std::map<int, Client> clients;
     std::vector<Channel> channels;
     std::string pass;
+    std::string motd_file;
     struct pollfd pfds[MAX_FDS];
     int pfd_count;
 
@@ -67,9 +69,10 @@ public:
     void nick(Client &client);
     void user(Client &client);
     void privmsg(Client &client, Command &cmd);
-    int quit(Client &client);
+    int quit(Client &client, std::string msg);
     int topic(Client &client, Command &cmd);
     void invite(Client &client, Command &cmd);
+    void motd(Client &client);
     std::vector<Channel>::iterator isChannelInServer(std::string chan);
     std::map<int, Client>::iterator getClient(Client& client);
     std::map<int, Client>::iterator getClient(std::string client);

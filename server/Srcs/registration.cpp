@@ -9,17 +9,16 @@ void Server::password(Client &client, std::string server_pass)
 		if (pass == client.getMessage())
 		{
 			sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "PASS"));
-			quit(client);
+			quit(client,CRPL_PASSWORD_ERROR);
 		}
 		else if (pass != server_pass)
 		{
 			sendMessageToClient(client, ERR_PASSWDMISMATCH);
-			quit(client);
+			quit(client, CRPL_PASSWORD_ERROR);
 		}
 		else
-		{
 			client.setMessage("");
-		}
+		client.setIsPasswordCorrect(true);
 	}
 	else
 		sendMessageToClient(client, ERR_ALREADYREGISTRED);
@@ -55,12 +54,23 @@ void Server::nick(Client &client)
 	if (nick == client.getMessage())
 	{
 		sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "NICK"));
+		client.setMessage("");
 		return;
+	}
+	if (isNickErroneous(nick))
+	{
+		sendMessageToClient(client, ERR_ERRONEUSNICKNAME(nick));
+		client.setMessage("");
+		return ;
 	}
 	if (isNickInUse(nick, getClients()) == 1)
 	{
 		if (client.getRegisterProcess() == 1)
+		{
 			sendMessageToClient(client, ERR_NICKNAMEINUSE(nick));
+			client.setMessage("");
+			return ;
+		}
 		else
 		{
 			std::string newNick = nicknameGenerator(nick);
@@ -70,14 +80,13 @@ void Server::nick(Client &client)
 				nick = newNick;
 			else
 			{
-			std::cout << "QUITTTTIN" << std::endl;
-			quit(client);
-			return;
+				quit(client, CRPLY_NICK_CHANGE_REQUIRED);
+				return;
 			}
 		}
 	}
-	client.setNickname(nick);
 	sendMessageToClient(client, CRPL_NICKCHANGE(client.getNickname(), nick));
+	client.setNickname(nick);
 	client.setHostname(client.getNickname() + "!" + client.getUsername());
 	client.setMessage("");
 }

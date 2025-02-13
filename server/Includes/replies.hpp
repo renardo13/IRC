@@ -12,8 +12,8 @@
 #define RPL_NAMES(nickname, channel, clientslist) (": 353 " + nickname + " @ #" + channel + " :" + clientslist + "\r\n")
 #define RPL_ENDOFNAMES(nickname, channel) (": 366 " + nickname + " #" + channel + " :END of /NAMES list")
 #define RPL_KICK(nickname, username, channel, person_kicked, reason) (":" + nickname + "!~" + username + "@127.0.0.1 KICK #" + channel + " " + person_kicked + " :" + reason)
+#define QUIT(client, msg) (":" + client.getHostname() + "@localhost QUIT :Quit: " + msg)
 # define SHOW_TOPIC(hostname, channel, topic) (":" + hostname + "@127.0.0.1 TOPIC #" + channel + " :" + topic)
-
 
 // For every modes
 # define RPL_CHANGEMODE(hostname, channel, mode, args) (":" + hostname + " MODE #" + channel + " " + mode + " " + args)
@@ -46,12 +46,18 @@
 # define ERR_UNKNOWNMODE(nickname, char) (":localhost 472 " + nickname + " :" + char)
 #define ERR_INVITEONLYCHAN(nickname, chname) (":localhost 473 " + nickname + " #" + chname + " :Cannot join channel (+i)")
 # define ERR_NEEDMOREPARAMSMODE(nickname, mode) (":localhost 461 " + nickname + " :MODE " + mode + " Not enough parameters")
-
+#define ERR_NOMOTD(client) (":localhost 422 " + client.getNickname() + " :MOTD File is missing")
+#define RPL_MOTDSTART(client) (":localhost 375 " + client.getNickname() + " :- server Message of the day - ")
+#define RPL_MOTD(client, line) (":localhost 372 " + client.getNickname() + " :" + line)
+#define RPL_ENDOFMOTD(client) (":localhost 376 " + client.getNickname() + " :End of /MOTD command.")
 #define ERR_CHANOPRIVSNEEDED(client, chname) (":localhost 482 " + client.getNickname() + " #" + chname + " :You're not channel operator")
 /* --------------------------- Custom reply -------------------------------------- */
 
 #define CRPL_NICKCHANGE(oldnick,newnick) (":" + oldnick + " NICK " + newnick)
 
-#define CMSG_PRIVMSG_CH(client, chname, msg) (":" + client.getNickname() + "!" + client.getHostname() + "@" + client.getHostname() + " PRIVMSG #" + chname + " :" + msg)
+#define CMSG_PRIVMSG_CH(client, chname, msg) (":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname() + " PRIVMSG #" + chname + " :" + msg)
 #define RPL_PRIVMSG(nickname, target, msg) (":" + nickname + " PRIVMSG " + target + " :" + msg)
 #define INVITE(inviter, invited, channel) (":" + inviter.getNickname() + " INVITE " + invited + " :" + channel)
+#define CRPL_PASSWORD_ERROR ("Password is wrong, connect again.")
+#define CRPL_TERMINAL_LOST ("Cannot get signal from terminal")
+#define CRPLY_NICK_CHANGE_REQUIRED ("Please change your nick")

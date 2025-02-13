@@ -1,9 +1,17 @@
 #include "../Includes/Server.hpp"
 #include "../Includes/replies.hpp"
 
-int Server::quit(Client &client)
+int Server::quit(Client &client, std::string msg)
 {
-    sendMessageToClient(client,ERROR(std::string("Quit")));
+    sendMessageToClient(client,ERROR(msg));
+    std::string msgval = client.getMessage().substr(client.getMessage().find(':') + 1);
+	if (msgval == client.getMessage())
+	{
+        if (msg == CRPL_TERMINAL_LOST)
+    	    msgval = "Client's terminal sent close signal";
+        else
+    	    msgval = "leaving";
+    }
     int tmp_pfd = client.getPfd();
 
     std::vector<Channel>::iterator chan = getChannels().begin();
@@ -17,9 +25,14 @@ int Server::quit(Client &client)
             if ((*chan_client)->getNickname() == client.getNickname())
             {
                 chan->getClients().erase(chan_client);
+                std::vector<Client *>::iterator client_op = client.getOperator(*chan);
+	            if (client_op != chan->getOperators().end())
+		            chan->getOperators().erase(client_op);  
                 client_found = true;
                 break;
             }
+            else
+                sendMessageToClient(**chan_client, QUIT(client,msgval));
             ++chan_client;
         }
         if (client_found && chan->getClients().empty())
