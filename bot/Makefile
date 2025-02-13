@@ -4,7 +4,7 @@ SRCDIR = Srcs
 INCDIR = Includes
 OBJDIR = objs
 
-SRCS = main.cpp Bot.cpp
+SRCS = main.cpp Bot.cpp ../../server/Srcs/Command.cpp
 OBJS = $(addprefix $(OBJDIR)/, $(SRCS:.cpp=.o))
 DEPS = $(OBJS:.o=.d)
 
