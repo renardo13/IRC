@@ -65,10 +65,7 @@ void Server::handle_message(int i)
     if (nbytes <= 0)
     {
         if (nbytes == 0)
-        {
-            std::cout << "connection closed, client is removed";
             quit(clients.find(pfds[i].fd)->second, CRPL_TERMINAL_LOST);
-        }
         else
             throw std::runtime_error(ERR_SOCKET_RECEIVE);
     }
@@ -87,7 +84,6 @@ void Server::handle_message(int i)
                 if (clients[pfds[i].fd].getMessage().size() > 510)
                 {
                     clients[pfds[i].fd].setMessage("");
-                    std::cout << "LONGA MSG" << std::endl;
                     return ;
                 }
                 handle_commands(pfds[i].fd);
@@ -100,8 +96,6 @@ void Server::handle_message(int i)
         else
             clients[pfds[i].fd].setMessage(clients[pfds[i].fd].getMessage() + buff_str);
     }
-    else
-        std::cout << "bunemkk" << std::endl;
 }
 
 /* First create and fd witch a socket

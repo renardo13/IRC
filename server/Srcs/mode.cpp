@@ -44,9 +44,7 @@ int Server::mode(Client &client, Command &cmd)
         return (-1);
     std::vector<Channel>::iterator chan = isChannelInServer(cmd.getChannel()[0]);
     if (client.getOperator(*chan) == chan->getOperators().end() && chan->getTopicOp())
-		{std::cout << "Not op in mode\n";
-
-        return (sendMessageToClient(client, ERR_NOTOPERATOR(client.getNickname(), chan->getName())));}
+        return (sendMessageToClient(client, ERR_NOTOPERATOR(client.getNickname(), chan->getName())));
     std::string arg;
     if (cmd.getArg().empty())
         arg = "";

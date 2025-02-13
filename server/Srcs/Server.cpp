@@ -4,7 +4,7 @@ Server::Server()
 {
     clients = std::map<int, Client>();
     channels = std::vector<Channel>();
-    motd_file = "server/MOTD";
+    motd_file = "./MOTD";
     pass = "";
     pfd_count = 0;
     memset(pfds, 0, sizeof(pfds));
@@ -46,44 +46,6 @@ std::vector<Channel> &Server::getChannels()
 void Server::setClients(std::map<int, Client> &clients)
 {
     this->clients = clients;
-}
-
-void Server::print()
-{
-    std::map<int, Client>::iterator it = getClients().begin();
-
-    for (int i = 1; it != getClients().end(); it++)
-    {
-        std::cout << std::string(40, '_');
-        std::cout << "\nClient " << i << std::endl;
-        i++;
-    }
-
-    std::vector<Channel>::iterator ite = getChannels().begin();
-    for (int i = 1; ite != getChannels().end(); ite++, i++)
-    {
-        if (i == 1)
-            std::cout << "\n- Channels list -\n";
-        std::cout << "Chan " << i << " : " << ite->getName() << std::endl;
-        std::vector<Client*>::iterator client_it = ite->getClients().begin();
-        for (; client_it != ite->getClients().end(); client_it++)
-        {
-            std::cout << "    - " << (*client_it)->getNickname();
-            // std::vector<std::string>::iterator admin = ite->getOperators().begin();
-
-            // for (; admin != ite->getOperators().end(); admin++)
-            // {
-                // if (admin == client_it->getNickname())
-                // {
-                //     std::cout << " -> operator";
-                //     break;
-                // }
-            // }
-            std::cout << std::endl;
-        }
-    }
-
-    std::cout << std::string(40, '*') << std::endl;
 }
 
 void Server::addNewClient(Client &client, int fd)

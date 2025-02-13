@@ -36,7 +36,6 @@ public:
     void setClients(std::map<int, Client> &clients);
 
     int set_server(char *port, char *passwd);
-    void print();
     void addNewClient(Client &client, int fd);
     int sendMessageToClient(Client &client, std::string msg);
     int sendMessageToEveryone(std::string msg, std::string chan);

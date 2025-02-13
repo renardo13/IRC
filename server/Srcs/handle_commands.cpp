@@ -35,7 +35,7 @@ int Server::handle_commands(int fd)
 	{
 		if (cmd.getCmd() == "PING")
 			pong(client, cmd);
-		else if (cmd.getCmd() == "JOIN")
+		else if (cmd.getCmd() == "JOIN" && client.getNickname() != "")
 			join(client, cmd);
 		else if (cmd.getCmd() == "PART")
 			part(client, cmd);
@@ -45,7 +45,7 @@ int Server::handle_commands(int fd)
 			return(nick(client), 1);
 		else if (cmd.getCmd() == "USER")
 			user(client);
-		else if (cmd.getCmd() == "PRIVMSG")
+		else if (cmd.getCmd() == "PRIVMSG" && client.getNickname() != "")
 			privmsg(client, cmd);
 		else if (cmd.getCmd() == "MODE")
 			mode(client, cmd);
@@ -61,7 +61,7 @@ int Server::handle_commands(int fd)
 			sendMessageToClient(client, ERR_UNKNOWNCOMMAND(client.getNickname(), cmd.getCmd()));
 	}
 	else
-		sendMessageToClient(client, "Please enter the password before start using the server's commands.");
+		sendMessageToClient(client, "Please enter the password and nick before start using the server's commands.");
 
 	client.setMessage("");
 	client.setNBytes(0);
