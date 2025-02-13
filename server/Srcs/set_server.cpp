@@ -140,7 +140,7 @@ int Server::set_server(char *port, char *passwd)
             if (fcntl(pfds[i].fd, F_SETFL, O_NONBLOCK) == -1) {
                 throw std::runtime_error("fcntl F_SETFL failed");
             }
-            if (pfds[i].revents & (POLLIN | POLLHUP))
+            if (isRunning == 1 && (pfds[i].revents & (POLLIN | POLLHUP)))
             {
                 if (pfds[i].fd == server_fd)
                     handle_new_connection(server_fd);
