@@ -68,25 +68,5 @@ void Command::parseCmd(std::string message)
             break;
         }
     }
-    std::cout << std::endl << "Command : " << cmd;
-    std::cout << std::endl << "Mode : ";
-    for (std::vector<std::string>::iterator mod = mode.begin(); mod != mode.end(); mod++)
-    {
-        std::cout << *mod << ", ";
-    }
-    std::cout << std::endl;
-    std::cout << "Channel : ";
-    for (std::vector<std::string>::iterator channel = this->channel.begin(); channel != this->channel.end(); channel++)
-    {
-        std::cout << *channel << ", ";
-    }
-    std::cout << std::endl;
-    std::cout << "Arg : ";
-    for (std::vector<std::string>::iterator use = arg.begin(); use != arg.end(); use++)
-    {
-        std::cout << *use  << ", ";
-    }
-    std::cout << std::endl;
-    std::cout << "Message in command : " << msg << std::endl;
 }
 
