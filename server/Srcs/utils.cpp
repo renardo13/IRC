@@ -107,11 +107,21 @@ int Server::getPfdIndexByPfd(int pfd)
     }
     return 0;
 }
+
+bool isStrAlnum(std::string str)
+{
+    int i = 0;
+    while (str[i])
+    {
+        if (!isalnum(str[i]))
+            return false;
+        i++;
+    }
+    return true;
+}
+
 bool isNickErroneous(std::string nick)
 {
-    if (nick.find(' ') != std::string::npos || nick.find('@') != std::string::npos || nick == "")
-        return true;
-    else
-        return false;
+    return (nick.find(' ') != std::string::npos || nick.find('@') != std::string::npos || nick == "" || !isStrAlnum(nick));
 }
 
