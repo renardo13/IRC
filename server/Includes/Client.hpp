@@ -37,6 +37,7 @@ private:
     std::string nickname;
     std::string hostname;
     bool isRegistered;
+    bool isPasswordCorrect;
     int register_process;
     bool admin;
     int nb_channels;
@@ -58,6 +59,7 @@ public:
     int getRegisterProcess() const;
     int getNBytes() const;
     bool getIsRegistered() const;
+    bool getIsPasswordCorrect() const;
     std::vector<Client*>::iterator getOperator(Channel& chan);
     std::vector<Client*>::iterator getOperator(Channel &channel, std::string name);
     void setUsername(std::string username);
@@ -68,6 +70,7 @@ public:
     void DecreaseNbChannels();
 
     void SetIsRegistered(bool status);
+    void setIsPasswordCorrect(bool status);
     void setNBytes(int);
     void setResMessage(std::string resMessage);
     void setRegisterProcess(int rp);

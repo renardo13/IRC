@@ -15,7 +15,8 @@ Client::Client(int pfd) : pfd(pfd)
     username = "";
     nickname = "";
     hostname = "";
-    isRegistered = "";
+    isRegistered = false;
+    isPasswordCorrect = false;
     admin = "";
     register_process = 0;
     nb_channels = 0;
@@ -37,6 +38,7 @@ Client const &Client::operator=(Client const &obj)
     this->message = obj.message;
     this->resMessage = obj.resMessage;
     this->isRegistered = obj.isRegistered;
+    this->isPasswordCorrect = obj.isPasswordCorrect;
     this->username = obj.username;
     this->hostname = obj.hostname;
     this->nickname = obj.nickname;
@@ -176,4 +178,13 @@ std::vector<Client*>::iterator Client::getOperator(Channel &channel, std::string
 void Client::setRegisterProcess(int rp)
 {
     this->register_process = rp;
+}
+
+void Client::setIsPasswordCorrect(bool status)
+{
+    this->isPasswordCorrect = status;
+}
+bool Client::getIsPasswordCorrect() const
+{
+    return this->isPasswordCorrect;
 }

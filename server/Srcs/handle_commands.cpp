@@ -30,35 +30,41 @@ int Server::handle_commands(int fd)
 		password(client, getPassword());
 		return 1;
 	}
-	else if (cmd.getCmd() == "PING")
-		pong(client, cmd);
-	else if (cmd.getCmd() == "JOIN")
-		join(client, cmd);
-	else if (cmd.getCmd() == "PART")
-		part(client, cmd);
-	else if (cmd.getCmd() == "KICK")
-		kick(client, cmd);
-	else if (cmd.getCmd() == "NICK")
+	else if (client.getIsPasswordCorrect())
 	{
-		nick(client);
-		return 1;
+		if (cmd.getCmd() == "PING")
+			pong(client, cmd);
+		else if (cmd.getCmd() == "JOIN")
+			join(client, cmd);
+		else if (cmd.getCmd() == "PART")
+			part(client, cmd);
+		else if (cmd.getCmd() == "KICK")
+			kick(client, cmd);
+		else if (cmd.getCmd() == "NICK")
+		{
+			nick(client);
+			return 1;
+		}
+		else if (cmd.getCmd() == "USER")
+			user(client);
+		else if (cmd.getCmd() == "PRIVMSG")
+			privmsg(client, cmd);
+		else if (cmd.getCmd() == "MODE")
+			mode(client, cmd);
+		else if (cmd.getCmd() == "QUIT")
+			return (quit(client, "QUIT"));
+		else if (cmd.getCmd() == "TOPIC")
+			topic(client, cmd);
+		else if (cmd.getCmd() == "INVITE")
+			invite(client, cmd);
+		else if (cmd.getCmd() == "motd")
+			motd(client);
+		else if (cmd.getCmd() != "CAP" && cmd.getCmd() != "WHOIS" && cmd.getCmd() != "WHO")
+			sendMessageToClient(client, ERR_UNKNOWNCOMMAND(client.getNickname(), cmd.getCmd()));
 	}
-	else if (cmd.getCmd() == "USER")
-		user(client);
-	else if (cmd.getCmd() == "PRIVMSG")
-		privmsg(client, cmd);
-	else if (cmd.getCmd() == "MODE")
-		mode(client, cmd);
-	else if (cmd.getCmd() == "QUIT")
-		return (quit(client, "QUIT"));
-	else if (cmd.getCmd() == "TOPIC")
-		topic(client, cmd);
-	else if (cmd.getCmd() == "INVITE")
-		invite(client, cmd);
-	else if (cmd.getCmd() == "motd")
-		motd(client);
-	else if (cmd.getCmd() != "CAP" && cmd.getCmd() != "WHOIS" && cmd.getCmd() != "WHO")
-		sendMessageToClient(client, ERR_UNKNOWNCOMMAND(client.getNickname(), cmd.getCmd()));
+	else
+		sendMessageToClient(client, "Please enter the password before start using the server's commands.");
+
 	client.setMessage("");
 	client.setNBytes(0);
 	return (0);
