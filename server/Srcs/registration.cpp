@@ -15,9 +15,9 @@ void Server::password(Client &client, std::string server_pass)
 		{
 			sendMessageToClient(client, ERR_PASSWDMISMATCH);
 			quit(client, CRPL_PASSWORD_ERROR);
+			return ;
 		}
-		else
-			client.setMessage("");
+		client.setMessage("");
 		client.setIsPasswordCorrect(true);
 	}
 	else
