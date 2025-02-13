@@ -16,28 +16,6 @@ typename Container::iterator findValue(Container &container,
 	return (container.end());
 }
 
-
-std::vector<Client*>::iterator Channel::isClientInChan(Client& client)
-{
-    for(std::vector<Client*>::iterator it = getClients().begin(); it != getClients().end(); it++)
-    {
-        if((*it)->getNickname() == client.getNickname())
-            return(it);
-    }
-    return(getClients().end());
-}
-
-
-std::vector<Client*>::iterator Channel::isClientInChan(std::string name)
-{
-    for(std::vector<Client*>::iterator it = getClients().begin(); it != getClients().end(); it++)
-    {
-        if((*it)->getNickname() == name)
-            return(it);
-    }
-    return(getClients().end());
-}
-
 int Server::reach_channel(Client &client, Command &cmd, Channel &chan, std::string chan_name)
 {
     if (chan.isClientInChan(client) != chan.getClients().end())

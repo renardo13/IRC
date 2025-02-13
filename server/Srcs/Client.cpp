@@ -133,16 +133,6 @@ void Client::setResMessage(std::string resMessage)
     this->resMessage = resMessage;
 }
 
-// bool Client::getAdmin() const
-// {
-//     return (admin);
-// }
-
-// void Client::setAdmin(bool flag)
-// {
-//     admin = flag;
-// }
-
 void Client::IncreaseNbChannels()
 {
     this->nb_channels++;

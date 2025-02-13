@@ -1,20 +1,11 @@
 #include "../Includes/Client.hpp"
 #include <sstream>
-#include <stdio.h>
 
-// Generic function to find a value of a certain type in a certain container type. ("::Value_type" is the type of elements that the container store)
-template <typename Container, typename AttributeType,
-          typename Value>
-typename Container::value_type *findValue(Container &container,
-                                          AttributeType (Container::value_type::*getter)() const, const Value value)
+void Server::sendMessageToEveryClientInChannel(std::string msg, Channel &channel)
 {
-    typename Container::iterator it = container.begin();
-    for (; it != container.end(); it++)
-    {
-        if (((*it).*getter)() == value)
-            return (&(*it));
-    }
-    return (NULL);
+	std::vector<Client *>::iterator client_it = channel.getClients().begin();
+	for (; client_it != channel.getClients().end(); client_it++)
+		sendMessageToClient(*(*client_it), msg);
 }
 
 int Server::sendMessageToEveryone(std::string msg, std::string chan_name)
@@ -125,3 +116,23 @@ bool isNickErroneous(std::string nick)
     return (nick.find(' ') != std::string::npos || nick.find('@') != std::string::npos || nick == "" || !isStrAlnum(nick));
 }
 
+std::vector<Client*>::iterator Channel::isClientInChan(Client& client)
+{
+    for(std::vector<Client*>::iterator it = getClients().begin(); it != getClients().end(); it++)
+    {
+        if((*it)->getNickname() == client.getNickname())
+            return(it);
+    }
+    return(getClients().end());
+}
+
+
+std::vector<Client*>::iterator Channel::isClientInChan(std::string name)
+{
+    for(std::vector<Client*>::iterator it = getClients().begin(); it != getClients().end(); it++)
+    {
+        if((*it)->getNickname() == name)
+            return(it);
+    }
+    return(getClients().end());
+}
