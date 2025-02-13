@@ -3,7 +3,7 @@
 
 /* No need to user NONBLOCKANT flag because we use poll that allows us to know when datas are received */
 
-Bot::Bot(int port, std::string channel, std::string psswd) : port(port), channel(channel), psswd(psswd), name("Julia"), admin(false), start(0)
+Bot::Bot(int port, std::string channel, std::string psswd) : port(port), channel(channel), psswd(psswd), name("Julia")
 {
     srand(time(0));
     memset(&server_addr, 0, sizeof(server_addr));
@@ -93,32 +93,11 @@ void Bot::play(std::string user)
     bot_point = 0;
 }
 
-bool Bot::amIAdmin(std::string buffer)
-{
-    int i = 0;
-    while (buffer[i])
-    {
-        if (buffer[i] == '@' && buffer[i - 1] == ':')
-        {
-            std::cout << "HLOOOOO" << "{" << buffer[i + name.size()] << "}\n";
-            std::string admin = buffer.substr(i + 1, buffer.find('\n', i + 1) - i);
-            admin = admin.substr(0, admin.size() - 2);
-
-            if (admin == name && buffer[i + name.size()] == '\n')
-            {
-                std::cout << "JE SUIS ADMIN\n";
-                return (true);
-            }
-            break;
-        }
-        i++;
-    }
-    return (false);
-}
-
-void Bot::parseServMsg(std::string buffer)
+int Bot::parseServMsg(std::string buffer)
 {
     Command cmd;
+    if (buffer.empty())
+        return(-1);
     cmd.parseCmd(buffer);
     std::string command = cmd.getArg()[0];
     std::string user = "";
@@ -127,14 +106,6 @@ void Bot::parseServMsg(std::string buffer)
         user = cmd.getCmd().substr(1, cmd.getCmd().find("!") - 1);
         if (user != name)
             sendMsgToServer(RPL_IN_CHAN(channel, "Welcome " + user + " please, play with me ! Type PLAY to play with me 🤗🤗"));
-    }
-    else if (command == "MODE")
-    {
-        user = cmd.getArg()[1].substr(0, cmd.getArg()[1].size() - 2);
-        if (cmd.getMode()[0] == "+o" && user == name)
-            admin = true;
-        if (cmd.getMode()[0] == "-o" && user == name)
-            admin = false;
     }
     else if (!cmd.getMsg().empty() && cmd.getMsg().substr(0, cmd.getMsg().size() - 2) == "PLAY")
     {
@@ -147,6 +118,7 @@ void Bot::parseServMsg(std::string buffer)
             play(user);
         }
     }
+    return(0);
 }
 
 void Bot::getMessages()
@@ -158,7 +130,7 @@ void Bot::getMessages()
     {
         ret = poll(fds, 1, 100000);
         if (g_sigint)
-                break;
+            break;
         if (ret == 0)
             continue;
         if (ret == -1)
@@ -169,11 +141,13 @@ void Bot::getMessages()
             if (nbytes == -1)
                 throw std::runtime_error("Error while receiving data from server");
             buffer[nbytes] = '\0';
-            std::cout << std::endl
+            if(buffer[0])
+                std::cout << std::endl
                       << BOLD << RED << "[SERVER] => " << buffer << RESET;
-            parseServMsg(buffer);
+            if (parseServMsg(buffer) == -1)
+                break;
         }
-    } 
+    }
     sendMsgToServer("QUIT :leaving");
     close(pfd);
 }

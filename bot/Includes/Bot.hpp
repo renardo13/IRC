@@ -33,11 +33,8 @@ class Bot
         std::string psswd;
         std::string name;
         std::string serv_msg;
-        bool admin;
-        bool play_mode;
         int adversary_point;
         int bot_point;
-        int start;
     public:
         Bot(int port, std::string channel, std::string psswd);
         ~Bot();
@@ -48,9 +45,7 @@ class Bot
         void connectToServer();
         void getMessages();
         void play(std::string user);
-        void parseServMsg(std::string buffer);
-        bool amIAdmin(std::string buffer);
+        int parseServMsg(std::string buffer);
         std::string randomChoice();
         void dual(std::string command);
-        bool isOpenedSocket(int socket);
 };
