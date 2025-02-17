@@ -136,3 +136,17 @@ std::vector<Client*>::iterator Channel::isClientInChan(std::string name)
     }
     return(getClients().end());
 }
+
+bool passwordCheck(std::string pass)
+{
+    if (pass.empty())
+        return false;
+    int i = 0;
+    while (pass[i])
+    {
+        if (isspace(pass[i]) || !isalnum(pass[i]))
+            return false;
+        i++;
+    }
+    return true;
+}

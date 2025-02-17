@@ -82,3 +82,4 @@ public:
 int atoi(char *str);
 std::string toStdString(char *str);
 std::string getRealNickname(std::string nick);
+bool passwordCheck(std::string pass);
