@@ -67,7 +67,7 @@ public:
     void password(Client &client, std::string server_pass);
     void nick(Client &client);
     void user(Client &client);
-    void privmsg(Client &client, Command &cmd);
+    int privmsg(Client &client, Command &cmd);
     int quit(Client &client, std::string msg);
     int topic(Client &client, Command &cmd);
     void invite(Client &client, Command &cmd);

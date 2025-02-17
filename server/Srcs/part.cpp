@@ -19,6 +19,8 @@ typename Container::iterator findValue(Container &container,
 
 int Server::part(Client &client, Command &cmd)
 {
+	if(cmd.getChannel().empty())
+		return (sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), cmd.getCmd())));
 	std::vector<Channel>::iterator chan = findValue(getChannels(),
 													&Channel::getName, cmd.getChannel()[0]);
 	if (chan == getChannels().end())

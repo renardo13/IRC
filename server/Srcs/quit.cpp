@@ -3,7 +3,10 @@
 
 int Server::quit(Client &client, std::string msg)
 {
-    sendMessageToClient(client,ERROR(msg));
+    std::vector<Channel>::iterator chan = getChannels().begin();
+    if (chan->isClientInChan(client) == chan->getClients().end())
+        return (sendMessageToClient(client, ERR_NOTONCHANNEL(client, chan->getName())));
+    sendMessageToClient(client, ERROR(msg));
     std::string msgval = client.getMessage().substr(client.getMessage().find(':') + 1);
 	if (msgval == client.getMessage())
 	{
@@ -14,7 +17,6 @@ int Server::quit(Client &client, std::string msg)
     }
     int tmp_pfd = client.getPfd();
 
-    std::vector<Channel>::iterator chan = getChannels().begin();
     while (chan != getChannels().end())
     {
         std::vector<Client*>::iterator chan_client = chan->getClients().begin();

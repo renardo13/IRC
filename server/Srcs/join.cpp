@@ -3,27 +3,27 @@
 
 // Generic function to find a value of a certain type in a certain container type. ("::Value_type" is the type of elements that the container store)
 template <typename Container, typename AttributeType,
-		  typename Value>
+          typename Value>
 typename Container::iterator findValue(Container &container,
-									   AttributeType (Container::value_type::*getter)() const, const Value value)
+                                       AttributeType (Container::value_type::*getter)() const, const Value value)
 {
-	typename Container::iterator it = container.begin();
-	for (; it != container.end(); it++)
-	{
-		if (((*it).*getter)() == value)
-			return (it);
-	}
-	return (container.end());
+    typename Container::iterator it = container.begin();
+    for (; it != container.end(); it++)
+    {
+        if (((*it).*getter)() == value)
+            return (it);
+    }
+    return (container.end());
 }
 
 int Server::reach_channel(Client &client, Command &cmd, Channel &chan, std::string chan_name)
 {
     if (chan.isClientInChan(client) != chan.getClients().end())
         return (0);
-    if ((int)chan.getClients().size() >= chan.getClientLimit())
-        return (sendMessageToClient(client, ERR_TOOMANYCLIENTS(client.getNickname(), chan.getName())));
     else if (client.getNbChannels() > 10)
         return (sendMessageToClient(client, ERR_TOOMANYCHANNELS(client.getNickname(), chan.getName())));
+    else if ((int)chan.getClients().size() >= chan.getClientLimit())
+        return (sendMessageToClient(client, ERR_TOOMANYCLIENTS(client.getNickname(), chan.getName())));
     else if (chan.getInviteOnly() && (chan.getInviteOnly() && !chan.isClientInInviteList(client.getNickname())))
         return (sendMessageToClient(client, INVITE_ONLY(client.getNickname(), chan.getName())));
     else if (!chan.getPsswd().empty())
@@ -68,12 +68,12 @@ void Server::create_channel(Client &client, std::string chan_name)
 
 std::vector<Channel>::iterator Server::isChannelInServer(std::string chan)
 {
-    for(std::vector<Channel>::iterator it = getChannels().begin(); it != getChannels().end(); it++)
+    for (std::vector<Channel>::iterator it = getChannels().begin(); it != getChannels().end(); it++)
     {
-        if(it->getName() == chan)
-            return(it);
+        if (it->getName() == chan)
+            return (it);
     }
-    return(getChannels().end());
+    return (getChannels().end());
 }
 
 int Server::join(Client &client, Command &cmd)
@@ -83,8 +83,8 @@ int Server::join(Client &client, Command &cmd)
     std::vector<std::string>::iterator chan_name = cmd.getChannel().begin();
     for (; chan_name != cmd.getChannel().end(); chan_name++)
     {
-        std::vector<Channel>::iterator chan = findValue(getChannels(), &Channel::getName, cmd.getChannel()[0]);
-        if(chan != getChannels().end())
+        std::vector<Channel>::iterator chan = findValue(getChannels(), &Channel::getName, *chan_name);
+        if (chan != getChannels().end())
             reach_channel(client, cmd, *chan, *chan_name);
         else
             create_channel(client, *chan_name);

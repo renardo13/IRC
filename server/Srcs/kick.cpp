@@ -20,8 +20,17 @@ typename Container::iterator findValue(Container &container,
 
 int Server::kick(Client &client, Command &cmd)
 {
-    std::string user = cmd.getArg()[0];
+    if(cmd.getChannel().empty() || cmd.getArg().empty())
+        return(sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), cmd.getCmd())));
+    if(getChannels().empty())
+        return(sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), cmd.getChannel()[0])));
     std::vector<Channel>::iterator chan = findValue(getChannels(), &Channel::getName, cmd.getChannel()[0]);
+    if(chan == getChannels().end())
+        return(sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), cmd.getChannel()[0])));
+    std::vector<Client*>::iterator client_it = chan->isClientInChan(client);
+    if (client_it == chan->getClients().end())
+		return(sendMessageToClient(client, ERR_NOTONCHANNEL(client, chan->getName())));
+    std::string user = cmd.getArg()[0];
     if (client.getOperator(*chan) == chan->getOperators().end())
         return (sendMessageToClient(client, ERR_NOTOPERATOR(client.getNickname(), chan->getName())));
     std::map<int, Client>::iterator clients_in_serv = getClient(user);

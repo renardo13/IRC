@@ -4,7 +4,7 @@ SRCDIR = Srcs
 INCDIR = Includes
 OBJDIR = objs
 
-SRCS = main.cpp Client.cpp set_server.cpp utils.cpp msgUtils.cpp join.cpp \
+SRCS = main.cpp Client.cpp set_server.cpp utils.cpp join.cpp \
 handle_commands.cpp Server.cpp Channel.cpp Command.cpp mode.cpp quit.cpp \
 privmsg.cpp registration.cpp kick.cpp motd.cpp topic.cpp invite.cpp part.cpp
 OBJS = $(addprefix $(OBJDIR)/, $(SRCS:.cpp=.o))
