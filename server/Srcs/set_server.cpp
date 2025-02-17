@@ -55,12 +55,33 @@ void Server::handle_new_connection(int server_fd)
     }
 }
 
+char *eof_signal_handler(int nbytes, char *str)
+{
+    int i = 0;
+    int j = 0;
+    while (i < nbytes)
+    {
+        if (str[i] == '\0')
+        {
+            j = i;
+            while (j < nbytes)
+            {
+                str[j] = str[j + 1];
+                j++;
+            }
+        }
+        i++;
+    }
+    return str;
+}
+
 void Server::handle_message(int i)
 {
     char buff[512];
     std::map<int, Client>& clients = getClients();
     int recent_pfd = pfds[i].fd;
     int nbytes = recv(pfds[i].fd, buff, 512, 0);
+    std::cout << "Bytes received: " << nbytes << std::endl;
     clients[pfds[i].fd].setNBytes(clients[pfds[i].fd].getNBytes() + nbytes);
     if (nbytes <= 0)
     {
@@ -69,10 +90,11 @@ void Server::handle_message(int i)
         else
             throw std::runtime_error(ERR_SOCKET_RECEIVE);
     }
-    else if (nbytes > 1)
+    else
     {
         buff[nbytes] = '\0';
-        std::string buff_str = std::string(buff);
+        char *buffEofHandled = eof_signal_handler(nbytes, buff);
+        std::string buff_str = std::string(buffEofHandled);
         int nCrlf = getCrlfAmount(buff_str.c_str());
         if (nCrlf != 0)
         {
