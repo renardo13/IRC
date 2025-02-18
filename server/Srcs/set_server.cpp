@@ -61,7 +61,7 @@ char *eof_signal_handler(int nbytes, char *str)
     int j = 0;
     while (i < nbytes)
     {
-        if (str[i] == '\0')
+        if (str[i] == '\0' || str[i] == 4)
         {
             j = i;
             while (j < nbytes)
@@ -81,7 +81,6 @@ void Server::handle_message(int i)
     std::map<int, Client>& clients = getClients();
     int recent_pfd = pfds[i].fd;
     int nbytes = recv(pfds[i].fd, buff, 512, 0);
-    std::cout << "Bytes received: " << nbytes << std::endl;
     clients[pfds[i].fd].setNBytes(clients[pfds[i].fd].getNBytes() + nbytes);
     if (nbytes <= 0)
     {

@@ -10,6 +10,7 @@ void Server::password(Client &client, std::string server_pass)
 		{
 			sendMessageToClient(client, ERR_NEEDMOREPARAMS(client.getNickname(), "PASS"));
 			quit(client,CRPL_PASSWORD_ERROR);
+			return ;
 		}
 		else if (pass != server_pass)
 		{

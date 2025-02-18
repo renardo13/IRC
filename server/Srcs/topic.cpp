@@ -32,7 +32,7 @@ int Server::topic(Client &client, Command &cmd)
 		return (sendMessageToClient(client, ERR_NOSUCHCHANNEL(client.getNickname(), *ch_names)));
 	if (it_ch->isClientInChan(client) != it_ch->getClients().end())
 	{
-		if (topic_str == raw_msg)
+		if (topic_str.empty())
 			return ((it_ch->getTopic() == "") ? sendMessageToClient(client, RPL_NOTOPIC(client, *ch_names)) : sendMessageToClient(client, RPL_TOPIC(client.getNickname(), *ch_names, it_ch->getTopic())));
 		if (it_ch->isClientInChan(client) == it_ch->getClients().end())
 			return (sendMessageToClient(client, ERR_NOTONCHANNEL(client, *ch_names)));
@@ -45,6 +45,6 @@ int Server::topic(Client &client, Command &cmd)
 		}
 	}
 	else
-		sendMessageToClient(client, RPL_TOPIC(client.getNickname(), it_ch->getName(), it_ch->getTopic()));
+		return ((it_ch->getTopic() == "") ? sendMessageToClient(client, RPL_NOTOPIC(client, *ch_names)) : sendMessageToClient(client, RPL_TOPIC(client.getNickname(), *ch_names, it_ch->getTopic())));
 	return (0);
 }

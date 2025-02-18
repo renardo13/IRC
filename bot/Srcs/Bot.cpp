@@ -80,7 +80,6 @@ void Bot::play(std::string user)
                       << BOLD << RED << "[SERVER] => " << buffer << RESET;
             cmd.parseCmd(buffer);
             std::string command = cmd.getMsg().substr(0, cmd.getMsg().size() - 2);
-            std::cout << "COMMAND = " << command << std::endl;
             if (command == "ROCK" || command == "PAPER" || command == "SCISSORS")
                 dual(command);
         }
