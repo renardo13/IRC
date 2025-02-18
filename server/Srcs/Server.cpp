@@ -30,6 +30,10 @@ Server::Server(Server const &obj)
 Server const &Server::operator=(Server const &obj)
 {
     this->clients = obj.clients;
+    this->channels = obj.channels;
+    this->motd_file = obj.motd_file;
+    this->pass = obj.pass;
+    this->pfd_count = obj.pfd_count;
     return (*this);
 }
 
